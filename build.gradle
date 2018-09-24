@@ -3,7 +3,7 @@ plugins {
 }
 
 apply plugin: 'application'
-mainClassName = "org.demoth.hedron.HedronMainKt"
+mainClassName = "org.demoth.ktxtest.HedronMainKt"
 
 
 group 'org.demoth'
@@ -15,9 +15,15 @@ repositories {
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+
     compile "com.badlogicgames.gdx:gdx:1.9.8"
     compile "com.badlogicgames.gdx:gdx-backend-lwjgl:1.9.8"
     compile "com.badlogicgames.gdx:gdx-platform:1.9.8:natives-desktop"
+
+    compile "io.github.libktx:ktx-vis:1.9.8-b5"
+    compile "io.github.libktx:ktx-vis-style:1.9.8-b5"
+    compile "io.github.libktx:ktx-app:1.9.8-b5"
+    compile "io.github.libktx:ktx-actors:1.9.8-b5"
 }
 
 compileKotlin {
