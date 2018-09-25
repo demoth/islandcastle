@@ -8,6 +8,7 @@ fun main(args: Array<String>) {
     config.title = "Hello Daniil"
     config.width = 2000
     config.height = 1000
+    config.forceExit = false
     LwjglApplication(KtxTest1(), config)
 }
 

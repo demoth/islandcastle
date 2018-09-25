@@ -25,55 +25,86 @@ class KtxTest1 : KtxApplicationAdapter {
         stage = Stage(view)
 
         chooseCharacterWindow = window("Choose your character") {
-            sizeBy(500f, 500f)
+            sizeBy(800f, 500f)
             centerWindow()
-            label("character selection:")
-            row()
-            list<String> {
-                setItems("wichka", "templar", "molekula")
-            }
-            row()
-            button {
-                label("Start game")
+            bottom().left()
+            table { t ->
+                t.padTop(16f)
+                debug = true
+                defaults().pad(16f)
+                setFillParent(true)
+                list<String> {
+                    it.width(140f)
+                    setItems("wichka", "templar", "molekula")
+                }
+                label("Character details") {
+                    it.expand()
+                }
+                row()
+                button {
+                    label("Disconnect")
+                    onClick {
+                        stage.actors.removeValue(chooseCharacterWindow, true)
+                        stage.addActor(loginWindow)
+                    }
+                }
+                button {
+                    label("Start game")
+                }
             }
         }
-
         loginWindow = window("Login screen") {
-            sizeBy(500f, 500f)
+            sizeBy(800f, 500f)
             centerWindow()
-            label("Server url:")
-            val url = textField {
-                text = "localhost:8080"
-            }
-            row()
+            bottom().left()
+            table { _ ->
+                debug = true
+                defaults().pad(16f)
+                setFillParent(true)
 
-            label("login:")
-            val login = textField {}
-            row()
+                label("Server url:") {
+                    it.right()
+                }
+                val url = textField {
+                    text = "localhost:8080/action.json"
+                    it.width(400f)
+                }
+                row()
 
-            label("password:")
-            val password = textField {
-                isPasswordMode = true
-            }
-            row()
+                label("Login:") {
+                    it.right()
+                }
+                val login = textField {
+                    text = "test"
+                    it.fill()
+                }
+                row()
 
-            button {
-                label("Connect")
-                onClick {
-                    println("Connected!: ${url.text}, ${login.text}, ${password.text}")
-                    stage.actors.removeValue(loginWindow, true)
-                    stage.addActor(chooseCharacterWindow)
+                label("Password:") {
+                    it.right()
+                }
+                val password = textField {
+                    isPasswordMode = true
+                    text = "test"
+                    it.fill()
+                }
+                row()
+
+                button {
+                    label("Exit")
+                    onClick {
+                        Gdx.app.exit()
+                    }
+                }
+                button {
+                    label("Connect")
+                    onClick {
+                        println("Connected!: ${url.text}, ${login.text}, ${password.text}")
+                        stage.actors.removeValue(loginWindow, true)
+                        stage.addActor(chooseCharacterWindow)
+                    }
                 }
             }
-
-            button {
-                label("Exit")
-                onClick {
-                    Gdx.app.exit()
-                }
-            }
-
-
         }
         stage.addActor(loginWindow)
         Gdx.input.inputProcessor = stage
@@ -88,6 +119,9 @@ class KtxTest1 : KtxApplicationAdapter {
         Gdx.gl.glClearColor(0.2f, 0.2f, 0.2f, 1f)
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT or GL20.GL_DEPTH_BUFFER_BIT)
         stage.draw()
+    }
 
+    override fun dispose() {
+        stage.dispose()
     }
 }
