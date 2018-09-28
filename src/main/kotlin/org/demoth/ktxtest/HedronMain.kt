@@ -9,6 +9,6 @@ fun main(args: Array<String>) {
     config.width = 2000
     config.height = 1000
     config.forceExit = false
-    LwjglApplication(KtxTest1(), config)
+    LwjglApplication(Game2dTest(), config)
 }
 

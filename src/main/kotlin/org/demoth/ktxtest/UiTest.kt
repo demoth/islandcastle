@@ -87,7 +87,7 @@ class UISimpleTest : ApplicationAdapter() {
             }
         })
 
-        // Add an image actor. Have to set the size, else it would be the size of the drawable (which is the 1x1 texture).
+        // Add an playerTex actor. Have to set the size, else it would be the size of the drawable (which is the 1x1 texture).
         table.add(Image(skin.newDrawable("white", Color.RED))).size(64f)
     }
 

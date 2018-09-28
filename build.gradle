@@ -2,13 +2,18 @@ plugins {
     id 'org.jetbrains.kotlin.jvm' version '1.2.70'
 }
 
-apply plugin: 'application'
-mainClassName = "org.demoth.ktxtest.HedronMainKt"
-
-
 group 'org.demoth'
 version '1.0-SNAPSHOT'
 
+apply plugin: 'application'
+mainClassName = "org.demoth.ktxtest.HedronMainKt"
+
+ext  {
+    kotlinVersion = '1.2.70'
+    libgdxVersion = '1.9.8'
+    libktxVersion = "$libgdxVersion-b5"
+    kotlinJvmVersion = '1.8'
+}
 repositories {
     mavenCentral()
 }
@@ -16,22 +21,26 @@ repositories {
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
 
-    compile "com.badlogicgames.gdx:gdx:1.9.8"
-    compile "com.badlogicgames.gdx:gdx-backend-lwjgl:1.9.8"
-    compile "com.badlogicgames.gdx:gdx-platform:1.9.8:natives-desktop"
-
-    compile "io.github.libktx:ktx-vis:1.9.8-b5"
-    compile "io.github.libktx:ktx-vis-style:1.9.8-b5"
-    compile "io.github.libktx:ktx-app:1.9.8-b5"
-    compile "io.github.libktx:ktx-actors:1.9.8-b5"
+    compile "com.badlogicgames.gdx:gdx:$libgdxVersion"
+    compile "com.badlogicgames.gdx:gdx-box2d:$libgdxVersion"
+    compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$libgdxVersion"
+    compile "com.badlogicgames.gdx:gdx-platform:$libgdxVersion:natives-desktop"
+    compile "com.badlogicgames.gdx:gdx-box2d-platform:$libgdxVersion:natives-desktop"
+    
+    compile "io.github.libktx:ktx-vis:$libktxVersion"
+    compile "io.github.libktx:ktx-vis-style:$libktxVersion"
+    compile "io.github.libktx:ktx-app:$libktxVersion"
+    compile "io.github.libktx:ktx-actors:$libktxVersion"
+    compile "io.github.libktx:ktx-box2d:$libktxVersion"
+    compile "io.github.libktx:ktx-graphics:$libktxVersion"
 }
 
 compileKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = kotlinJvmVersion
 }
 
 compileTestKotlin {
-    kotlinOptions.jvmTarget = "1.8"
+    kotlinOptions.jvmTarget = kotlinJvmVersion
 }
 
 build << {

@@ -11,7 +11,7 @@ import ktx.actors.onClick
 import ktx.app.KtxApplicationAdapter
 import ktx.vis.window
 
-class KtxTest1 : KtxApplicationAdapter {
+class GameUiTest : KtxApplicationAdapter {
 
     lateinit var stage: Stage
     lateinit var view: Viewport
