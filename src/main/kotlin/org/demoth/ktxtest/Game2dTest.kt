@@ -103,7 +103,7 @@ class Game2dTest : KtxApplicationAdapter {
         batch.use {
             it.draw(playerTex, playerBody.position.x * PPM - playerTex.width / 2f, playerBody.position.y * PPM - playerTex.height / 2)
         }
-        box2dRenderer.render(world, camera.combined.scl(PPM))
+        //box2dRenderer.render(world, camera.combined.scl(PPM))
 
     }
 
