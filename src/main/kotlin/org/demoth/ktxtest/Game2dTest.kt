@@ -66,11 +66,11 @@ class Game2dTest : KtxApplicationAdapter {
                 }
             }
         }
-
+        val startPosition = map.layers["entities"].objects["start"] as RectangleMapObject
         playerBody = world.body {
             // todo use start position
-            position.x = 16f * TILE_SIZE / PPM
-            position.y = 16f * TILE_SIZE / PPM
+            position.x = startPosition.rectangle.x / PPM
+            position.y = startPosition.rectangle.y / PPM
             type = BodyDef.BodyType.DynamicBody
             linearDamping = SPEED_DECEL
             fixedRotation = true
