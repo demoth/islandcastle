@@ -38,6 +38,10 @@ class Game2dTest : KtxApplicationAdapter {
     lateinit var box2dRenderer: Box2DDebugRenderer
     lateinit var tileRenderer: OrthogonalTiledMapRenderer
 
+    var drawDebug = false
+    var drawTiles = true
+    var drawSprites = true
+
     override fun create() {
         super.create()
         Box2D.init()
@@ -96,14 +100,20 @@ class Game2dTest : KtxApplicationAdapter {
         camera.position.set(playerBody.position.x * PPM, playerBody.position.y * PPM, 0f)
         camera.update()
 
-        tileRenderer.setView(camera)
-        tileRenderer.render()
-
-        batch.projectionMatrix = camera.combined
-        batch.use {
-            it.draw(playerTex, playerBody.position.x * PPM - playerTex.width / 2f, playerBody.position.y * PPM - playerTex.height / 2)
+        if (drawTiles) {
+            tileRenderer.setView(camera)
+            tileRenderer.render()
         }
-        //box2dRenderer.render(world, camera.combined.scl(PPM))
+
+        if (drawSprites) {
+            batch.projectionMatrix = camera.combined
+            batch.use {
+                it.draw(playerTex, playerBody.position.x * PPM - playerTex.width / 2f, playerBody.position.y * PPM - playerTex.height / 2)
+            }
+        }
+        if (drawDebug) {
+            box2dRenderer.render(world, camera.combined.scl(PPM))
+        }
 
     }
 
@@ -120,6 +130,15 @@ class Game2dTest : KtxApplicationAdapter {
         if (Gdx.input.isKeyPressed(Input.Keys.D) && playerBody.linearVelocity.x < MAX_SPEED) {
             playerBody.applyForceToCenter(WALK_FORCE, 0f, true)
         }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F1))
+            drawDebug = !drawDebug
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F2))
+            drawTiles = !drawTiles
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F3))
+            drawSprites = !drawSprites
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
+            Gdx.app.exit()
 
         if (Gdx.input.isKeyPressed(Input.Keys.SPACE))
             println("pos: ${playerBody.position}, speed: ${playerBody.linearVelocity}")
