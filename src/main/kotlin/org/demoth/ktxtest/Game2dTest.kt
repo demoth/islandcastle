@@ -50,9 +50,10 @@ class Game2dTest : KtxApplicationAdapter {
         super.create()
         Box2D.init()
         world = createWorld()
+
         box2dRenderer = Box2DDebugRenderer()
+
         batch = SpriteBatch()
-        //playerTex =
 
         map = TmxMapLoader().load("grassmap.tmx")
         tileRenderer = OrthogonalTiledMapRenderer(map, 1f)
@@ -74,7 +75,6 @@ class Game2dTest : KtxApplicationAdapter {
             with<PlayerControlled>()
             with<Physical> {
                 body = world.body {
-                    // todo use start position
                     position.x = startPosition.rectangle.x / PPM
                     position.y = startPosition.rectangle.y / PPM
                     type = BodyDef.BodyType.DynamicBody
@@ -132,6 +132,7 @@ class Game2dTest : KtxApplicationAdapter {
             engine.update(0f)
         }
         if (drawDebug) {
+            // scale with PPM
             box2dRenderer.render(world, camera.combined.scl(PPM))
         }
 

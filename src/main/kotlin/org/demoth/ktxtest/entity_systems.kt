@@ -1,21 +1,13 @@
 package org.demoth.ktxtest
 
-import com.badlogic.ashley.core.Component
 import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Camera
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.physics.box2d.Body
 import ktx.ashley.allOf
 import ktx.ashley.mapperFor
-
-class PlayerControlled : Component
-
-class Physical(var body: Body? = null) : Component
-
-class Textured(var texture: Texture? = null) : Component
+import ktx.ashley.oneOf
 
 class PlayerControlSystem : EntitySystem() {
     private val physicMapper = mapperFor<Physical>()
@@ -43,22 +35,25 @@ class PlayerControlSystem : EntitySystem() {
     }
 }
 
-class BatchDrawSystem(val batch: SpriteBatch) : EntitySystem() {
+class BatchDrawSystem(private val batch: SpriteBatch, var drawSprites: Boolean = true) : EntitySystem() {
     private val texMapper = mapperFor<Textured>()
     private val physicMapper = mapperFor<Physical>()
+    private val positionMapper = mapperFor<Positioned>()
     override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(allOf(Textured::class, Physical::class).get()).forEach { e ->
-            val texture = texMapper[e]?.texture
-            val position = physicMapper[e]?.body?.position
-            if (texture != null && position != null)
-                batch.draw(texture,
-                        position.x * PPM - texture.width / 2,
-                        position.y * PPM - texture.height / 2)
+        if (drawSprites) {
+            engine.getEntitiesFor(allOf(Textured::class).oneOf(Physical::class, Positioned::class).get()).forEach { e ->
+                val texture = texMapper[e]?.texture
+                val position = physicMapper[e]?.body?.position ?: positionMapper[e].position
+                if (texture != null && position != null)
+                    batch.draw(texture,
+                            position.x * PPM - texture.width / 2,
+                            position.y * PPM - texture.height / 2)
+            }
         }
     }
 }
 
-class CameraSystem(val camera: Camera) : EntitySystem() {
+class CameraSystem(private val camera: Camera) : EntitySystem() {
     private val physicMapper = mapperFor<Physical>()
 
     override fun update(deltaTime: Float) {
