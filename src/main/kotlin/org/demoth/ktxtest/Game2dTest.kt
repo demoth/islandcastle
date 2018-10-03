@@ -27,7 +27,9 @@ import ktx.graphics.use
 
 const val MAX_SPEED = 10f
 const val SPEED_DECEL = 5f
+// how many tiles we see around
 const val SIGHT_RADIUS = 16
+// size of tiles in pixels
 const val TILE_SIZE = 32f
 const val WALK_FORCE = 20f
 const val PPM = 32f // 1 meter - 32 pixels
@@ -40,7 +42,7 @@ class Game2dTest : KtxApplicationAdapter {
     lateinit var map: TiledMap
     lateinit var box2dRenderer: Box2DDebugRenderer
     lateinit var tileRenderer: OrthogonalTiledMapRenderer
-
+    lateinit var batchDrawSystem: BatchDrawSystem
     lateinit var engine: PooledEngine
     var drawDebug = false
     var drawTiles = true
@@ -64,7 +66,8 @@ class Game2dTest : KtxApplicationAdapter {
 
         engine = PooledEngine()
         engine.addSystem(PlayerControlSystem())
-        engine.addSystem(BatchDrawSystem(batch))
+        batchDrawSystem = BatchDrawSystem(batch)
+        engine.addSystem(batchDrawSystem)
         engine.addSystem(CameraSystem(camera))
 
         // add player
@@ -90,14 +93,18 @@ class Game2dTest : KtxApplicationAdapter {
             if (layer.name.startsWith("solid_")) {
                 layer.objects.getByType(RectangleMapObject::class.java).forEach { obj ->
                     val rectangleMapObject = obj as RectangleMapObject
-                    world.body {
-                        type = BodyDef.BodyType.StaticBody
+                    engine.entity {
+                        with<Physical> {
+                            body = world.body {
+                                type = BodyDef.BodyType.StaticBody
 
-                        val newPosition = Vector2()
-                        rectangleMapObject.rectangle.getCenter(newPosition)
-                        newPosition.scl(1 / PPM)
-                        position.set(newPosition)
-                        box(width = rectangleMapObject.rectangle.width / PPM, height = rectangleMapObject.rectangle.height / PPM)
+                                val newPosition = Vector2()
+                                rectangleMapObject.rectangle.getCenter(newPosition)
+                                newPosition.scl(1 / PPM)
+                                position.set(newPosition)
+                                box(width = rectangleMapObject.rectangle.width / PPM, height = rectangleMapObject.rectangle.height / PPM)
+                            }
+                        }
                     }
                 }
             }
@@ -105,6 +112,7 @@ class Game2dTest : KtxApplicationAdapter {
     }
 
     override fun dispose() {
+        // TODO dispose of used textures
         world.dispose()
         box2dRenderer.dispose()
         tileRenderer.dispose()
@@ -144,7 +152,7 @@ class Game2dTest : KtxApplicationAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.F2))
             drawTiles = !drawTiles
         if (Gdx.input.isKeyJustPressed(Input.Keys.F3))
-            drawSprites = !drawSprites
+            batchDrawSystem.drawSprites = !batchDrawSystem.drawSprites
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
             Gdx.app.exit()
     }
