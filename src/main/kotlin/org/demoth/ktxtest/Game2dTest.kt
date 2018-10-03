@@ -46,7 +46,6 @@ class Game2dTest : KtxApplicationAdapter {
     lateinit var engine: PooledEngine
     var drawDebug = false
     var drawTiles = true
-    var drawSprites = true
 
     override fun create() {
         super.create()
@@ -76,6 +75,9 @@ class Game2dTest : KtxApplicationAdapter {
                 texture = Texture(Gdx.files.internal("knight32.png"))
             }
             with<PlayerControlled>()
+            with<Named> {
+                name = "player"
+            }
             with<Physical> {
                 body = world.body {
                     position.x = startPosition.rectangle.x / PPM
@@ -90,24 +92,34 @@ class Game2dTest : KtxApplicationAdapter {
 
 
         map.layers.forEach { layer ->
-            if (layer.name.startsWith("solid_")) {
-                layer.objects.getByType(RectangleMapObject::class.java).forEach { obj ->
-                    val rectangleMapObject = obj as RectangleMapObject
+            layer.objects.getByType<RectangleMapObject>(RectangleMapObject::class.java).forEach { obj ->
+                if (layer.name.startsWith("solid_") || !obj.name.isNullOrBlank())
                     engine.entity {
-                        with<Physical> {
-                            body = world.body {
-                                type = BodyDef.BodyType.StaticBody
-
+                        if (layer.name.startsWith("solid_"))
+                            with<Physical> {
+                                body = world.body {
+                                    type = BodyDef.BodyType.StaticBody
+                                    val newPosition = Vector2()
+                                    obj.rectangle.getCenter(newPosition)
+                                    newPosition.scl(1 / PPM)
+                                    position.set(newPosition)
+                                    box(width = obj.rectangle.width / PPM, height = obj.rectangle.height / PPM)
+                                }
+                            }
+                        if (!obj.name.isNullOrBlank()) {
+                            with<Named> {
+                                name = obj.name
+                            }
+                            with<Positioned> {
                                 val newPosition = Vector2()
-                                rectangleMapObject.rectangle.getCenter(newPosition)
+                                obj.rectangle.getCenter(newPosition)
                                 newPosition.scl(1 / PPM)
-                                position.set(newPosition)
-                                box(width = rectangleMapObject.rectangle.width / PPM, height = rectangleMapObject.rectangle.height / PPM)
+                                position = newPosition
                             }
                         }
                     }
-                }
             }
+
         }
     }
 
@@ -153,6 +165,8 @@ class Game2dTest : KtxApplicationAdapter {
             drawTiles = !drawTiles
         if (Gdx.input.isKeyJustPressed(Input.Keys.F3))
             batchDrawSystem.drawSprites = !batchDrawSystem.drawSprites
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F4))
+            batchDrawSystem.drawNames = !batchDrawSystem.drawNames
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
             Gdx.app.exit()
     }

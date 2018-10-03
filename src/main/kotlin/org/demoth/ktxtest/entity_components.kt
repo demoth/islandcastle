@@ -18,3 +18,5 @@ class Positioned(var position: Vector2? = null) : Component
 class Physical(var body: Body? = null) : Component
 
 class Textured(var texture: Texture? = null) : Component
+
+class Named(var name: String? = null) : Component
