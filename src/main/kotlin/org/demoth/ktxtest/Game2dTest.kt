@@ -5,14 +5,11 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.maps.objects.RectangleMapObject
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.TmxMapLoader
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
-import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.Box2D
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.physics.box2d.World
@@ -20,7 +17,6 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.app.KtxApplicationAdapter
 import ktx.ashley.entity
-import ktx.box2d.body
 import ktx.box2d.createWorld
 import ktx.graphics.use
 
@@ -71,53 +67,13 @@ class Game2dTest : KtxApplicationAdapter {
 
         // add player
         engine.entity {
-            with<Textured> {
-                texture = Texture(Gdx.files.internal("knight32.png"))
-            }
-            with<PlayerControlled>()
-            with<Named> {
-                name = "player"
-            }
-            with<Physical> {
-                body = world.body {
-                    position.x = startPosition.rectangle.x / PPM
-                    position.y = startPosition.rectangle.y / PPM
-                    type = BodyDef.BodyType.DynamicBody
-                    linearDamping = SPEED_DECEL
-                    fixedRotation = true
-                    circle(0.5f)
-                }
-            }
+            createPlayerEntity(engine, world, startPosition.rectangle.getCentralPoint())
         }
 
 
         map.layers.forEach { layer ->
             layer.objects.getByType<RectangleMapObject>(RectangleMapObject::class.java).forEach { obj ->
-                if (layer.name.startsWith("solid_") || !obj.name.isNullOrBlank())
-                    engine.entity {
-                        if (layer.name.startsWith("solid_"))
-                            with<Physical> {
-                                body = world.body {
-                                    type = BodyDef.BodyType.StaticBody
-                                    val newPosition = Vector2()
-                                    obj.rectangle.getCenter(newPosition)
-                                    newPosition.scl(1 / PPM)
-                                    position.set(newPosition)
-                                    box(width = obj.rectangle.width / PPM, height = obj.rectangle.height / PPM)
-                                }
-                            }
-                        if (!obj.name.isNullOrBlank()) {
-                            with<Named> {
-                                name = obj.name
-                            }
-                            with<Positioned> {
-                                val newPosition = Vector2()
-                                obj.rectangle.getCenter(newPosition)
-                                newPosition.scl(1 / PPM)
-                                position = newPosition
-                            }
-                        }
-                    }
+                createMapObject(engine, world, layer.name, obj.name, obj.rectangle)
             }
 
         }

@@ -24,6 +24,7 @@ dependencies {
 
     compile "com.badlogicgames.gdx:gdx:$libgdxVersion"
     compile "com.badlogicgames.gdx:gdx-box2d:$libgdxVersion"
+    compile "com.badlogicgames.gdx:gdx-box2d:$libgdxVersion"
     compile "com.badlogicgames.ashley:ashley:$ashleyVersion"
     compile "com.badlogicgames.gdx:gdx-backend-lwjgl:$libgdxVersion"
     compile "com.badlogicgames.gdx:gdx-platform:$libgdxVersion:natives-desktop"
@@ -36,6 +37,7 @@ dependencies {
     compile "io.github.libktx:ktx-actors:$libktxVersion"
     compile "io.github.libktx:ktx-box2d:$libktxVersion"
     compile "io.github.libktx:ktx-graphics:$libktxVersion"
+    compile "io.github.libktx:ktx-math:$libktxVersion"
 }
 
 compileKotlin {
