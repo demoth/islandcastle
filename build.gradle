@@ -12,7 +12,7 @@ ext  {
     kotlinVersion = '1.2.70'
     libgdxVersion = '1.9.8'
     libktxVersion = "$libgdxVersion-b5"
-    ashleyVersion = '1.7.0'
+    ashleyVersion = '1.7.3'
     kotlinJvmVersion = '1.8'
 }
 repositories {
@@ -32,6 +32,7 @@ dependencies {
     compile "io.github.libktx:ktx-vis:$libktxVersion"
     compile "io.github.libktx:ktx-vis-style:$libktxVersion"
     compile "io.github.libktx:ktx-app:$libktxVersion"
+    compile "io.github.libktx:ktx-ashley:$libktxVersion"
     compile "io.github.libktx:ktx-actors:$libktxVersion"
     compile "io.github.libktx:ktx-box2d:$libktxVersion"
     compile "io.github.libktx:ktx-graphics:$libktxVersion"

@@ -1,5 +1,6 @@
 package org.demoth.ktxtest
 
+import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.GL20
@@ -11,10 +12,14 @@ import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.TmxMapLoader
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.*
+import com.badlogic.gdx.physics.box2d.BodyDef
+import com.badlogic.gdx.physics.box2d.Box2D
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
+import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.app.KtxApplicationAdapter
+import ktx.ashley.entity
 import ktx.box2d.body
 import ktx.box2d.createWorld
 import ktx.graphics.use
@@ -30,14 +35,13 @@ const val PPM = 32f // 1 meter - 32 pixels
 class Game2dTest : KtxApplicationAdapter {
     lateinit var world: World
     lateinit var batch: SpriteBatch
-    lateinit var playerTex: Texture
     lateinit var viewport: Viewport
     lateinit var camera: OrthographicCamera
-    lateinit var playerBody: Body
     lateinit var map: TiledMap
     lateinit var box2dRenderer: Box2DDebugRenderer
     lateinit var tileRenderer: OrthogonalTiledMapRenderer
 
+    lateinit var engine: PooledEngine
     var drawDebug = false
     var drawTiles = true
     var drawSprites = true
@@ -48,11 +52,39 @@ class Game2dTest : KtxApplicationAdapter {
         world = createWorld()
         box2dRenderer = Box2DDebugRenderer()
         batch = SpriteBatch()
-        playerTex = Texture(Gdx.files.internal("knight32.png"))
+        //playerTex =
+
         map = TmxMapLoader().load("grassmap.tmx")
         tileRenderer = OrthogonalTiledMapRenderer(map, 1f)
+
         camera = OrthographicCamera(TILE_SIZE, TILE_SIZE)
         viewport = FitViewport(TILE_SIZE * SIGHT_RADIUS, TILE_SIZE * SIGHT_RADIUS, camera)
+        val startPosition = map.layers["entities"].objects["start"] as RectangleMapObject
+
+        engine = PooledEngine()
+        engine.addSystem(PlayerControlSystem())
+        engine.addSystem(BatchDrawSystem(batch))
+        engine.addSystem(CameraSystem(camera))
+
+        // add player
+        engine.entity {
+            with<Textured> {
+                texture = Texture(Gdx.files.internal("knight32.png"))
+            }
+            with<PlayerControlled>()
+            with<Physical> {
+                body = world.body {
+                    // todo use start position
+                    position.x = startPosition.rectangle.x / PPM
+                    position.y = startPosition.rectangle.y / PPM
+                    type = BodyDef.BodyType.DynamicBody
+                    linearDamping = SPEED_DECEL
+                    fixedRotation = true
+                    circle(0.5f)
+                }
+            }
+        }
+
 
         map.layers.forEach { layer ->
             if (layer.name.startsWith("solid_")) {
@@ -70,16 +102,6 @@ class Game2dTest : KtxApplicationAdapter {
                 }
             }
         }
-        val startPosition = map.layers["entities"].objects["start"] as RectangleMapObject
-        playerBody = world.body {
-            // todo use start position
-            position.x = startPosition.rectangle.x / PPM
-            position.y = startPosition.rectangle.y / PPM
-            type = BodyDef.BodyType.DynamicBody
-            linearDamping = SPEED_DECEL
-            fixedRotation = true
-            circle(0.5f)
-        }
     }
 
     override fun dispose() {
@@ -88,16 +110,16 @@ class Game2dTest : KtxApplicationAdapter {
         tileRenderer.dispose()
         map.dispose()
         batch.dispose()
-        playerTex.dispose()
     }
 
     override fun render() {
 
-        handleInput()
+        handleGlobalInput()
+        // update physical world
         world.step(1 / 60f, 6, 2)
 
         clearScreen()
-        camera.position.set(playerBody.position.x * PPM, playerBody.position.y * PPM, 0f)
+
         camera.update()
 
         if (drawTiles) {
@@ -105,11 +127,9 @@ class Game2dTest : KtxApplicationAdapter {
             tileRenderer.render()
         }
 
-        if (drawSprites) {
-            batch.projectionMatrix = camera.combined
-            batch.use {
-                it.draw(playerTex, playerBody.position.x * PPM - playerTex.width / 2f, playerBody.position.y * PPM - playerTex.height / 2)
-            }
+        batch.projectionMatrix = camera.combined
+        batch.use {
+            engine.update(0f)
         }
         if (drawDebug) {
             box2dRenderer.render(world, camera.combined.scl(PPM))
@@ -117,20 +137,7 @@ class Game2dTest : KtxApplicationAdapter {
 
     }
 
-    private fun handleInput() {
-        if (Gdx.input.isKeyPressed(Input.Keys.W) && playerBody.linearVelocity.y < MAX_SPEED) {
-            playerBody.applyForceToCenter(0f, WALK_FORCE, true)
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.A) && playerBody.linearVelocity.x > -MAX_SPEED) {
-            playerBody.applyForceToCenter(-WALK_FORCE, 0f, true)
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.S) && playerBody.linearVelocity.y > -MAX_SPEED) {
-            playerBody.applyForceToCenter(0f, -WALK_FORCE, true)
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.D) && playerBody.linearVelocity.x < MAX_SPEED) {
-            playerBody.applyForceToCenter(WALK_FORCE, 0f, true)
-        }
-
+    private fun handleGlobalInput() {
         if (Gdx.input.isKeyJustPressed(Input.Keys.F1))
             drawDebug = !drawDebug
         if (Gdx.input.isKeyJustPressed(Input.Keys.F2))
@@ -139,9 +146,6 @@ class Game2dTest : KtxApplicationAdapter {
             drawSprites = !drawSprites
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
             Gdx.app.exit()
-
-        if (Gdx.input.isKeyPressed(Input.Keys.SPACE))
-            println("pos: ${playerBody.position}, speed: ${playerBody.linearVelocity}")
     }
 
     private fun clearScreen() {
