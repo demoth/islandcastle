@@ -48,6 +48,7 @@ class Game2dTest : KtxApplicationAdapter {
 
     var drawDebug = false
     var drawTiles = true
+    var time = 0f
 
     override fun create() {
         super.create()
@@ -100,6 +101,8 @@ class Game2dTest : KtxApplicationAdapter {
                 return true
             }
         }
+
+
     }
 
     override fun dispose() {
@@ -112,7 +115,7 @@ class Game2dTest : KtxApplicationAdapter {
     }
 
     override fun render() {
-        val delta = Gdx.graphics.deltaTime
+        time += Gdx.graphics.deltaTime
         handleGlobalInput()
         // update physical world
         world.step(1 / 60f, 6, 2)
@@ -128,7 +131,7 @@ class Game2dTest : KtxApplicationAdapter {
 
         batch.projectionMatrix = camera.combined
         batch.use {
-            engine.update(0f)
+            engine.update(Gdx.graphics.deltaTime)
         }
         if (drawDebug) {
             // scale with PPM

@@ -65,13 +65,17 @@ class BatchDrawSystem(
     private val physicMapper = mapperFor<Physical>()
     private val positionMapper = mapperFor<Positioned>()
     private val namedMapper = mapperFor<Named>()
-
+    private val aninatedMapper = mapperFor<Animated>()
     private val font = BitmapFont()
+    var time = 0f
 
     override fun update(deltaTime: Float) {
+        time += deltaTime
+
         if (drawSprites) {
-            engine.getEntitiesFor(allOf(Textured::class).oneOf(Physical::class, Positioned::class).get()).forEach { e ->
+            engine.getEntitiesFor(oneOf(Textured::class, Animated::class).oneOf(Physical::class, Positioned::class).get()).forEach { e ->
                 val texture = texMapper[e]?.texture
+                val animated = aninatedMapper[e]
                 val position = physicMapper[e]?.body?.position ?: positionMapper[e].position
                 if (position != null) {
                     if (texture != null) {
@@ -79,6 +83,12 @@ class BatchDrawSystem(
                         batch.draw(texture,
                                 position.x * PPM - texture.width / 2,
                                 position.y * PPM - texture.height / 2)
+                    }
+                    val keyFrame = animated?.animation?.getKeyFrame(time)
+                    if (keyFrame != null) {
+                        batch.draw(keyFrame,
+                                position.x * PPM - keyFrame.regionWidth / 2,
+                                position.y * PPM - keyFrame.regionHeight / 2)
                     }
                 }
             }

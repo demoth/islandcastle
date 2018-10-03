@@ -1,5 +1,8 @@
 package org.demoth.ktxtest
 
+import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.Animation
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Contact
@@ -29,4 +32,11 @@ open class ContactAdapter : ContactListener {
 
     override fun postSolve(contact: Contact?, impulse: ContactImpulse?) {
     }
+}
+
+fun createAnimation(sheet: Texture, cols: Int, rows: Int, duration: Float, mode: Animation.PlayMode): Animation<TextureRegion> {
+    val flameFrames = TextureRegion.split(sheet, sheet.width / cols, sheet.height / rows).flatten()
+    val animation = Animation(duration, *flameFrames.toTypedArray())
+    animation.playMode = mode
+    return animation
 }

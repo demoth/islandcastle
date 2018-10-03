@@ -3,6 +3,7 @@ package org.demoth.ktxtest
 import com.badlogic.ashley.core.Engine
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.BodyDef
@@ -70,8 +71,11 @@ fun createMapObject(engine: Engine, world: World, layer: String, name: String?, 
 
 fun createFireBall(engine: Engine, world: World, actionLocation: Vector2, origin: Vector2, owner: String) {
     engine.entity {
-        with<Textured> {
-            texture = Texture(Gdx.files.internal("Ardentryst-MagicSpriteEffects/Ardentryst-rfireball.png"))
+        with<Animated> {
+            animation = createAnimation(
+                    Texture(Gdx.files.internal("sprites/Sprite_FX_Fire_0004_FIX.png")),
+                    4, 1, 0.1f, Animation.PlayMode.LOOP
+            )
         }
         with<Physical> {
             this.owner = owner
@@ -82,7 +86,7 @@ fun createFireBall(engine: Engine, world: World, actionLocation: Vector2, origin
                 this.linearVelocity.set(actionLocation)
                 this.position.set(origin)
                 userData = this@with
-                circle(0.3f) {
+                circle(0.5f) {
                     isSensor = true
                 }
             }
