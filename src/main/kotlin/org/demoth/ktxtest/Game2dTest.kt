@@ -3,6 +3,7 @@ package org.demoth.ktxtest
 import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
+import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
@@ -10,6 +11,7 @@ import com.badlogic.gdx.maps.objects.RectangleMapObject
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.TmxMapLoader
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Box2D
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.physics.box2d.World
@@ -39,6 +41,7 @@ class Game2dTest : KtxApplicationAdapter {
     lateinit var box2dRenderer: Box2DDebugRenderer
     lateinit var tileRenderer: OrthogonalTiledMapRenderer
     lateinit var batchDrawSystem: BatchDrawSystem
+    lateinit var playerControlSystem: PlayerControlSystem
     lateinit var engine: PooledEngine
     var drawDebug = false
     var drawTiles = true
@@ -60,8 +63,10 @@ class Game2dTest : KtxApplicationAdapter {
         val startPosition = map.layers["entities"].objects["start"] as RectangleMapObject
 
         engine = PooledEngine()
-        engine.addSystem(PlayerControlSystem())
+        playerControlSystem = PlayerControlSystem(world)
         batchDrawSystem = BatchDrawSystem(batch)
+
+        engine.addSystem(playerControlSystem)
         engine.addSystem(batchDrawSystem)
         engine.addSystem(CameraSystem(camera))
 
@@ -76,6 +81,18 @@ class Game2dTest : KtxApplicationAdapter {
                 createMapObject(engine, world, layer.name, obj.name, obj.rectangle)
             }
 
+        }
+
+        Gdx.input.inputProcessor = object : InputAdapter() {
+            override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
+                if (button == Input.Buttons.LEFT) {
+                    println("touched! $screenX, $screenY")
+                    playerControlSystem.actionLocation = Vector2(
+                            1f * screenX - viewport.screenWidth / 2f,
+                            -1f * screenY + viewport.screenHeight / 2f).scl(0.5f / PPM)
+                }
+                return true
+            }
         }
     }
 

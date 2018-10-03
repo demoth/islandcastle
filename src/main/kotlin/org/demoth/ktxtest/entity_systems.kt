@@ -4,21 +4,32 @@ import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Camera
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
+import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.physics.box2d.BodyDef
+import com.badlogic.gdx.physics.box2d.World
 import ktx.ashley.allOf
+import ktx.ashley.entity
 import ktx.ashley.mapperFor
 import ktx.ashley.oneOf
+import ktx.box2d.body
+import ktx.math.plus
 
-class PlayerControlSystem : EntitySystem() {
+class PlayerControlSystem(private val world: World) : EntitySystem() {
+    /**
+     * location relative to player (center)
+     */
+    var actionLocation: Vector2? = null
     private val physicMapper = mapperFor<Physical>()
     private val playerCtrlMapper = mapperFor<PlayerControlled>()
 
     override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(allOf(Physical::class, PlayerControlled::class).get()).forEach { e ->
+        engine.getEntitiesFor(allOf(Physical::class, PlayerControlled::class).get()).forEach { player ->
             // this may be used later to affect how controls are used
-            val control = playerCtrlMapper[e]
-            physicMapper[e]?.body?.let { body ->
+            val control = playerCtrlMapper[player]
+            physicMapper[player]?.body?.let { body ->
                 if (Gdx.input.isKeyPressed(Input.Keys.W) && body.linearVelocity.y < MAX_SPEED) {
                     body.applyForceToCenter(0f, WALK_FORCE, true)
                 }
@@ -30,6 +41,30 @@ class PlayerControlSystem : EntitySystem() {
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.D) && body.linearVelocity.x < MAX_SPEED) {
                     body.applyForceToCenter(WALK_FORCE, 0f, true)
+                }
+
+                if (actionLocation != null) {
+                    println("actionLocation: $actionLocation")
+                    println("player: ${body.position}")
+                    engine.entity {
+                        with<Textured> {
+                            texture = Texture(Gdx.files.internal("Ardentryst-MagicSpriteEffects/Ardentryst-rfireball.png"))
+                        }
+                        with<Physical> {
+                            this.body = world.body {
+                                type = BodyDef.BodyType.DynamicBody
+                                this.linearVelocity.set(actionLocation)
+                                this.position.set(body.position + actionLocation!!.nor())
+                                circle(0.3f) {
+                                    isSensor = true
+                                }
+                            }
+                        }
+                        with<Named> {
+                            name = "fireball"
+                        }
+                    }
+                    actionLocation = null
                 }
             }
         }
