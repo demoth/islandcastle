@@ -4,19 +4,17 @@ import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Camera
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.World
 import ktx.ashley.allOf
-import ktx.ashley.entity
 import ktx.ashley.mapperFor
 import ktx.ashley.oneOf
-import ktx.box2d.body
-import ktx.math.plus
 
+/**
+ * Moves player in the physical world
+ */
 class PlayerControlSystem(private val world: World) : EntitySystem() {
     /**
      * location relative to player (center)
@@ -29,7 +27,8 @@ class PlayerControlSystem(private val world: World) : EntitySystem() {
         engine.getEntitiesFor(allOf(Physical::class, PlayerControlled::class).get()).forEach { player ->
             // this may be used later to affect how controls are used
             val control = playerCtrlMapper[player]
-            physicMapper[player]?.body?.let { body ->
+            val playerPhysics = physicMapper[player]
+            playerPhysics?.body?.let { body ->
                 if (Gdx.input.isKeyPressed(Input.Keys.W) && body.linearVelocity.y < MAX_SPEED) {
                     body.applyForceToCenter(0f, WALK_FORCE, true)
                 }
@@ -44,26 +43,9 @@ class PlayerControlSystem(private val world: World) : EntitySystem() {
                 }
 
                 if (actionLocation != null) {
+                    createFireBall(engine, world, actionLocation!!, body.position, playerPhysics.owner!!)
                     println("actionLocation: $actionLocation")
                     println("player: ${body.position}")
-                    engine.entity {
-                        with<Textured> {
-                            texture = Texture(Gdx.files.internal("Ardentryst-MagicSpriteEffects/Ardentryst-rfireball.png"))
-                        }
-                        with<Physical> {
-                            this.body = world.body {
-                                type = BodyDef.BodyType.DynamicBody
-                                this.linearVelocity.set(actionLocation)
-                                this.position.set(body.position + actionLocation!!.nor())
-                                circle(0.3f) {
-                                    isSensor = true
-                                }
-                            }
-                        }
-                        with<Named> {
-                            name = "fireball"
-                        }
-                    }
                     actionLocation = null
                 }
             }
@@ -71,6 +53,9 @@ class PlayerControlSystem(private val world: World) : EntitySystem() {
     }
 }
 
+/**
+ * Draw everything that has a position, and texture or name
+ */
 class BatchDrawSystem(
         private val batch: SpriteBatch,
         var drawSprites: Boolean = true,
@@ -112,6 +97,9 @@ class BatchDrawSystem(
     }
 }
 
+/**
+ * Moves camera view to center on player
+ */
 class CameraSystem(private val camera: Camera) : EntitySystem() {
     private val physicMapper = mapperFor<Physical>()
 
@@ -119,6 +107,20 @@ class CameraSystem(private val camera: Camera) : EntitySystem() {
         engine.getEntitiesFor(allOf(Physical::class, PlayerControlled::class).get()).forEach { e ->
             physicMapper[e]?.body?.let { body ->
                 camera.position.set(body.position.x * PPM, body.position.y * PPM, 0f)
+            }
+        }
+    }
+}
+
+class PhysicalSystem(private val world: World) : EntitySystem() {
+    private val physicMapper = mapperFor<Physical>()
+
+    override fun update(deltaTime: Float) {
+        engine.getEntitiesFor(allOf(Physical::class).get()).forEach { e ->
+            val physical = physicMapper[e]
+            if (physical.toBeRemoved) {
+                world.destroyBody(physical.body)
+                engine.removeEntity(e)
             }
         }
     }

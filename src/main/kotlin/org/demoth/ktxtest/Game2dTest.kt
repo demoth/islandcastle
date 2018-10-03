@@ -14,6 +14,8 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Box2D
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
+import com.badlogic.gdx.physics.box2d.Contact
+import com.badlogic.gdx.physics.box2d.ContactListener
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -21,6 +23,9 @@ import ktx.app.KtxApplicationAdapter
 import ktx.ashley.entity
 import ktx.box2d.createWorld
 import ktx.graphics.use
+import org.demoth.ktxtest.CollisionClass.DEAL_DAMAGE
+import org.demoth.ktxtest.CollisionClass.RECEIVE_DAMAGE
+import org.demoth.ktxtest.CollisionClass.SOLID
 
 
 const val MAX_SPEED = 10f
@@ -43,6 +48,8 @@ class Game2dTest : KtxApplicationAdapter {
     lateinit var batchDrawSystem: BatchDrawSystem
     lateinit var playerControlSystem: PlayerControlSystem
     lateinit var engine: PooledEngine
+    lateinit var collisionListener: ContactListener
+
     var drawDebug = false
     var drawTiles = true
 
@@ -50,6 +57,28 @@ class Game2dTest : KtxApplicationAdapter {
         super.create()
         Box2D.init()
         world = createWorld()
+        collisionListener = object : ContactAdapter() {
+            override fun beginContact(contact: Contact?) {
+                if (contact != null && contact.isTouching) {
+                    val dataA = contact.fixtureA?.body?.userData
+                    val dataB = contact.fixtureB?.body?.userData
+                    if (dataA is Physical && dataB is Physical) {
+                        // todo check if not owner
+                        if (dataA.collisionClass == DEAL_DAMAGE
+                                && dataB.collisionClass!! in setOf(RECEIVE_DAMAGE, SOLID)) {
+                            if (dataA.owner != dataB.owner)
+                                dataA.toBeRemoved = true
+                        }
+                        if (dataB.collisionClass == DEAL_DAMAGE
+                                && dataA.collisionClass!! in setOf(RECEIVE_DAMAGE, SOLID)) {
+                            if (dataA.owner != dataB.owner)
+                                dataB.toBeRemoved = true
+                        }
+                    }
+                }
+            }
+        }
+        world.setContactListener(collisionListener)
 
         box2dRenderer = Box2DDebugRenderer()
 
@@ -69,6 +98,7 @@ class Game2dTest : KtxApplicationAdapter {
         engine.addSystem(playerControlSystem)
         engine.addSystem(batchDrawSystem)
         engine.addSystem(CameraSystem(camera))
+        engine.addSystem(PhysicalSystem(world))
 
         // add player
         engine.entity {

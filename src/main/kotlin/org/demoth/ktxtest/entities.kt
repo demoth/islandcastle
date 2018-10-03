@@ -9,6 +9,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.World
 import ktx.ashley.entity
 import ktx.box2d.body
+import java.util.*
 
 fun createPlayerEntity(engine: Engine, world: World, startPosition: Vector2) {
     engine.entity {
@@ -20,12 +21,15 @@ fun createPlayerEntity(engine: Engine, world: World, startPosition: Vector2) {
             name = "player"
         }
         with<Physical> {
+            owner = UUID.randomUUID().toString()
+            collisionClass = CollisionClass.RECEIVE_DAMAGE
             body = world.body {
                 position.x = startPosition.x
                 position.y = startPosition.y
                 type = BodyDef.BodyType.DynamicBody
                 linearDamping = SPEED_DECEL
                 fixedRotation = true
+                userData = this@with
                 circle(0.5f)
             }
         }
@@ -43,7 +47,13 @@ fun createMapObject(engine: Engine, world: World, layer: String, name: String?, 
                     body = world.body {
                         type = BodyDef.BodyType.StaticBody
                         position.set(rect.getCentralPoint())
+                        userData = this@with
                         box(width = rect.width / PPM, height = rect.height / PPM)
+                    }
+                    collisionClass = if (name.isNullOrBlank()) {
+                        CollisionClass.SOLID_INVISIBLE
+                    } else {
+                        CollisionClass.SOLID
                     }
                 }
             }
@@ -56,4 +66,30 @@ fun createMapObject(engine: Engine, world: World, layer: String, name: String?, 
                 }
             }
         }
+}
+
+fun createFireBall(engine: Engine, world: World, actionLocation: Vector2, origin: Vector2, owner: String) {
+    engine.entity {
+        with<Textured> {
+            texture = Texture(Gdx.files.internal("Ardentryst-MagicSpriteEffects/Ardentryst-rfireball.png"))
+        }
+        with<Physical> {
+            this.owner = owner
+            toBeRemoved = false
+            collisionClass = CollisionClass.DEAL_DAMAGE
+            this.body = world.body {
+                type = BodyDef.BodyType.DynamicBody
+                this.linearVelocity.set(actionLocation)
+                this.position.set(origin)
+                userData = this@with
+                circle(0.3f) {
+                    isSensor = true
+                }
+            }
+        }
+        with<Named> {
+            name = "fireball"
+        }
+
+    }
 }

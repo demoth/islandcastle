@@ -15,7 +15,12 @@ class PlayerControlled : Component
  */
 class Positioned(var position: Vector2? = null) : Component
 
-class Physical(var body: Body? = null) : Component
+class Physical(
+        var body: Body? = null,
+        var toBeRemoved: Boolean = false,
+        var collisionClass: CollisionClass? = null,
+        var owner: String? = null
+) : Component
 
 class Textured(var texture: Texture? = null) : Component
 
