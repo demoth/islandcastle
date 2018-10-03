@@ -14,7 +14,6 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Box2D
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
-import com.badlogic.gdx.physics.box2d.Contact
 import com.badlogic.gdx.physics.box2d.ContactListener
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.viewport.FitViewport
@@ -23,9 +22,6 @@ import ktx.app.KtxApplicationAdapter
 import ktx.ashley.entity
 import ktx.box2d.createWorld
 import ktx.graphics.use
-import org.demoth.ktxtest.CollisionClass.DEAL_DAMAGE
-import org.demoth.ktxtest.CollisionClass.RECEIVE_DAMAGE
-import org.demoth.ktxtest.CollisionClass.SOLID
 
 
 const val MAX_SPEED = 10f
@@ -38,17 +34,17 @@ const val WALK_FORCE = 20f
 const val PPM = 32f // 1 meter - 32 pixels
 
 class Game2dTest : KtxApplicationAdapter {
-    lateinit var world: World
-    lateinit var batch: SpriteBatch
-    lateinit var viewport: Viewport
-    lateinit var camera: OrthographicCamera
-    lateinit var map: TiledMap
-    lateinit var box2dRenderer: Box2DDebugRenderer
-    lateinit var tileRenderer: OrthogonalTiledMapRenderer
-    lateinit var batchDrawSystem: BatchDrawSystem
-    lateinit var playerControlSystem: PlayerControlSystem
-    lateinit var engine: PooledEngine
-    lateinit var collisionListener: ContactListener
+    private lateinit var world: World
+    private lateinit var batch: SpriteBatch
+    private lateinit var viewport: Viewport
+    private lateinit var camera: OrthographicCamera
+    private lateinit var map: TiledMap
+    private lateinit var box2dRenderer: Box2DDebugRenderer
+    private lateinit var tileRenderer: OrthogonalTiledMapRenderer
+    private lateinit var batchDrawSystem: BatchDrawSystem
+    private lateinit var playerControlSystem: PlayerControlSystem
+    private lateinit var engine: PooledEngine
+    private lateinit var collisionListener: ContactListener
 
     var drawDebug = false
     var drawTiles = true
@@ -57,27 +53,7 @@ class Game2dTest : KtxApplicationAdapter {
         super.create()
         Box2D.init()
         world = createWorld()
-        collisionListener = object : ContactAdapter() {
-            override fun beginContact(contact: Contact?) {
-                if (contact != null && contact.isTouching) {
-                    val dataA = contact.fixtureA?.body?.userData
-                    val dataB = contact.fixtureB?.body?.userData
-                    if (dataA is Physical && dataB is Physical) {
-                        // todo check if not owner
-                        if (dataA.collisionClass == DEAL_DAMAGE
-                                && dataB.collisionClass!! in setOf(RECEIVE_DAMAGE, SOLID)) {
-                            if (dataA.owner != dataB.owner)
-                                dataA.toBeRemoved = true
-                        }
-                        if (dataB.collisionClass == DEAL_DAMAGE
-                                && dataA.collisionClass!! in setOf(RECEIVE_DAMAGE, SOLID)) {
-                            if (dataA.owner != dataB.owner)
-                                dataB.toBeRemoved = true
-                        }
-                    }
-                }
-            }
-        }
+        collisionListener = CollisionProcessor()
         world.setContactListener(collisionListener)
 
         box2dRenderer = Box2DDebugRenderer()
@@ -136,7 +112,7 @@ class Game2dTest : KtxApplicationAdapter {
     }
 
     override fun render() {
-
+        val delta = Gdx.graphics.deltaTime
         handleGlobalInput()
         // update physical world
         world.step(1 / 60f, 6, 2)
