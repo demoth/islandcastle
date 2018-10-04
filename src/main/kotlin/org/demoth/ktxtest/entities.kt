@@ -12,7 +12,7 @@ import ktx.ashley.entity
 import ktx.box2d.body
 import java.util.*
 
-fun createPlayerEntity(engine: Engine, world: World, startPosition: Vector2) {
+fun createPlayerEntity(engine: Engine, world: World, location: Vector2) {
     engine.entity {
         with<Textured> {
             texture = Texture(Gdx.files.internal("knight32.png"))
@@ -25,8 +25,8 @@ fun createPlayerEntity(engine: Engine, world: World, startPosition: Vector2) {
             owner = UUID.randomUUID().toString()
             collisionClass = CollisionClass.RECEIVE_DAMAGE
             body = world.body {
-                position.x = startPosition.x
-                position.y = startPosition.y
+                position.x = location.x
+                position.y = location.y
                 type = BodyDef.BodyType.DynamicBody
                 linearDamping = SPEED_DECEL
                 fixedRotation = true
@@ -37,11 +37,38 @@ fun createPlayerEntity(engine: Engine, world: World, startPosition: Vector2) {
     }
 }
 
+fun createEyeMonster(engine: Engine, world: World, x: Float, y: Float) {
+    engine.entity {
+        with<Textured> {
+            texture = Texture(Gdx.files.internal("eye_monsters/eyelander.png"))
+        }
+        with<Named> {
+            name = "eyelander"
+        }
+        with<Physical> {
+            owner = UUID.randomUUID().toString()
+            collisionClass = CollisionClass.RECEIVE_DAMAGE
+            body = world.body {
+                position.x = x
+                position.y = y
+                type = BodyDef.BodyType.DynamicBody
+                linearDamping = SPEED_DECEL
+                fixedRotation = true
+                userData = this@with
+                circle(0.5f)
+            }
+        }
+    }
+    println("spawned eye lander")
+}
+
 /**
  * Creates walls, solid objects, also named objects (like starting positions)
  */
 fun createMapObject(engine: Engine, world: World, layer: String, name: String?, rect: Rectangle) {
-    if (layer.startsWith("solid_") || !name.isNullOrBlank())
+    if (name == "spawn_eyelander") {
+        createEyeMonster(engine, world, rect.x / PPM, rect.y / PPM)
+    } else if (layer.startsWith("solid_") || !name.isNullOrBlank())
         engine.entity {
             if (layer.startsWith("solid_")) {
                 with<Physical> {
@@ -69,7 +96,33 @@ fun createMapObject(engine: Engine, world: World, layer: String, name: String?, 
         }
 }
 
-fun createFireBall(engine: Engine, world: World, actionLocation: Vector2, origin: Vector2, owner: String) {
+fun createFireBall(engine: Engine, world: World, velocity: Vector2, origin: Vector2, owner: String) {
+    engine.entity {
+        with<Textured> {
+            texture = Texture(Gdx.files.internal("Ardentryst-MagicSpriteEffects/Ardentryst-rfireball.png"))
+        }
+        with<Physical> {
+            this.owner = owner
+            toBeRemoved = false
+            collisionClass = CollisionClass.DEAL_DAMAGE
+            this.body = world.body {
+                type = BodyDef.BodyType.DynamicBody
+                this.linearVelocity.set(velocity)
+                this.position.set(origin)
+                userData = this@with
+                circle(0.5f) {
+                    isSensor = true
+                }
+            }
+        }
+        with<Named> {
+            name = "fireball"
+        }
+
+    }
+}
+
+fun createRotatingFireBall(engine: Engine, world: World, velocity: Vector2, origin: Vector2, owner: String) {
     engine.entity {
         with<Animated> {
             animation = createAnimation(
@@ -83,7 +136,7 @@ fun createFireBall(engine: Engine, world: World, actionLocation: Vector2, origin
             collisionClass = CollisionClass.DEAL_DAMAGE
             this.body = world.body {
                 type = BodyDef.BodyType.DynamicBody
-                this.linearVelocity.set(actionLocation)
+                this.linearVelocity.set(velocity)
                 this.position.set(origin)
                 userData = this@with
                 circle(0.5f) {
