@@ -21,6 +21,7 @@ class Physical(
         var body: Body? = null,
         var toBeRemoved: Boolean = false,
         var collisionClass: CollisionClass? = null,
+        var force: Float = 1f,
         var owner: String? = null
 ) : Component
 
