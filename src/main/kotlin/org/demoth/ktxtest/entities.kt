@@ -58,6 +58,7 @@ fun createEyeMonster(engine: Engine, world: World, x: Float, y: Float) {
                 circle(0.5f)
             }
         }
+        with<MonsterStationaryRanged>()
     }
     println("spawned eye lander")
 }

@@ -11,6 +11,15 @@ import com.badlogic.gdx.physics.box2d.World
 import ktx.ashley.allOf
 import ktx.ashley.mapperFor
 import ktx.ashley.oneOf
+import ktx.math.minus
+
+val physicMapper = mapperFor<Physical>()
+val playerCtrlMapper = mapperFor<PlayerControlled>()
+val texMapper = mapperFor<Textured>()
+val positionMapper = mapperFor<Positioned>()
+val namedMapper = mapperFor<Named>()
+val animatedMapper = mapperFor<Animated>()
+val monsterMapper = mapperFor<MonsterStationaryRanged>()
 
 /**
  * Moves player in the physical world
@@ -20,8 +29,6 @@ class PlayerControlSystem(private val world: World) : EntitySystem() {
      * location relative to player (center)
      */
     var actionLocation: Vector2? = null
-    private val physicMapper = mapperFor<Physical>()
-    private val playerCtrlMapper = mapperFor<PlayerControlled>()
 
     override fun update(deltaTime: Float) {
         engine.getEntitiesFor(allOf(Physical::class, PlayerControlled::class).get()).forEach { player ->
@@ -61,11 +68,6 @@ class BatchDrawSystem(
         var drawSprites: Boolean = true,
         var drawNames: Boolean = false
 ) : EntitySystem() {
-    private val texMapper = mapperFor<Textured>()
-    private val physicMapper = mapperFor<Physical>()
-    private val positionMapper = mapperFor<Positioned>()
-    private val namedMapper = mapperFor<Named>()
-    private val aninatedMapper = mapperFor<Animated>()
     private val font = BitmapFont()
     var time = 0f
 
@@ -75,7 +77,7 @@ class BatchDrawSystem(
         if (drawSprites) {
             engine.getEntitiesFor(oneOf(Textured::class, Animated::class).oneOf(Physical::class, Positioned::class).get()).forEach { e ->
                 val texture = texMapper[e]?.texture
-                val animated = aninatedMapper[e]
+                val animated = animatedMapper[e]
                 val position = physicMapper[e]?.body?.position ?: positionMapper[e].position
                 if (position != null) {
                     if (texture != null) {
@@ -111,8 +113,6 @@ class BatchDrawSystem(
  * Moves camera view to center on player
  */
 class CameraSystem(private val camera: Camera) : EntitySystem() {
-    private val physicMapper = mapperFor<Physical>()
-
     override fun update(deltaTime: Float) {
         engine.getEntitiesFor(allOf(Physical::class, PlayerControlled::class).get()).forEach { e ->
             physicMapper[e]?.body?.let { body ->
@@ -123,14 +123,34 @@ class CameraSystem(private val camera: Camera) : EntitySystem() {
 }
 
 class PhysicalSystem(private val world: World) : EntitySystem() {
-    private val physicMapper = mapperFor<Physical>()
-
     override fun update(deltaTime: Float) {
         engine.getEntitiesFor(allOf(Physical::class).get()).forEach { e ->
             val physical = physicMapper[e]
             if (physical.toBeRemoved) {
                 world.destroyBody(physical.body)
                 engine.removeEntity(e)
+            }
+        }
+    }
+}
+
+class MonsterAiSystem(private val world: World) : EntitySystem() {
+    override fun update(deltaTime: Float) {
+        engine.getEntitiesFor(allOf(MonsterStationaryRanged::class, Physical::class).get()).forEach {
+            val monster = monsterMapper[it]
+            val monsterPhysics = physicMapper[it]
+            monster.currentTime += deltaTime
+            if (monster.currentTime > monster.fireRate) {
+                monster.currentTime = 0f
+                val playerEntity = engine.getEntitiesFor(allOf(PlayerControlled::class, Physical::class).get()).firstOrNull()
+                if (playerEntity != null) {
+                    val playerPhysical = physicMapper[playerEntity]
+                    val monsterLocation = monsterPhysics.body!!.position
+                    createRotatingFireBall(engine, world,
+                            playerPhysical.body!!.position.cpy() - monsterLocation,
+                            monsterLocation,
+                            monsterPhysics.owner!!)
+                }
             }
         }
     }

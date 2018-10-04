@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
+import java.util.*
 
 /**
  * Marker used by PlayerControlSystem to control player movements
@@ -30,3 +31,8 @@ class Animated(var animation: Animation<TextureRegion>? = null) : Component
 class Textured(var texture: Texture? = null) : Component
 
 class Named(var name: String? = null) : Component
+
+/**
+ * will fire fireRate/sec towards player
+ */
+class MonsterStationaryRanged(var fireRate: Float = 1f, var currentTime: Float = Random().nextFloat()) : Component

@@ -76,12 +76,12 @@ class Game2dTest : KtxApplicationAdapter {
         engine.addSystem(batchDrawSystem)
         engine.addSystem(CameraSystem(camera))
         engine.addSystem(PhysicalSystem(world))
+        engine.addSystem(MonsterAiSystem(world))
 
         // add player
         engine.entity {
             createPlayerEntity(engine, world, startPosition.rectangle.getCentralPoint())
         }
-
 
         map.layers.forEach { layer ->
             layer.objects.getByType<RectangleMapObject>(RectangleMapObject::class.java).forEach { obj ->
@@ -93,7 +93,7 @@ class Game2dTest : KtxApplicationAdapter {
         Gdx.input.inputProcessor = object : InputAdapter() {
             override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
                 if (button == Input.Buttons.LEFT) {
-                    println("touched! $screenX, $screenY")
+                    println("clicked! screen coords:  $screenX, $screenY")
                     playerControlSystem.actionLocation = Vector2(
                             1f * screenX - viewport.screenWidth / 2f,
                             -1f * screenY + viewport.screenHeight / 2f).scl(0.5f / PPM)
