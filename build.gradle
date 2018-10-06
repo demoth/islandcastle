@@ -48,12 +48,16 @@ compileTestKotlin {
     kotlinOptions.jvmTarget = kotlinJvmVersion
 }
 
-build << {
-    copy {
-        from "assets"
-        into "$buildDir/assets"
+distributions {
+    main {
+        contents {
+            from('assets') {
+                into 'bin'
+            }
+        }
     }
 }
+
 run {
     workingDir = "assets"
 }
