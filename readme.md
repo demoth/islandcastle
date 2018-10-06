@@ -12,3 +12,12 @@ Currently implemented:
  * Box2D integration
  * Using fireball missiles
  * Stationary enemies shooting missiles
+
+Required Java (openjdk is fine)
+
+to build distribution:
+./gradlew distZip
+
+to run, either run from gradle:
+./gradlew run
+or unpack distribution and execute main script from bin folder
