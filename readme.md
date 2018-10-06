@@ -3,7 +3,7 @@ Island castle
 
 This is a 2d top down single player action rpg. Work in progress.
 
-Based on LibGDX + LibKTX + Box2d
+Written in kotlin and based on libraries: LibGDX, LibKTX, Box2d
 
 Currently implemented:
 
