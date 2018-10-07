@@ -72,9 +72,7 @@ class Game2dTest : KtxApplicationAdapter {
 
         playerControlSystem = PlayerControlSystem(world)
         batchDrawSystem = BatchDrawSystem(batch, viewport)
-        engine.entity().apply {
-            add(PlayerScore())
-        }
+
         engine.addSystem(playerControlSystem)
         engine.addSystem(batchDrawSystem)
         engine.addSystem(CameraSystem(camera))

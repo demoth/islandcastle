@@ -11,7 +11,7 @@ import java.util.*
 /**
  * Marker used by PlayerControlSystem to control player movements
  */
-class PlayerControlled : Component
+class Player(var score: Int = 666 * 30, var health: Int = 9000) : Component
 
 /**
  * Position in physical space units
@@ -24,11 +24,7 @@ class Physical(
         val owner: String = "",
         var force: Float = 1f, // how strong fireballs can push
         var toBeRemoved: Boolean = false
-) : Component {
-    init {
-        body.userData = this
-    }
-}
+) : Component
 
 class Animated(val animation: Animation<TextureRegion>) : Component
 
@@ -39,11 +35,9 @@ class Named(val name: String) : Component
 /**
  * will fire fireRate/sec towards player
  */
-class MonsterStationaryRanged(var fireRate: Float = 1f, var currentTime: Float = Random().nextFloat()) : Component
+class MonsterStationaryRanged(var health: Int = 6666, var fireRate: Float = 1f, var currentTime: Float = Random().nextFloat()) : Component
 
 /**
  * Used for damage labels - they float up a bit then disappear
  */
 class FloatingUpLabel(var ttl: Float = 2f) : Component
-
-class PlayerScore(var value: Int = 666 * 30) : Component

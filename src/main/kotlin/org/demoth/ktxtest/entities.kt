@@ -15,9 +15,10 @@ import java.util.*
 fun createPlayerEntity(engine: Engine, world: World, location: Vector2) {
     engine.entity().apply {
         add(Textured(Texture(Gdx.files.internal("knight32.png"))))
-        add(PlayerControlled())
+        add(Player())
         add(Named("player"))
         add(Physical(world.body {
+            userData = this@apply
             position.x = location.x
             position.y = location.y
             type = BodyDef.BodyType.DynamicBody
@@ -34,6 +35,7 @@ fun createEyeMonster(engine: Engine, world: World, x: Float, y: Float) {
         add(MonsterStationaryRanged())
         add(Textured(Texture(Gdx.files.internal("eye_monsters/eyelander.png"))))
         add(Physical(world.body {
+            userData = this@apply
             position.x = x
             position.y = y
             type = BodyDef.BodyType.DynamicBody
@@ -56,14 +58,15 @@ fun createMapObject(engine: Engine, world: World, layer: String, name: String?, 
         engine.entity().apply {
             if (layer.startsWith("solid_")) {
                 add(Physical(world.body {
+                    userData = this@apply
                     type = BodyDef.BodyType.StaticBody
                     position.set(rect.getCentralPoint())
                     box(width = rect.width / PPM, height = rect.height / PPM)
-                }, if (name.isNullOrBlank()) {
+                }, if (name.isNullOrBlank())
                     CollisionClass.SOLID_INVISIBLE
-                } else {
-                    CollisionClass.SOLID
-                }))
+                else
+                    CollisionClass.SOLID)
+                )
 
             }
             if (!name.isNullOrBlank()) {
@@ -75,8 +78,10 @@ fun createMapObject(engine: Engine, world: World, layer: String, name: String?, 
 
 fun createFireBall(engine: Engine, world: World, velocity: Vector2, origin: Vector2, owner: String) {
     engine.entity().apply {
+        add(Named("fireball"))
         add(Textured(Texture(Gdx.files.internal("Ardentryst-MagicSpriteEffects/Ardentryst-rfireball.png"))))
         add(Physical(world.body {
+            userData = this@apply
             type = BodyDef.BodyType.DynamicBody
             this.linearVelocity.set(velocity)
             this.position.set(origin)
@@ -84,16 +89,17 @@ fun createFireBall(engine: Engine, world: World, velocity: Vector2, origin: Vect
                 isSensor = true
             }
         }, CollisionClass.DEAL_DAMAGE, owner))
-        add(Named("fireball"))
     }
 }
 
 fun createRotatingFireBall(engine: Engine, world: World, velocity: Vector2, origin: Vector2, owner: String) {
     engine.entity().apply {
+        add(Named("fireball"))
         add(Animated(createAnimation(
                 Texture(Gdx.files.internal("sprites/Sprite_FX_Fire_0004_FIX.png")),
                 4, 1, 0.1f, Animation.PlayMode.LOOP)))
         add(Physical(world.body {
+            userData = this@apply
             type = BodyDef.BodyType.DynamicBody
             this.linearVelocity.set(velocity)
             this.position.set(origin)
@@ -101,7 +107,6 @@ fun createRotatingFireBall(engine: Engine, world: World, velocity: Vector2, orig
                 isSensor = true
             }
         }, CollisionClass.DEAL_DAMAGE, owner))
-        add(Named("fireball"))
 
     }
 }

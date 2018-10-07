@@ -16,14 +16,13 @@ import ktx.ashley.oneOf
 import ktx.math.minus
 
 val physicMapper = mapperFor<Physical>()
-val playerCtrlMapper = mapperFor<PlayerControlled>()
+val playerMapper = mapperFor<Player>()
 val texMapper = mapperFor<Textured>()
 val positionMapper = mapperFor<Positioned>()
 val namedMapper = mapperFor<Named>()
 val animatedMapper = mapperFor<Animated>()
 val monsterMapper = mapperFor<MonsterStationaryRanged>()
 val floatingUpLabelMapper = mapperFor<FloatingUpLabel>()
-val playerScoreMapper = mapperFor<PlayerScore>()
 
 /**
  * Moves player in the physical world
@@ -35,9 +34,9 @@ class PlayerControlSystem(private val world: World) : EntitySystem() {
     var actionLocation: Vector2? = null
 
     override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(allOf(Physical::class, PlayerControlled::class).get()).forEach { player ->
+        engine.getEntitiesFor(allOf(Physical::class, Player::class).get()).forEach { player ->
             // this may be used later to affect how controls are used
-            val control = playerCtrlMapper[player]
+            val control = playerMapper[player]
             val playerPhysics = physicMapper[player]
             playerPhysics?.body?.let { body ->
                 if (Gdx.input.isKeyPressed(Input.Keys.W) && body.linearVelocity.y < MAX_SPEED) {
@@ -124,12 +123,12 @@ class BatchDrawSystem(
             }
         }
 
-        engine.getEntitiesFor(oneOf(PlayerScore::class).get()).firstOrNull()?.let {
-            val playerScore = playerScoreMapper[it]
-            val g = GlyphLayout(font, "Score: ${playerScore.value}")
+        engine.getEntitiesFor(oneOf(Player::class).get()).firstOrNull()?.let {
+            val player = playerMapper[it]
+            val g = GlyphLayout(font, "Score: ${player.score}")
 
             font.draw(batch, g, viewport.camera.position.x - g.width / 2, viewport.camera.position.y - viewport.screenHeight * 0.2f)
-            playerScore.value--
+            player.score--
         }
     }
 }
@@ -139,7 +138,7 @@ class BatchDrawSystem(
  */
 class CameraSystem(private val camera: Camera) : EntitySystem() {
     override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(allOf(Physical::class, PlayerControlled::class).get()).forEach { e ->
+        engine.getEntitiesFor(allOf(Physical::class, Player::class).get()).forEach { e ->
             physicMapper[e]?.body?.let { body ->
                 camera.position.set(body.position.x * PPM, body.position.y * PPM, 0f)
             }
@@ -165,9 +164,12 @@ class MonsterAiSystem(private val world: World) : EntitySystem() {
             val monster = monsterMapper[it]
             val monsterPhysics = physicMapper[it]
             monster.currentTime += deltaTime
-            if (monster.currentTime > monster.fireRate) {
+            if (monster.health < 0) {
+                engine.removeEntity(it)
+                world.destroyBody(monsterPhysics.body)
+            } else if (monster.currentTime > monster.fireRate) {
                 monster.currentTime = 0f
-                val playerEntity = engine.getEntitiesFor(allOf(PlayerControlled::class, Physical::class).get()).firstOrNull()
+                val playerEntity = engine.getEntitiesFor(allOf(Player::class, Physical::class).get()).firstOrNull()
                 if (playerEntity != null) {
                     val playerPhysical = physicMapper[playerEntity]
                     val monsterLocation = monsterPhysics.body.position
