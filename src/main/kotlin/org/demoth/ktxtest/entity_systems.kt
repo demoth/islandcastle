@@ -43,7 +43,7 @@ class PlayerControlSystem(private val world: World) : EntitySystem() {
             if (player.health < 0) {
                 engine.entity().apply {
                     add(FloatingUpLabel(10f))
-                    add(Named("You have died! Press F5 to restart"))
+                    add(Named("You have died! Press F5 to restart. Score: ${player.score}"))
                     add(Positioned(playerPhysics.body.position.cpy()))
                 }
                 engine.removeEntity(it)
