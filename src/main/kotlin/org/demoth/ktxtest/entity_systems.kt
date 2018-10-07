@@ -21,6 +21,7 @@ val positionMapper = mapperFor<Positioned>()
 val namedMapper = mapperFor<Named>()
 val animatedMapper = mapperFor<Animated>()
 val monsterMapper = mapperFor<MonsterStationaryRanged>()
+val floatingUpLabelMapper = mapperFor<FloatingUpLabel>()
 
 /**
  * Moves player in the physical world
@@ -51,7 +52,7 @@ class PlayerControlSystem(private val world: World) : EntitySystem() {
                 }
 
                 if (actionLocation != null) {
-                    createFireBall(engine, world, actionLocation!!, body.position, playerPhysics.owner!!)
+                    createFireBall(engine, world, actionLocation!!, body.position, playerPhysics.owner)
                     println("actionLocation: $actionLocation")
                     println("player: ${body.position}")
                     actionLocation = null
@@ -100,11 +101,25 @@ class BatchDrawSystem(
             engine.getEntitiesFor(allOf(Named::class).oneOf(Physical::class, Positioned::class).get()).forEach { e ->
                 val name = namedMapper[e].name
                 val position = physicMapper[e]?.body?.position ?: positionMapper[e].position
-                if (!name.isNullOrBlank() && position != null) {
+                if (name.isNotBlank()) {
                     // TODO check if object is visible from current viewport
                     val g = GlyphLayout(font, name)
-                    font.draw(batch, name, position.x * PPM - g.width / 2, position.y * PPM)
+                    font.draw(batch, g, position.x * PPM - g.width / 2, position.y * PPM)
                 }
+            }
+
+        }
+        engine.getEntitiesFor(allOf(FloatingUpLabel::class, Positioned::class).get()).forEach {
+            val floating = floatingUpLabelMapper[it]
+            val positioned = positionMapper[it]
+            val named = namedMapper[it]
+            floating.ttl -= deltaTime
+            if (floating.ttl > 0) {
+                positioned.position.y += 0.01f
+                val g = GlyphLayout(font, named.name)
+                font.draw(batch, g, positioned.position.x * PPM - g.width / 2, positioned.position.y * PPM)
+            } else {
+                engine.removeEntity(it)
             }
 
         }
@@ -147,11 +162,11 @@ class MonsterAiSystem(private val world: World) : EntitySystem() {
                 val playerEntity = engine.getEntitiesFor(allOf(PlayerControlled::class, Physical::class).get()).firstOrNull()
                 if (playerEntity != null) {
                     val playerPhysical = physicMapper[playerEntity]
-                    val monsterLocation = monsterPhysics.body!!.position
+                    val monsterLocation = monsterPhysics.body.position
                     createRotatingFireBall(engine, world,
-                            playerPhysical.body!!.position.cpy() - monsterLocation,
+                            playerPhysical.body.position.cpy() - monsterLocation,
                             monsterLocation,
-                            monsterPhysics.owner!!)
+                            monsterPhysics.owner)
                 }
             }
         }

@@ -54,8 +54,6 @@ class Game2dTest : KtxApplicationAdapter {
 
         world = createWorld()
 
-        collisionListener = CollisionProcessor()
-        world.setContactListener(collisionListener)
 
         box2dRenderer = Box2DDebugRenderer()
 
@@ -69,6 +67,9 @@ class Game2dTest : KtxApplicationAdapter {
         val startPosition = map.layers["entities"].objects["start"] as RectangleMapObject
 
         engine = PooledEngine()
+        collisionListener = CollisionProcessor(engine)
+        world.setContactListener(collisionListener)
+
         playerControlSystem = PlayerControlSystem(world)
         batchDrawSystem = BatchDrawSystem(batch)
 

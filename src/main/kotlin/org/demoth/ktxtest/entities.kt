@@ -105,3 +105,10 @@ fun createRotatingFireBall(engine: Engine, world: World, velocity: Vector2, orig
 
     }
 }
+
+fun createFloatingLabel(engine: Engine, value: String, location: Vector2) {
+    val label = engine.entity()
+    label.add(Named(value))
+    label.add(FloatingUpLabel())
+    label.add(Positioned(location))
+}
