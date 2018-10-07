@@ -50,10 +50,10 @@ class Game2dTest : KtxApplicationAdapter {
     var drawTiles = true
     var time = 0f
 
-    override fun create() {
-        super.create()
-        Box2D.init()
+    fun loadMap(mapname: String) {
+
         world = createWorld()
+
         collisionListener = CollisionProcessor()
         world.setContactListener(collisionListener)
 
@@ -61,7 +61,7 @@ class Game2dTest : KtxApplicationAdapter {
 
         batch = SpriteBatch()
 
-        map = TmxMapLoader().load("grassmap.tmx")
+        map = TmxMapLoader().load(mapname)
         tileRenderer = OrthogonalTiledMapRenderer(map, 1f)
 
         camera = OrthographicCamera(TILE_SIZE, TILE_SIZE)
@@ -102,7 +102,12 @@ class Game2dTest : KtxApplicationAdapter {
             }
         }
 
+    }
 
+    override fun create() {
+        Box2D.init()
+
+        loadMap("grassmap.tmx")
     }
 
     override fun dispose() {
@@ -112,6 +117,7 @@ class Game2dTest : KtxApplicationAdapter {
         tileRenderer.dispose()
         map.dispose()
         batch.dispose()
+        engine.removeAllEntities()
     }
 
     override fun render() {
@@ -149,6 +155,13 @@ class Game2dTest : KtxApplicationAdapter {
             batchDrawSystem.drawSprites = !batchDrawSystem.drawSprites
         if (Gdx.input.isKeyJustPressed(Input.Keys.F4))
             batchDrawSystem.drawNames = !batchDrawSystem.drawNames
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F5)) {
+            dispose()
+            loadMap("grassmap.tmx")
+            // todo remove hardcoded size
+            viewport.update(1000, 1000)
+        }
+
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
             Gdx.app.exit()
     }
@@ -159,7 +172,6 @@ class Game2dTest : KtxApplicationAdapter {
     }
 
     override fun resize(width: Int, height: Int) {
-        super.resize(width, height)
         viewport.update(width, height)
     }
 }

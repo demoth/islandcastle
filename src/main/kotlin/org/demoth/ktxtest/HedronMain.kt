@@ -9,6 +9,7 @@ fun main(args: Array<String>) {
     config.width = 1000
     config.height = 1000
     config.forceExit = false
+    config.resizable = false
     LwjglApplication(Game2dTest(), config)
 }
 
