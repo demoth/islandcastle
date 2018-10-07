@@ -4,5 +4,6 @@ enum class CollisionClass {
     DEAL_DAMAGE,
     SOLID,
     SOLID_INVISIBLE,
-    RECEIVE_DAMAGE
+    RECEIVE_DAMAGE,
+    TRIGGER
 }

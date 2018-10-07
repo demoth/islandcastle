@@ -51,9 +51,11 @@ fun createEyeMonster(engine: Engine, world: World, x: Float, y: Float) {
 /**
  * Creates walls, solid objects, also named objects (like starting positions)
  */
-fun createMapObject(engine: Engine, world: World, layer: String, name: String?, rect: Rectangle) {
+fun createMapObject(engine: Engine, world: World, layer: String, name: String?, rect: Rectangle, finishTrigger: (Int) -> Unit) {
     if (name == "spawn_eyelander") {
         createEyeMonster(engine, world, rect.x / PPM, rect.y / PPM)
+    } else if (name == "exit") {
+        createTrigger("exit", engine, world, rect, finishTrigger)
     } else if (layer.startsWith("solid_") || !name.isNullOrBlank())
         engine.entity().apply {
             if (layer.startsWith("solid_")) {
@@ -116,4 +118,19 @@ fun createFloatingLabel(engine: Engine, value: String, location: Vector2) {
     label.add(Named(value))
     label.add(FloatingUpLabel())
     label.add(Positioned(location))
+}
+
+fun createTrigger(name: String, engine: Engine, world: World, rect: Rectangle, action: (Int) -> Unit) {
+    engine.entity().apply {
+        add(Named(name))
+        add(Physical(world.body {
+            userData = this@apply
+            type = BodyDef.BodyType.StaticBody
+            position.set(rect.getCentralPoint())
+            box(width = rect.width / PPM, height = rect.height / PPM) {
+                isSensor = true
+            }
+        }, CollisionClass.TRIGGER))
+        add(Trigger(action))
+    }
 }

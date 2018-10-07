@@ -6,6 +6,7 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
+import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.maps.objects.RectangleMapObject
 import com.badlogic.gdx.maps.tiled.TiledMap
@@ -49,6 +50,7 @@ class Game2dTest : KtxApplicationAdapter {
     var drawDebug = false
     var drawTiles = true
     var time = 0f
+    var finishedScore: Int? = null
 
     fun loadMap(mapname: String) {
 
@@ -86,7 +88,9 @@ class Game2dTest : KtxApplicationAdapter {
 
         map.layers.forEach { layer ->
             layer.objects.getByType<RectangleMapObject>(RectangleMapObject::class.java).forEach { obj ->
-                createMapObject(engine, world, layer.name, obj.name, obj.rectangle)
+                createMapObject(engine, world, layer.name, obj.name, obj.rectangle) { i ->
+                    finishedScore = i
+                }
             }
 
         }
@@ -128,7 +132,14 @@ class Game2dTest : KtxApplicationAdapter {
         world.step(1 / 60f, 6, 2)
 
         clearScreen()
-
+        if (finishedScore != null) {
+            val font = BitmapFont()
+            batch.use {
+                font.draw(batch, "CONGLATURATION!!!", camera.position.x, camera.position.y + 30)
+                font.draw(batch, "Score: $finishedScore", camera.position.x, camera.position.y)
+            }
+            return
+        }
         camera.update()
 
         if (drawTiles) {

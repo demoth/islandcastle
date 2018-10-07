@@ -41,3 +41,5 @@ class MonsterStationaryRanged(var health: Int = 6666, var fireRate: Float = 1f, 
  * Used for damage labels - they float up a bit then disappear
  */
 class FloatingUpLabel(var ttl: Float = 2f) : Component
+
+class Trigger(val action: (Int) -> Unit) : Component
