@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Camera
 import com.badlogic.gdx.graphics.g2d.BitmapFont
+import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.World
@@ -101,7 +102,8 @@ class BatchDrawSystem(
                 val position = physicMapper[e]?.body?.position ?: positionMapper[e].position
                 if (!name.isNullOrBlank() && position != null) {
                     // TODO check if object is visible from current viewport
-                    font.draw(batch, name, position.x * PPM, position.y * PPM)
+                    val g = GlyphLayout(font, name)
+                    font.draw(batch, name, position.x * PPM - g.width / 2, position.y * PPM)
                 }
             }
 
