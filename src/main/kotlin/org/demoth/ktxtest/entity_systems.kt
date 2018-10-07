@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.ashley.allOf
+import ktx.ashley.entity
 import ktx.ashley.mapperFor
 import ktx.ashley.oneOf
 import ktx.math.minus
@@ -34,10 +35,22 @@ class PlayerControlSystem(private val world: World) : EntitySystem() {
     var actionLocation: Vector2? = null
 
     override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(allOf(Physical::class, Player::class).get()).forEach { player ->
+        engine.getEntitiesFor(allOf(Physical::class, Player::class).get()).firstOrNull()?.let { it ->
             // this may be used later to affect how controls are used
-            val control = playerMapper[player]
-            val playerPhysics = physicMapper[player]
+            val player = playerMapper[it]
+            val playerPhysics = physicMapper[it]
+
+            if (player.health < 0) {
+                engine.entity().apply {
+                    add(FloatingUpLabel(10f))
+                    add(Named("You have died! Press F5 to restart"))
+                    add(Positioned(playerPhysics.body.position.cpy()))
+                }
+                engine.removeEntity(it)
+                world.destroyBody(playerPhysics.body)
+                return
+            }
+
             playerPhysics?.body?.let { body ->
                 if (Gdx.input.isKeyPressed(Input.Keys.W) && body.linearVelocity.y < MAX_SPEED) {
                     body.applyForceToCenter(0f, WALK_FORCE, true)
@@ -109,7 +122,7 @@ class BatchDrawSystem(
             }
 
         }
-        engine.getEntitiesFor(allOf(FloatingUpLabel::class, Positioned::class).get()).forEach {
+        engine.getEntitiesFor(allOf(FloatingUpLabel::class, Positioned::class, Named::class).get()).forEach {
             val floating = floatingUpLabelMapper[it]
             val positioned = positionMapper[it]
             val named = namedMapper[it]
@@ -126,8 +139,10 @@ class BatchDrawSystem(
         engine.getEntitiesFor(oneOf(Player::class).get()).firstOrNull()?.let {
             val player = playerMapper[it]
             val g = GlyphLayout(font, "Score: ${player.score}")
+            val h = GlyphLayout(font, "Health: ${player.health}")
 
             font.draw(batch, g, viewport.camera.position.x - g.width / 2, viewport.camera.position.y - viewport.screenHeight * 0.2f)
+            font.draw(batch, h, viewport.camera.position.x - h.width / 2, viewport.camera.position.y - viewport.screenHeight * 0.23f)
             player.score--
         }
     }
