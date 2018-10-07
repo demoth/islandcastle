@@ -19,18 +19,22 @@ class PlayerControlled : Component
 class Positioned(var position: Vector2? = null) : Component
 
 class Physical(
-        var body: Body? = null,
-        var toBeRemoved: Boolean = false,
-        var collisionClass: CollisionClass? = null,
-        var force: Float = 1f,
-        var owner: String? = null
-) : Component
+        val body: Body,
+        val collisionClass: CollisionClass,
+        val owner: String = "",
+        var force: Float = 1f, // how strong fireballs can push
+        var toBeRemoved: Boolean = false
+) : Component {
+    init {
+        body.userData = this
+    }
+}
 
-class Animated(var animation: Animation<TextureRegion>? = null) : Component
+class Animated(val animation: Animation<TextureRegion>) : Component
 
-class Textured(var texture: Texture? = null) : Component
+class Textured(val texture: Texture) : Component
 
-class Named(var name: String? = null) : Component
+class Named(val name: String) : Component
 
 /**
  * will fire fireRate/sec towards player

@@ -13,53 +13,36 @@ import ktx.box2d.body
 import java.util.*
 
 fun createPlayerEntity(engine: Engine, world: World, location: Vector2) {
-    engine.entity {
-        with<Textured> {
-            texture = Texture(Gdx.files.internal("knight32.png"))
-        }
-        with<PlayerControlled>()
-        with<Named> {
-            name = "player"
-        }
-        with<Physical> {
-            owner = UUID.randomUUID().toString()
-            collisionClass = CollisionClass.RECEIVE_DAMAGE
-            body = world.body {
-                position.x = location.x
-                position.y = location.y
-                type = BodyDef.BodyType.DynamicBody
-                linearDamping = SPEED_DECEL
-                fixedRotation = true
-                userData = this@with
-                circle(0.5f)
-            }
-        }
+    engine.entity().apply {
+        add(Textured(Texture(Gdx.files.internal("knight32.png"))))
+        add(PlayerControlled())
+        add(Named("player"))
+        add(Physical(world.body {
+            position.x = location.x
+            position.y = location.y
+            type = BodyDef.BodyType.DynamicBody
+            linearDamping = SPEED_DECEL
+            fixedRotation = true
+            circle(0.5f)
+        }, CollisionClass.RECEIVE_DAMAGE, UUID.randomUUID().toString()))
     }
 }
 
 fun createEyeMonster(engine: Engine, world: World, x: Float, y: Float) {
-    engine.entity {
-        with<Textured> {
-            texture = Texture(Gdx.files.internal("eye_monsters/eyelander.png"))
-        }
-        with<Named> {
-            name = "eyelander"
-        }
-        with<Physical> {
-            owner = UUID.randomUUID().toString()
-            collisionClass = CollisionClass.RECEIVE_DAMAGE
-            body = world.body {
-                position.x = x
-                position.y = y
-                type = BodyDef.BodyType.DynamicBody
-                linearDamping = SPEED_DECEL
-                fixedRotation = true
-                userData = this@with
-                circle(0.5f)
-            }
-        }
-        with<MonsterStationaryRanged>()
+    engine.entity().apply {
+        add(Named("eyelander"))
+        add(MonsterStationaryRanged())
+        add(Textured(Texture(Gdx.files.internal("eye_monsters/eyelander.png"))))
+        add(Physical(world.body {
+            position.x = x
+            position.y = y
+            type = BodyDef.BodyType.DynamicBody
+            linearDamping = SPEED_DECEL
+            fixedRotation = true
+            circle(0.5f)
+        }, CollisionClass.RECEIVE_DAMAGE, UUID.randomUUID().toString()))
     }
+
     println("spawned eye lander")
 }
 
@@ -70,84 +53,55 @@ fun createMapObject(engine: Engine, world: World, layer: String, name: String?, 
     if (name == "spawn_eyelander") {
         createEyeMonster(engine, world, rect.x / PPM, rect.y / PPM)
     } else if (layer.startsWith("solid_") || !name.isNullOrBlank())
-        engine.entity {
+        engine.entity().apply {
             if (layer.startsWith("solid_")) {
-                with<Physical> {
-                    body = world.body {
-                        type = BodyDef.BodyType.StaticBody
-                        position.set(rect.getCentralPoint())
-                        userData = this@with
-                        box(width = rect.width / PPM, height = rect.height / PPM)
-                    }
-                    collisionClass = if (name.isNullOrBlank()) {
-                        CollisionClass.SOLID_INVISIBLE
-                    } else {
-                        CollisionClass.SOLID
-                    }
-                }
+                add(Physical(world.body {
+                    type = BodyDef.BodyType.StaticBody
+                    position.set(rect.getCentralPoint())
+                    box(width = rect.width / PPM, height = rect.height / PPM)
+                }, if (name.isNullOrBlank()) {
+                    CollisionClass.SOLID_INVISIBLE
+                } else {
+                    CollisionClass.SOLID
+                }))
+
             }
             if (!name.isNullOrBlank()) {
-                with<Named> {
-                    this.name = name
-                }
-                with<Positioned> {
-                    position = rect.getCentralPoint()
-                }
+                add(Named(name!!))
+                add(Positioned(rect.getCentralPoint()))
             }
         }
 }
 
 fun createFireBall(engine: Engine, world: World, velocity: Vector2, origin: Vector2, owner: String) {
-    engine.entity {
-        with<Textured> {
-            texture = Texture(Gdx.files.internal("Ardentryst-MagicSpriteEffects/Ardentryst-rfireball.png"))
-        }
-        with<Physical> {
-            this.owner = owner
-            toBeRemoved = false
-            collisionClass = CollisionClass.DEAL_DAMAGE
-            this.body = world.body {
-                type = BodyDef.BodyType.DynamicBody
-                this.linearVelocity.set(velocity)
-                this.position.set(origin)
-                userData = this@with
-                circle(0.5f) {
-                    isSensor = true
-                }
+    engine.entity().apply {
+        add(Textured(Texture(Gdx.files.internal("Ardentryst-MagicSpriteEffects/Ardentryst-rfireball.png"))))
+        add(Physical(world.body {
+            type = BodyDef.BodyType.DynamicBody
+            this.linearVelocity.set(velocity)
+            this.position.set(origin)
+            circle(0.5f) {
+                isSensor = true
             }
-        }
-        with<Named> {
-            name = "fireball"
-        }
-
+        }, CollisionClass.DEAL_DAMAGE, owner))
+        add(Named("fireball"))
     }
 }
 
 fun createRotatingFireBall(engine: Engine, world: World, velocity: Vector2, origin: Vector2, owner: String) {
-    engine.entity {
-        with<Animated> {
-            animation = createAnimation(
-                    Texture(Gdx.files.internal("sprites/Sprite_FX_Fire_0004_FIX.png")),
-                    4, 1, 0.1f, Animation.PlayMode.LOOP
-            )
-        }
-        with<Physical> {
-            this.owner = owner
-            toBeRemoved = false
-            collisionClass = CollisionClass.DEAL_DAMAGE
-            this.body = world.body {
-                type = BodyDef.BodyType.DynamicBody
-                this.linearVelocity.set(velocity)
-                this.position.set(origin)
-                userData = this@with
-                circle(0.5f) {
-                    isSensor = true
-                }
+    engine.entity().apply {
+        add(Animated(createAnimation(
+                Texture(Gdx.files.internal("sprites/Sprite_FX_Fire_0004_FIX.png")),
+                4, 1, 0.1f, Animation.PlayMode.LOOP)))
+        add(Physical(world.body {
+            type = BodyDef.BodyType.DynamicBody
+            this.linearVelocity.set(velocity)
+            this.position.set(origin)
+            circle(0.5f) {
+                isSensor = true
             }
-        }
-        with<Named> {
-            name = "fireball"
-        }
+        }, CollisionClass.DEAL_DAMAGE, owner))
+        add(Named("fireball"))
 
     }
 }
