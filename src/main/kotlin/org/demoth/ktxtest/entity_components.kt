@@ -45,3 +45,5 @@ class MonsterStationaryRanged(var fireRate: Float = 1f, var currentTime: Float =
  * Used for damage labels - they float up a bit then disappear
  */
 class FloatingUpLabel(var ttl: Float = 2f) : Component
+
+class PlayerScore(var value: Int = 666 * 30) : Component

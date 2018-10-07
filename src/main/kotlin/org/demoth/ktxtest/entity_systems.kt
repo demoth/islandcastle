@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.World
+import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.ashley.allOf
 import ktx.ashley.mapperFor
 import ktx.ashley.oneOf
@@ -22,6 +23,7 @@ val namedMapper = mapperFor<Named>()
 val animatedMapper = mapperFor<Animated>()
 val monsterMapper = mapperFor<MonsterStationaryRanged>()
 val floatingUpLabelMapper = mapperFor<FloatingUpLabel>()
+val playerScoreMapper = mapperFor<PlayerScore>()
 
 /**
  * Moves player in the physical world
@@ -67,6 +69,7 @@ class PlayerControlSystem(private val world: World) : EntitySystem() {
  */
 class BatchDrawSystem(
         private val batch: SpriteBatch,
+        private val viewport: Viewport,
         var drawSprites: Boolean = true,
         var drawNames: Boolean = false
 ) : EntitySystem() {
@@ -81,19 +84,17 @@ class BatchDrawSystem(
                 val texture = texMapper[e]?.texture
                 val animated = animatedMapper[e]
                 val position = physicMapper[e]?.body?.position ?: positionMapper[e].position
-                if (position != null) {
-                    if (texture != null) {
-                        // TODO check if object is visible from current viewport
-                        batch.draw(texture,
-                                position.x * PPM - texture.width / 2,
-                                position.y * PPM - texture.height / 2)
-                    }
-                    val keyFrame = animated?.animation?.getKeyFrame(time)
-                    if (keyFrame != null) {
-                        batch.draw(keyFrame,
-                                position.x * PPM - keyFrame.regionWidth / 2,
-                                position.y * PPM - keyFrame.regionHeight / 2)
-                    }
+                if (texture != null) {
+                    // TODO check if object is visible from current viewport
+                    batch.draw(texture,
+                            position.x * PPM - texture.width / 2,
+                            position.y * PPM - texture.height / 2)
+                }
+                val keyFrame = animated?.animation?.getKeyFrame(time)
+                if (keyFrame != null) {
+                    batch.draw(keyFrame,
+                            position.x * PPM - keyFrame.regionWidth / 2,
+                            position.y * PPM - keyFrame.regionHeight / 2)
                 }
             }
         }
@@ -121,7 +122,14 @@ class BatchDrawSystem(
             } else {
                 engine.removeEntity(it)
             }
+        }
 
+        engine.getEntitiesFor(oneOf(PlayerScore::class).get()).firstOrNull()?.let {
+            val playerScore = playerScoreMapper[it]
+            val g = GlyphLayout(font, "Score: ${playerScore.value}")
+
+            font.draw(batch, g, viewport.camera.position.x - g.width / 2, viewport.camera.position.y - viewport.screenHeight * 0.2f)
+            playerScore.value--
         }
     }
 }

@@ -24,7 +24,7 @@ fun createPlayerEntity(engine: Engine, world: World, location: Vector2) {
             linearDamping = SPEED_DECEL
             fixedRotation = true
             circle(0.5f)
-        }, CollisionClass.RECEIVE_DAMAGE, UUID.randomUUID().toString()))
+        }, CollisionClass.RECEIVE_DAMAGE, "player"))
     }
 }
 

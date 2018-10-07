@@ -3,7 +3,7 @@ package org.demoth.ktxtest
 import com.badlogic.ashley.core.Engine
 import com.badlogic.gdx.physics.box2d.Contact
 
-class CollisionProcessor(val engine: Engine) : ContactAdapter() {
+class CollisionProcessor(private val engine: Engine) : ContactAdapter() {
     override fun beginContact(contact: Contact?) {
         if (contact != null && contact.isTouching) {
             val dataA = contact.fixtureA?.body?.userData
@@ -23,10 +23,10 @@ class CollisionProcessor(val engine: Engine) : ContactAdapter() {
         }
     }
 
-    fun removeMissileAndApplyDamage(missile: Physical, receiver: Physical) {
+    private fun removeMissileAndApplyDamage(missile: Physical, receiver: Physical) {
         missile.toBeRemoved = true
         receiver.body.applyLinearImpulse(missile.body.linearVelocity.cpy().scl(missile.force), receiver.body.localCenter, true)
         if (receiver.collisionClass == CollisionClass.RECEIVE_DAMAGE)
-            createFloatingLabel(engine, "3070", receiver.body.position.cpy())
+            createFloatingLabel(engine, "-3070", receiver.body.position.cpy())
     }
 }
