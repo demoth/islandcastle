@@ -66,6 +66,7 @@ class PlayerControlSystem(private val world: World) : EntitySystem() {
                 }
 
                 if (actionLocation != null) {
+                    player.score -= 3070
                     createFireBall(engine, world, actionLocation!!, body.position, playerPhysics.owner)
                     println("actionLocation: $actionLocation")
                     println("player: ${body.position}")
