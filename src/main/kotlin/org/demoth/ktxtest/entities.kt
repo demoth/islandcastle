@@ -1,6 +1,7 @@
 package org.demoth.ktxtest
 
 import com.badlogic.ashley.core.Engine
+import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Animation
@@ -9,14 +10,15 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.World
 import ktx.ashley.entity
+import ktx.ashley.get
 import ktx.box2d.body
-import java.util.*
 
 fun createPlayerEntity(engine: Engine, world: World, location: Vector2) {
     engine.entity().apply {
         add(Textured(Texture(Gdx.files.internal("knight32.png"))))
         add(Player())
         add(Named("player"))
+        add(Health(9000))
         add(Physical(world.body {
             userData = this@apply
             position.x = location.x
@@ -25,7 +27,7 @@ fun createPlayerEntity(engine: Engine, world: World, location: Vector2) {
             linearDamping = SPEED_DECEL
             fixedRotation = true
             circle(0.5f)
-        }, CollisionClass.RECEIVE_DAMAGE, "player"))
+        }, collision = ::damageHealth))
     }
 }
 
@@ -33,6 +35,7 @@ fun createEyeMonster(engine: Engine, world: World, x: Float, y: Float) {
     engine.entity().apply {
         add(Named("eyelander"))
         add(MonsterStationaryRanged())
+        add(Health(1000))
         add(Textured(Texture(Gdx.files.internal("eye_monsters/eyelander.png"))))
         add(Physical(world.body {
             userData = this@apply
@@ -42,10 +45,9 @@ fun createEyeMonster(engine: Engine, world: World, x: Float, y: Float) {
             linearDamping = SPEED_DECEL
             fixedRotation = true
             circle(0.5f)
-        }, CollisionClass.RECEIVE_DAMAGE, UUID.randomUUID().toString()))
+        }, collision = ::damageHealth))
     }
-
-    println("spawned eye lander")
+    println("spawned eye lander at ($x, $y)")
 }
 
 /**
@@ -56,29 +58,26 @@ fun createMapObject(engine: Engine, world: World, layer: String, name: String?, 
         createEyeMonster(engine, world, rect.x / PPM, rect.y / PPM)
     } else if (name == "exit") {
         createTrigger("exit", engine, world, rect, finishTrigger)
-    } else if (layer.startsWith("solid_") || !name.isNullOrBlank())
-        engine.entity().apply {
-            if (layer.startsWith("solid_")) {
-                add(Physical(world.body {
-                    userData = this@apply
-                    type = BodyDef.BodyType.StaticBody
-                    position.set(rect.getCentralPoint())
-                    box(width = rect.width / PPM, height = rect.height / PPM)
-                }, if (name.isNullOrBlank())
-                    CollisionClass.SOLID_INVISIBLE
-                else
-                    CollisionClass.SOLID)
-                )
-
-            }
-            if (!name.isNullOrBlank()) {
-                add(Named(name!!))
-                add(Positioned(rect.getCentralPoint()))
-            }
-        }
+    } else if (layer.startsWith("solid_"))
+        createWall(engine, layer, world, rect, name)
 }
 
-fun createFireBall(engine: Engine, world: World, velocity: Vector2, origin: Vector2, owner: String) {
+private fun createWall(engine: Engine, layer: String, world: World, rect: Rectangle, name: String?) {
+    engine.entity().apply {
+        add(Physical(world.body {
+            userData = this@apply
+            type = BodyDef.BodyType.StaticBody
+            position.set(rect.getCentralPoint())
+            box(width = rect.width / PPM, height = rect.height / PPM)
+        }))
+
+        if (!name.isNullOrBlank()) {
+            add(Named(name!!))
+        }
+    }
+}
+
+fun createFireBall(engine: Engine, world: World, velocity: Vector2, origin: Vector2, owner: Entity) {
     engine.entity().apply {
         add(Named("fireball"))
         add(Textured(Texture(Gdx.files.internal("Ardentryst-MagicSpriteEffects/Ardentryst-rfireball.png"))))
@@ -90,11 +89,12 @@ fun createFireBall(engine: Engine, world: World, velocity: Vector2, origin: Vect
             circle(0.5f) {
                 isSensor = true
             }
-        }, CollisionClass.DEAL_DAMAGE, owner))
+        }, collision = ::destroyFireball))
+        add(Damage(3070, owner))
     }
 }
 
-fun createRotatingFireBall(engine: Engine, world: World, velocity: Vector2, origin: Vector2, owner: String) {
+fun createRotatingFireBall(engine: Engine, world: World, velocity: Vector2, origin: Vector2, owner: Entity) {
     engine.entity().apply {
         add(Named("fireball"))
         add(Animated(createAnimation(
@@ -103,21 +103,22 @@ fun createRotatingFireBall(engine: Engine, world: World, velocity: Vector2, orig
         add(Physical(world.body {
             userData = this@apply
             type = BodyDef.BodyType.DynamicBody
-            this.linearVelocity.set(velocity)
-            this.position.set(origin)
+            linearVelocity.set(velocity)
+            position.set(origin)
             circle(0.5f) {
                 isSensor = true
             }
-        }, CollisionClass.DEAL_DAMAGE, owner))
-
+        }, collision = ::destroyFireball))
+        add(Damage(1000, owner))
     }
 }
 
 fun createFloatingLabel(engine: Engine, value: String, location: Vector2) {
-    val label = engine.entity()
-    label.add(Named(value))
-    label.add(FloatingUpLabel())
-    label.add(Positioned(location))
+    engine.entity().apply {
+        add(Named(value))
+        add(FloatingUpLabel())
+        add(Positioned(location))
+    }
 }
 
 fun createTrigger(name: String, engine: Engine, world: World, rect: Rectangle, action: (Int) -> Unit) {
@@ -130,7 +131,28 @@ fun createTrigger(name: String, engine: Engine, world: World, rect: Rectangle, a
             box(width = rect.width / PPM, height = rect.height / PPM) {
                 isSensor = true
             }
-        }, CollisionClass.TRIGGER))
-        add(Trigger(action))
+        }) { _, other ->
+            val player = other.get<Player>()
+            if (player != null) {
+                action.invoke(player.score)
+            }
+        })
     }
 }
+
+private fun damageHealth(self: Entity, other: Entity) {
+    val health = self.get<Health>()
+    val damage = other.get<Damage>()
+    if (damage != null && damage.owner !== self && health != null) {
+        health.value -= damage.value
+    }
+}
+
+private fun destroyFireball(self: Entity, other: Entity) {
+    val damage = self.get<Damage>()
+    val physical = self.get<Physical>()
+    if (physical != null && damage != null && other !== damage.owner) {
+        physical.toBeRemoved = true
+    }
+}
+

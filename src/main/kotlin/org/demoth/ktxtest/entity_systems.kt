@@ -24,6 +24,7 @@ val namedMapper = mapperFor<Named>()
 val animatedMapper = mapperFor<Animated>()
 val monsterMapper = mapperFor<MonsterStationaryRanged>()
 val floatingUpLabelMapper = mapperFor<FloatingUpLabel>()
+val healthMapper = mapperFor<Health>()
 
 /**
  * Moves player in the physical world
@@ -35,18 +36,19 @@ class PlayerControlSystem(private val world: World) : EntitySystem() {
     var actionLocation: Vector2? = null
 
     override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(allOf(Physical::class, Player::class).get()).firstOrNull()?.let { it ->
+        engine.getEntitiesFor(allOf(Physical::class, Player::class, Health::class).get()).firstOrNull()?.let { playerEntity ->
             // this may be used later to affect how controls are used
-            val player = playerMapper[it]
-            val playerPhysics = physicMapper[it]
+            val player = playerMapper[playerEntity]
+            val health = healthMapper[playerEntity]
+            val playerPhysics = physicMapper[playerEntity]
 
-            if (player.health < 0) {
+            if (health.value < 0) {
                 engine.entity().apply {
                     add(FloatingUpLabel(10f))
                     add(Named("You have died! Press F5 to restart. Score: ${player.score}"))
                     add(Positioned(playerPhysics.body.position.cpy()))
                 }
-                engine.removeEntity(it)
+                engine.removeEntity(playerEntity)
                 world.destroyBody(playerPhysics.body)
                 return
             }
@@ -67,7 +69,7 @@ class PlayerControlSystem(private val world: World) : EntitySystem() {
 
                 if (actionLocation != null) {
                     player.score -= 3070
-                    createFireBall(engine, world, actionLocation!!, body.position, playerPhysics.owner)
+                    createFireBall(engine, world, actionLocation!!, body.position, playerEntity)
                     println("actionLocation: $actionLocation")
                     println("player: ${body.position}")
                     actionLocation = null
@@ -137,10 +139,11 @@ class BatchDrawSystem(
             }
         }
 
-        engine.getEntitiesFor(oneOf(Player::class).get()).firstOrNull()?.let {
+        engine.getEntitiesFor(allOf(Player::class, Health::class).get()).firstOrNull()?.let {
             val player = playerMapper[it]
+            val health = healthMapper[it]
             val g = GlyphLayout(font, "Score: ${player.score}")
-            val h = GlyphLayout(font, "Health: ${player.health}")
+            val h = GlyphLayout(font, "Health: ${health.value}")
 
             font.draw(batch, g, viewport.camera.position.x - g.width / 2, viewport.camera.position.y - viewport.screenHeight * 0.2f)
             font.draw(batch, h, viewport.camera.position.x - h.width / 2, viewport.camera.position.y - viewport.screenHeight * 0.23f)
@@ -176,12 +179,13 @@ class PhysicalSystem(private val world: World) : EntitySystem() {
 
 class MonsterAiSystem(private val world: World) : EntitySystem() {
     override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(allOf(MonsterStationaryRanged::class, Physical::class).get()).forEach {
-            val monster = monsterMapper[it]
-            val monsterPhysics = physicMapper[it]
+        engine.getEntitiesFor(allOf(MonsterStationaryRanged::class, Physical::class, Health::class).get()).forEach { monsterEntity ->
+            val monster = monsterMapper[monsterEntity]
+            val monsterPhysics = physicMapper[monsterEntity]
+            val health = healthMapper[monsterEntity]
             monster.currentTime += deltaTime
-            if (monster.health < 0) {
-                engine.removeEntity(it)
+            if (health.value < 0) {
+                engine.removeEntity(monsterEntity)
                 world.destroyBody(monsterPhysics.body)
             } else if (monster.currentTime > monster.fireRate) {
                 monster.currentTime = 0f
@@ -192,7 +196,7 @@ class MonsterAiSystem(private val world: World) : EntitySystem() {
                     createRotatingFireBall(engine, world,
                             playerPhysical.body.position.cpy() - monsterLocation,
                             monsterLocation,
-                            monsterPhysics.owner)
+                            monsterEntity)
                 }
             }
         }
