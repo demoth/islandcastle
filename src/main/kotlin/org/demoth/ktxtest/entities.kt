@@ -19,15 +19,19 @@ fun createPlayerEntity(engine: Engine, world: World, location: Vector2) {
         add(Player())
         add(Named("player"))
         add(Health(9000))
-        add(Physical(world.body {
-            userData = this@apply
-            position.x = location.x
-            position.y = location.y
-            type = BodyDef.BodyType.DynamicBody
-            linearDamping = SPEED_DECEL
-            fixedRotation = true
-            circle(0.5f)
-        }, collision = ::damageHealth))
+        add(Physical(
+                body = world.body {
+                    userData = this@apply
+                    position.x = location.x
+                    position.y = location.y
+                    type = BodyDef.BodyType.DynamicBody
+                    linearDamping = SPEED_DECEL
+                    fixedRotation = true
+                    circle(0.5f)
+                },
+                collide = ::damageHealth,
+                collisionClass = RECEIVE_DAMAGE,
+                collidesWith = DEAL_DAMAGE or TRIGGER))
     }
 }
 
@@ -37,15 +41,19 @@ fun createEyeMonster(engine: Engine, world: World, x: Float, y: Float) {
         add(MonsterStationaryRanged())
         add(Health(1000))
         add(Textured(Texture(Gdx.files.internal("eye_monsters/eyelander.png"))))
-        add(Physical(world.body {
-            userData = this@apply
-            position.x = x
-            position.y = y
-            type = BodyDef.BodyType.DynamicBody
-            linearDamping = SPEED_DECEL
-            fixedRotation = true
-            circle(0.5f)
-        }, collision = ::damageHealth))
+        add(Physical(
+                body = world.body {
+                    userData = this@apply
+                    position.x = x
+                    position.y = y
+                    type = BodyDef.BodyType.DynamicBody
+                    linearDamping = SPEED_DECEL
+                    fixedRotation = true
+                    circle(0.5f)
+                },
+                collide = ::damageHealth,
+                collisionClass = RECEIVE_DAMAGE,
+                collidesWith = DEAL_DAMAGE))
     }
     println("spawned eye lander at ($x, $y)")
 }
@@ -81,15 +89,19 @@ fun createFireBall(engine: Engine, world: World, velocity: Vector2, origin: Vect
     engine.entity().apply {
         add(Named("fireball"))
         add(Textured(Texture(Gdx.files.internal("Ardentryst-MagicSpriteEffects/Ardentryst-rfireball.png"))))
-        add(Physical(world.body {
-            userData = this@apply
-            type = BodyDef.BodyType.DynamicBody
-            this.linearVelocity.set(velocity)
-            this.position.set(origin)
-            circle(0.5f) {
-                isSensor = true
-            }
-        }, collision = ::destroyFireball))
+        add(Physical(
+                body = world.body {
+                    userData = this@apply
+                    type = BodyDef.BodyType.DynamicBody
+                    this.linearVelocity.set(velocity)
+                    this.position.set(origin)
+                    circle(0.5f) {
+                        isSensor = true
+                    }
+                },
+                collide = ::destroyFireball,
+                collisionClass = DEAL_DAMAGE,
+                collidesWith = RECEIVE_DAMAGE or SOLID))
         add(Damage(3070, owner))
     }
 }
@@ -100,15 +112,19 @@ fun createRotatingFireBall(engine: Engine, world: World, velocity: Vector2, orig
         add(Animated(createAnimation(
                 Texture(Gdx.files.internal("sprites/Sprite_FX_Fire_0004_FIX.png")),
                 4, 1, 0.1f, Animation.PlayMode.LOOP)))
-        add(Physical(world.body {
-            userData = this@apply
-            type = BodyDef.BodyType.DynamicBody
-            linearVelocity.set(velocity)
-            position.set(origin)
-            circle(0.5f) {
-                isSensor = true
-            }
-        }, collision = ::destroyFireball))
+        add(Physical(
+                body = world.body {
+                    userData = this@apply
+                    type = BodyDef.BodyType.DynamicBody
+                    linearVelocity.set(velocity)
+                    position.set(origin)
+                    circle(0.5f) {
+                        isSensor = true
+                    }
+                },
+                collide = ::destroyFireball,
+                collisionClass = DEAL_DAMAGE,
+                collidesWith = RECEIVE_DAMAGE or SOLID))
         add(Damage(1000, owner))
     }
 }
@@ -124,19 +140,23 @@ fun createFloatingLabel(engine: Engine, value: String, location: Vector2) {
 fun createTrigger(name: String, engine: Engine, world: World, rect: Rectangle, action: (Int) -> Unit) {
     engine.entity().apply {
         add(Named(name))
-        add(Physical(world.body {
-            userData = this@apply
-            type = BodyDef.BodyType.StaticBody
-            position.set(rect.getCentralPoint())
-            box(width = rect.width / PPM, height = rect.height / PPM) {
-                isSensor = true
-            }
-        }) { _, other ->
-            val player = other.get<Player>()
-            if (player != null) {
-                action.invoke(player.score)
-            }
-        })
+        add(Physical(
+                body = world.body {
+                    userData = this@apply
+                    type = BodyDef.BodyType.StaticBody
+                    position.set(rect.getCentralPoint())
+                    box(width = rect.width / PPM, height = rect.height / PPM) {
+                        isSensor = true
+                    }
+                },
+                collide = { _, other ->
+                    val player = other.get<Player>()
+                    if (player != null) {
+                        action.invoke(player.score)
+                    }
+                },
+                collisionClass = TRIGGER,
+                collidesWith = RECEIVE_DAMAGE))
     }
 }
 

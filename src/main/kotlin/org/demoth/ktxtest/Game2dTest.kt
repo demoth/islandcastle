@@ -69,7 +69,7 @@ class Game2dTest : KtxApplicationAdapter {
         val startPosition = map.layers["entities"].objects["start"] as RectangleMapObject
 
         engine = PooledEngine()
-        collisionListener = CollisionProcessor(engine)
+        collisionListener = CollisionProcessor()
         world.setContactListener(collisionListener)
 
         playerControlSystem = PlayerControlSystem(world)

@@ -22,7 +22,9 @@ class Positioned(val position: Vector2) : Component
 class Physical(
         val body: Body,
         var toBeRemoved: Boolean = false,
-        val collision: ((self: Entity, other: Entity) -> Unit)? = null
+        val collisionClass: Long = NO_COLLISION,
+        val collidesWith: Long = NO_COLLISION,
+        val collide: ((self: Entity, other: Entity) -> Unit)? = null
 ) : Component
 
 class Animated(val animation: Animation<TextureRegion>) : Component
