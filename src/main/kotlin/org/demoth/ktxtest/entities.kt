@@ -74,12 +74,13 @@ fun createMapObject(engine: Engine, world: World, layer: String, name: String?, 
 
 private fun createWall(engine: Engine, layer: String, world: World, rect: Rectangle, name: String?) {
     engine.entity().apply {
-        add(Physical(world.body {
-            userData = this@apply
-            type = BodyDef.BodyType.StaticBody
-            position.set(rect.getCentralPoint())
-            box(width = rect.width / PPM, height = rect.height / PPM)
-        }))
+        add(Physical(
+                body = world.body {
+                    userData = this@apply
+                    type = BodyDef.BodyType.StaticBody
+                    position.set(rect.getCentralPoint())
+                    box(width = rect.width / PPM, height = rect.height / PPM)
+                }, collisionClass = if (name.isNullOrBlank()) SOLID_INVISIBLE else SOLID))
 
         if (!name.isNullOrBlank()) {
             add(Named(name!!))
