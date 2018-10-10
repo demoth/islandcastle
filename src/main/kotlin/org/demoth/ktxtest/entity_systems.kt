@@ -9,12 +9,14 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.World
+import com.badlogic.gdx.utils.Disposable
 import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.ashley.allOf
 import ktx.ashley.entity
 import ktx.ashley.mapperFor
 import ktx.ashley.oneOf
 import ktx.math.minus
+import java.util.*
 
 val physicMapper = mapperFor<Physical>()
 val playerMapper = mapperFor<Player>()
@@ -24,7 +26,8 @@ val namedMapper = mapperFor<Named>()
 val animatedMapper = mapperFor<Animated>()
 val monsterMapper = mapperFor<MonsterStationaryRanged>()
 val floatingUpLabelMapper = mapperFor<FloatingUpLabel>()
-val healthMapper = mapperFor<Health>()
+val healthMapper = mapperFor<HasHealth>()
+val soundMapper = mapperFor<HasSound>()
 
 /**
  * Moves player in the physical world
@@ -36,13 +39,14 @@ class PlayerControlSystem(private val world: World) : EntitySystem() {
     var actionLocation: Vector2? = null
 
     override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(allOf(Physical::class, Player::class, Health::class).get()).firstOrNull()?.let { playerEntity ->
+        engine.getEntitiesFor(allOf(Physical::class, Player::class, HasHealth::class).get()).firstOrNull()?.let { playerEntity ->
             // this may be used later to affect how controls are used
             val player = playerMapper[playerEntity]
             val health = healthMapper[playerEntity]
             val playerPhysics = physicMapper[playerEntity]
 
             if (health.value < 0) {
+                engine.entity().add(HasSound(Sounds.PLAYER_DIE))
                 engine.entity().apply {
                     add(FloatingUpLabel(10f))
                     add(Named("You have died! Press F5 to restart. Score: ${player.score}"))
@@ -139,11 +143,11 @@ class BatchDrawSystem(
             }
         }
 
-        engine.getEntitiesFor(allOf(Player::class, Health::class).get()).firstOrNull()?.let {
+        engine.getEntitiesFor(allOf(Player::class, HasHealth::class).get()).firstOrNull()?.let {
             val player = playerMapper[it]
             val health = healthMapper[it]
             val g = GlyphLayout(font, "Score: ${player.score}")
-            val h = GlyphLayout(font, "Health: ${health.value}")
+            val h = GlyphLayout(font, "HasHealth: ${health.value}")
 
             font.draw(batch, g, viewport.camera.position.x - g.width / 2, viewport.camera.position.y - viewport.screenHeight * 0.2f)
             font.draw(batch, h, viewport.camera.position.x - h.width / 2, viewport.camera.position.y - viewport.screenHeight * 0.23f)
@@ -179,12 +183,13 @@ class PhysicalSystem(private val world: World) : EntitySystem() {
 
 class MonsterAiSystem(private val world: World) : EntitySystem() {
     override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(allOf(MonsterStationaryRanged::class, Physical::class, Health::class).get()).forEach { monsterEntity ->
+        engine.getEntitiesFor(allOf(MonsterStationaryRanged::class, Physical::class, HasHealth::class).get()).forEach { monsterEntity ->
             val monster = monsterMapper[monsterEntity]
             val monsterPhysics = physicMapper[monsterEntity]
             val health = healthMapper[monsterEntity]
             monster.currentTime += deltaTime
             if (health.value < 0) {
+                engine.entity().add(HasSound(Sounds.MONSTER_DIE))
                 engine.removeEntity(monsterEntity)
                 world.destroyBody(monsterPhysics.body)
             } else if (monster.currentTime > monster.fireRate) {
@@ -199,6 +204,27 @@ class MonsterAiSystem(private val world: World) : EntitySystem() {
                             monsterEntity)
                 }
             }
+        }
+    }
+}
+
+class SoundSystem : EntitySystem(), Disposable {
+    override fun dispose() {
+        soundMap.values.forEach { it.dispose() }
+    }
+
+    private val soundMap = Sounds.values().map { it to Gdx.audio.newSound(Gdx.files.internal("sounds/${it.filename}")) }.toMap()
+
+    override fun update(deltaTime: Float) {
+        engine.getEntitiesFor(allOf(HasSound::class).get()).forEach {
+            val sound = soundMapper[it]
+            val soundFile = soundMap[sound.name] ?: return
+            // todo pan sound depending on location
+            sound.id = soundFile.play(1f, 1f + Random().nextFloat() * 0.2f, 0f)
+            it.remove(HasSound::class.java)
+            // FIXME
+            if (it.components.size() == 0)
+                engine.removeEntity(it)
         }
     }
 }

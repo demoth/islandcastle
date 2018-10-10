@@ -12,13 +12,14 @@ import com.badlogic.gdx.physics.box2d.World
 import ktx.ashley.entity
 import ktx.ashley.get
 import ktx.box2d.body
+import java.util.*
 
 fun createPlayerEntity(engine: Engine, world: World, location: Vector2) {
     engine.entity().apply {
         add(Textured(Texture(Gdx.files.internal("knight32.png"))))
         add(Player())
         add(Named("player"))
-        add(Health(9000))
+        add(HasHealth(9000))
         add(Physical(
                 body = world.body {
                     userData = this@apply
@@ -41,7 +42,7 @@ fun createEyeMonster(engine: Engine, world: World, x: Float, y: Float) {
     engine.entity().apply {
         add(Named("eyelander"))
         add(MonsterStationaryRanged())
-        add(Health(1000))
+        add(HasHealth(1000))
         add(Textured(Texture(Gdx.files.internal("eye_monsters/eyelander.png"))))
         add(Physical(
                 body = world.body {
@@ -105,7 +106,8 @@ fun createFireBall(engine: Engine, world: World, velocity: Vector2, origin: Vect
                 collide = ::destroyFireball,
                 collisionClass = DEAL_DAMAGE,
                 collidesWith = RECEIVE_DAMAGE or SOLID))
-        add(Damage(3070, owner))
+        add(HasDamage(3070, owner))
+        add(HasSound(Sounds.FIREBALL))
     }
 }
 
@@ -128,7 +130,7 @@ fun createRotatingFireBall(engine: Engine, world: World, velocity: Vector2, orig
                 collide = ::destroyFireball,
                 collisionClass = DEAL_DAMAGE,
                 collidesWith = RECEIVE_DAMAGE or SOLID))
-        add(Damage(1000, owner))
+        add(HasDamage(1000, owner))
     }
 }
 
@@ -155,6 +157,11 @@ fun createTrigger(name: String, engine: Engine, world: World, rect: Rectangle, a
                 collide = { _, other ->
                     val player = other.get<Player>()
                     if (player != null) {
+                        Gdx.audio.newSound(Gdx.files.internal("sounds/" +
+                                if (player.score > 0)
+                                    Sounds.VICTORY.filename
+                                else Sounds.GAME_OVER.filename
+                        )).play()
                         action.invoke(player.score)
                     }
                 },
@@ -164,18 +171,20 @@ fun createTrigger(name: String, engine: Engine, world: World, rect: Rectangle, a
 }
 
 private fun damageHealth(engine: Engine, self: Entity, other: Entity) {
-    val health = self.get<Health>()
-    val damage = other.get<Damage>()
+    val health = self.get<HasHealth>()
+    val damage = other.get<HasDamage>()
     val position = self.get<Physical>()?.body?.position
     if (damage != null && damage.owner !== self && health != null) {
         health.value -= damage.value
-        if (position != null)
+        if (position != null) {
             createFloatingLabel(engine, damage.value.toString(), position.cpy())
+        }
+        engine.entity().add(HasSound(HURT[Random().nextInt(4)]))
     }
 }
 
 private fun destroyFireball(self: Entity, other: Entity) {
-    val damage = self.get<Damage>()
+    val damage = self.get<HasDamage>()
     val physical = self.get<Physical>()
     if (physical != null && damage != null && other !== damage.owner) {
         physical.toBeRemoved = true

@@ -43,8 +43,8 @@ class MonsterStationaryRanged(var fireRate: Float = 1f, var currentTime: Float =
  */
 class FloatingUpLabel(var ttl: Float = 2f) : Component
 
-class Trigger(val action: (Int) -> Unit) : Component
+class HasDamage(val value: Int, val owner: Entity) : Component
 
-class Damage(val value: Int, val owner: Entity) : Component
+class HasHealth(var value: Int) : Component
 
-class Health(var value: Int) : Component
+class HasSound(val name: Sounds, var id: Long = 0) : Component

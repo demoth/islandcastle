@@ -46,6 +46,7 @@ class Game2dTest : KtxApplicationAdapter {
     private lateinit var playerControlSystem: PlayerControlSystem
     private lateinit var engine: PooledEngine
     private lateinit var collisionListener: ContactListener
+    private lateinit var soundSystem: SoundSystem
 
     var drawDebug = false
     var drawTiles = true
@@ -80,6 +81,8 @@ class Game2dTest : KtxApplicationAdapter {
         engine.addSystem(CameraSystem(camera))
         engine.addSystem(PhysicalSystem(world))
         engine.addSystem(MonsterAiSystem(world))
+        soundSystem = SoundSystem()
+        engine.addSystem(soundSystem)
 
         // add player
         engine.entity {
@@ -99,14 +102,18 @@ class Game2dTest : KtxApplicationAdapter {
             override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
                 if (button == Input.Buttons.LEFT) {
                     println("clicked! screen coords:  $screenX, $screenY")
-                    playerControlSystem.actionLocation = Vector2(
-                            1f * screenX - viewport.screenWidth / 2f,
-                            -1f * screenY + viewport.screenHeight / 2f).scl(0.5f / PPM)
+                    playerControlSystem.actionLocation = screenToWorld(screenX, screenY)
                 }
                 return true
             }
         }
 
+    }
+
+    private fun screenToWorld(screenX: Int, screenY: Int): Vector2 {
+        return Vector2(
+                1f * screenX - viewport.screenWidth / 2f,
+                -1f * screenY + viewport.screenHeight / 2f).scl(0.5f / PPM)
     }
 
     override fun create() {
@@ -123,6 +130,7 @@ class Game2dTest : KtxApplicationAdapter {
         map.dispose()
         batch.dispose()
         engine.removeAllEntities()
+        soundSystem.dispose()
     }
 
     override fun render() {
