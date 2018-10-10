@@ -29,10 +29,12 @@ fun createPlayerEntity(engine: Engine, world: World, location: Vector2) {
                     fixedRotation = true
                     circle(0.5f)
                 },
-                collide = ::damageHealth,
+                collide = { self, other -> damageHealth(engine, self, other) },
                 collisionClass = RECEIVE_DAMAGE,
                 collidesWith = DEAL_DAMAGE or TRIGGER))
     }
+    println("spawned player at (${location.x}, ${location.y})")
+
 }
 
 fun createEyeMonster(engine: Engine, world: World, x: Float, y: Float) {
@@ -51,7 +53,7 @@ fun createEyeMonster(engine: Engine, world: World, x: Float, y: Float) {
                     fixedRotation = true
                     circle(0.5f)
                 },
-                collide = ::damageHealth,
+                collide = { self, other -> damageHealth(engine, self, other) },
                 collisionClass = RECEIVE_DAMAGE,
                 collidesWith = DEAL_DAMAGE))
     }
@@ -160,11 +162,14 @@ fun createTrigger(name: String, engine: Engine, world: World, rect: Rectangle, a
     }
 }
 
-private fun damageHealth(self: Entity, other: Entity) {
+private fun damageHealth(engine: Engine, self: Entity, other: Entity) {
     val health = self.get<Health>()
     val damage = other.get<Damage>()
+    val position = self.get<Physical>()?.body?.position
     if (damage != null && damage.owner !== self && health != null) {
         health.value -= damage.value
+        if (position != null)
+            createFloatingLabel(engine, damage.value.toString(), position.cpy())
     }
 }
 
