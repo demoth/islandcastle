@@ -16,7 +16,7 @@ enum class Sounds(val filename: String) {
 val HURT = listOf(Sounds.HURT1, Sounds.HURT2, Sounds.HURT3, Sounds.HURT4)
 
 enum class Sprites(val filename: String) {
-    FIREBALL("Ardentryst-MagicSpriteEffects/Ardentryst-rfireball.png"),
+    FIREBALL("Sprite_FX_Explosion_0041_ball.png"),
     EYE_BOT("eye_monsters/eyebot.png"),
     EYE_LANDER("eye_monsters/eyelander.png"),
     KNIGHT("knight32.png")

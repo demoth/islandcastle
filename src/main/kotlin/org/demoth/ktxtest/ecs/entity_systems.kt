@@ -39,7 +39,7 @@ val soundMapper = mapperFor<HasSound>()
 /**
  * Moves player in the physical world
  */
-class PlayerControlSystem(private val world: World) : EntitySystem() {
+class PlayerControlSystem(private val world: World, private val entityFactory: EntityFactory) : EntitySystem() {
     /**
      * location relative to player (center)
      */
@@ -80,7 +80,7 @@ class PlayerControlSystem(private val world: World) : EntitySystem() {
 
                 if (actionLocation != null) {
                     player.score -= 3070
-                    createFireBall(engine, world, actionLocation!!, body.position, playerEntity)
+                    entityFactory.createFireBall(actionLocation!!, body.position, playerEntity)
                     println("actionLocation: $actionLocation")
                     println("player: ${body.position}")
                     actionLocation = null
@@ -203,7 +203,7 @@ class PhysicalSystem(private val world: World) : EntitySystem() {
     }
 }
 
-class MonsterAiSystem(private val world: World) : EntitySystem() {
+class MonsterAiSystem(private val world: World, private val entityFactory: EntityFactory) : EntitySystem() {
     override fun update(deltaTime: Float) {
         engine.getEntitiesFor(stationaryMonsters).forEach { monsterEntity ->
             val monster = monsterMapper[monsterEntity]
@@ -220,8 +220,7 @@ class MonsterAiSystem(private val world: World) : EntitySystem() {
                 if (playerEntity != null) {
                     val playerPhysical = physicMapper[playerEntity]
                     val monsterLocation = monsterPhysics.body.position
-                    createRotatingFireBall(engine, world,
-                            playerPhysical.body.position.cpy() - monsterLocation,
+                    entityFactory.createRotatingFireBall(playerPhysical.body.position.cpy() - monsterLocation,
                             monsterLocation,
                             monsterEntity)
                 }

@@ -25,12 +25,11 @@ import ktx.box2d.createWorld
 import ktx.graphics.use
 import org.demoth.ktxtest.ecs.BatchDrawSystem
 import org.demoth.ktxtest.ecs.CameraSystem
+import org.demoth.ktxtest.ecs.EntityFactory
 import org.demoth.ktxtest.ecs.MonsterAiSystem
 import org.demoth.ktxtest.ecs.PhysicalSystem
 import org.demoth.ktxtest.ecs.PlayerControlSystem
 import org.demoth.ktxtest.ecs.SoundSystem
-import org.demoth.ktxtest.ecs.createMapObject
-import org.demoth.ktxtest.ecs.createPlayerEntity
 
 
 const val MAX_SPEED = 10f
@@ -55,6 +54,7 @@ class Game2dTest : KtxApplicationAdapter {
     private lateinit var engine: PooledEngine
     private lateinit var collisionListener: ContactListener
     private lateinit var soundSystem: SoundSystem
+    private lateinit var entityFactory: EntityFactory
 
     var drawDebug = false
     var drawTiles = true
@@ -78,28 +78,29 @@ class Game2dTest : KtxApplicationAdapter {
         val startPosition = map.layers["entities"].objects["start"] as RectangleMapObject
 
         engine = PooledEngine()
+        entityFactory = EntityFactory(engine, world)
         collisionListener = CollisionProcessor()
         world.setContactListener(collisionListener)
 
-        playerControlSystem = PlayerControlSystem(world)
+        playerControlSystem = PlayerControlSystem(world, entityFactory)
         batchDrawSystem = BatchDrawSystem(batch, viewport)
 
         engine.addSystem(playerControlSystem)
         engine.addSystem(batchDrawSystem)
         engine.addSystem(CameraSystem(camera))
         engine.addSystem(PhysicalSystem(world))
-        engine.addSystem(MonsterAiSystem(world))
+        engine.addSystem(MonsterAiSystem(world, entityFactory))
         soundSystem = SoundSystem()
         engine.addSystem(soundSystem)
 
         // add player
         engine.entity {
-            createPlayerEntity(engine, world, startPosition.rectangle.getCentralPoint())
+            entityFactory.createPlayerEntity(startPosition.rectangle.getCentralPoint())
         }
 
         map.layers.forEach { layer ->
             layer.objects.getByType<RectangleMapObject>(RectangleMapObject::class.java).forEach { obj ->
-                createMapObject(engine, world, layer.name, obj.name, obj.rectangle) { i ->
+                entityFactory.createMapObject(layer.name, obj.name, obj.rectangle) { i ->
                     finishedScore = i
                 }
             }
