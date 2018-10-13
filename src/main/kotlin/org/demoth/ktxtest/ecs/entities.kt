@@ -2,8 +2,9 @@ package org.demoth.ktxtest.ecs
 
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.g2d.Animation
+import com.badlogic.gdx.maps.objects.RectangleMapObject
+import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.BodyDef
@@ -22,6 +23,7 @@ import org.demoth.ktxtest.Sounds
 import org.demoth.ktxtest.SpriteSheets
 import org.demoth.ktxtest.Sprites
 import org.demoth.ktxtest.TRIGGER
+import org.demoth.ktxtest.debug
 import org.demoth.ktxtest.getCentralPoint
 import java.util.*
 
@@ -52,6 +54,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
     }
 
     fun createEyeMonster(x: Float, y: Float) {
+        debug("Spawning eye monster at: ($x, $y)")
         engine.entity().apply {
             add(Named("eyelander"))
             add(MonsterStationaryRanged())
@@ -71,19 +74,38 @@ class EntityFactory(private val engine: Engine, private val world: World) {
                     collisionClass = RECEIVE_DAMAGE,
                     collidesWith = DEAL_DAMAGE))
         }
-        println("spawned eye lander at ($x, $y)")
     }
 
-    /**
-     * Creates walls, solid objects, also named objects (like starting positions)
-     */
-    fun createMapObject(layer: String, name: String?, rect: Rectangle, finishTrigger: (Int) -> Unit) {
-        if (name == "spawn_eyelander") {
-            createEyeMonster(rect.x / PPM, rect.y / PPM)
-        } else if (name == "exit") {
-            createTrigger("exit", rect, finishTrigger)
-        } else if (layer.startsWith("solid_"))
-            createWall(world, rect, name)
+    fun loadMap(map: TiledMap, previousMapName: String?, transition: (String) -> Unit) {
+        debug("Creating entities:")
+        val startPosition =
+                if (previousMapName == null) {
+                    debug("No previous map, looking for 'start' object...")
+                    map.layers["entities"].objects["start"] as RectangleMapObject
+                } else {
+                    debug("Changing map from $previousMapName, looking for corresponding 'entrance_from'")
+                    map.layers["entities"].objects
+                            .filter { it.name == "entrance_from" }
+                            .map { it as RectangleMapObject }
+                            .find { it.properties["from"] == previousMapName }
+                }
+        debug("Player start position is ${startPosition?.rectangle?.getCentralPoint()}")
+        if (startPosition == null)
+            throw IllegalStateException("Could not find entrance from $previousMapName!dd")
+        map.layers.forEach { layer ->
+            layer.objects.getByType<RectangleMapObject>(RectangleMapObject::class.java).forEach { obj ->
+                if (obj.name == "spawn_eyelander") {
+                    createEyeMonster(obj.rectangle.x / PPM, obj.rectangle.y / PPM)
+                } else if (obj.name == "exit_to") {
+                    val nextMap = obj.properties["to"] as String
+                    createTransition("exit to $nextMap", nextMap, obj.rectangle, transition)
+                } else if (layer.name.startsWith("solid_"))
+                    createWall(world, obj.rectangle, obj.name)
+            }
+
+        }
+        // add player
+        createPlayerEntity(startPosition.rectangle.getCentralPoint())
     }
 
     private fun createWall(world: World, rect: Rectangle, name: String?) {
@@ -155,7 +177,8 @@ class EntityFactory(private val engine: Engine, private val world: World) {
         }
     }
 
-    fun createTrigger(name: String, rect: Rectangle, action: (Int) -> Unit) {
+    fun createTransition(name: String, nextMap: String, rect: Rectangle, action: (String) -> Unit) {
+        debug("Creating transition to $nextMap")
         engine.entity().apply {
             add(Named(name))
             add(Physical(
@@ -170,12 +193,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
                     collide = { _, other ->
                         val player = other.get<Player>()
                         if (player != null) {
-                            Gdx.audio.newSound(Gdx.files.internal("sounds/" +
-                                    if (player.score > 0)
-                                        Sounds.VICTORY.filename
-                                    else Sounds.GAME_OVER.filename
-                            )).play()
-                            action.invoke(player.score)
+                            action.invoke(nextMap)
                         }
                     },
                     collisionClass = TRIGGER,

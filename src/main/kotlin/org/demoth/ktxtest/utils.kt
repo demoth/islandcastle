@@ -43,3 +43,8 @@ fun createAnimation(spriteSheet: Texture, cols: Int, rows: Int, duration: Float,
     animation.playMode = mode
     return animation
 }
+
+
+fun debug(message: String) {
+    println(message)
+}

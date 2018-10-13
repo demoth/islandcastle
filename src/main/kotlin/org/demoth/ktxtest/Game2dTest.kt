@@ -6,9 +6,7 @@ import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.maps.objects.RectangleMapObject
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.TmxMapLoader
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
@@ -20,7 +18,6 @@ import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.app.KtxApplicationAdapter
-import ktx.ashley.entity
 import ktx.box2d.createWorld
 import ktx.graphics.use
 import org.demoth.ktxtest.ecs.BatchDrawSystem
@@ -59,23 +56,24 @@ class Game2dTest : KtxApplicationAdapter {
     var drawDebug = false
     var drawTiles = true
     var time = 0f
-    var finishedScore: Int? = null
+    var nextLevel: String? = null
+    var previousLevel: String? = null
 
-    fun loadMap(mapname: String) {
-
+    fun changeLevel(currentMap: String, previousMapName: String?) {
+        previousLevel = currentMap
+        debug("Changing level to $currentMap...")
         world = createWorld()
-
-
+        debug("Box2 world created")
         box2dRenderer = Box2DDebugRenderer()
 
         batch = SpriteBatch()
 
-        map = TmxMapLoader().load("maps/$mapname")
+        map = TmxMapLoader().load("maps/$currentMap")
+        debug("TmxMapLoader: loaded tiled map: maps/$currentMap")
         tileRenderer = OrthogonalTiledMapRenderer(map, 1f)
 
         camera = OrthographicCamera(TILE_SIZE, TILE_SIZE)
         viewport = FitViewport(TILE_SIZE * SIGHT_RADIUS, TILE_SIZE * SIGHT_RADIUS, camera)
-        val startPosition = map.layers["entities"].objects["start"] as RectangleMapObject
 
         engine = PooledEngine()
         entityFactory = EntityFactory(engine, world)
@@ -84,27 +82,18 @@ class Game2dTest : KtxApplicationAdapter {
 
         playerControlSystem = PlayerControlSystem(world, entityFactory)
         batchDrawSystem = BatchDrawSystem(batch, viewport)
+        soundSystem = SoundSystem()
 
         engine.addSystem(playerControlSystem)
         engine.addSystem(batchDrawSystem)
         engine.addSystem(CameraSystem(camera))
         engine.addSystem(EntitiesCleanupSystem(world))
         engine.addSystem(MonsterAiSystem(world, entityFactory))
-        soundSystem = SoundSystem()
         engine.addSystem(soundSystem)
 
-        // add player
-        engine.entity {
-            entityFactory.createPlayerEntity(startPosition.rectangle.getCentralPoint())
-        }
-
-        map.layers.forEach { layer ->
-            layer.objects.getByType<RectangleMapObject>(RectangleMapObject::class.java).forEach { obj ->
-                entityFactory.createMapObject(layer.name, obj.name, obj.rectangle) { i ->
-                    finishedScore = i
-                }
-            }
-
+        entityFactory.loadMap(map, previousMapName) { nextMap ->
+            previousLevel = currentMap
+            nextLevel = nextMap
         }
 
         Gdx.input.inputProcessor = object : InputAdapter() {
@@ -127,12 +116,13 @@ class Game2dTest : KtxApplicationAdapter {
 
     override fun create() {
         Box2D.init()
-
-        loadMap("grassmap.tmx")
+        debug("Box2D initialized")
+        val startMapName = "grassmap.tmx"
+        debug("Starting game in $startMapName")
+        changeLevel(startMapName, null)
     }
 
     override fun dispose() {
-        // TODO dispose of used textures
         world.dispose()
         box2dRenderer.dispose()
         tileRenderer.dispose()
@@ -144,20 +134,19 @@ class Game2dTest : KtxApplicationAdapter {
     }
 
     override fun render() {
+        if (nextLevel != null) {
+            changeLevel(nextLevel!!, previousLevel)
+            // todo remove hardcoded size
+            viewport.update(1000, 1000)
+            nextLevel = null
+            previousLevel = null
+        }
         time += Gdx.graphics.deltaTime
         handleGlobalInput()
         // update physical world
         world.step(1 / 60f, 6, 2)
 
         clearScreen()
-        if (finishedScore != null) {
-            val font = BitmapFont()
-            batch.use {
-                font.draw(batch, "CONGLATURATION!!!", camera.position.x, camera.position.y + 30)
-                font.draw(batch, "Score: $finishedScore", camera.position.x, camera.position.y)
-            }
-            return
-        }
         camera.update()
 
         if (drawTiles) {
@@ -187,7 +176,7 @@ class Game2dTest : KtxApplicationAdapter {
             batchDrawSystem.drawNames = !batchDrawSystem.drawNames
         if (Gdx.input.isKeyJustPressed(Input.Keys.F5)) {
             dispose()
-            loadMap("grassmap.tmx")
+            changeLevel("grassmap.tmx", null)
             // todo remove hardcoded size
             viewport.update(1000, 1000)
         }

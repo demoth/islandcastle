@@ -83,8 +83,7 @@ class PlayerControlSystem(private val world: World, private val entityFactory: E
                 if (actionLocation != null) {
                     player.score -= 3070
                     entityFactory.createFireBall(actionLocation!!, body.position, playerEntity)
-                    println("actionLocation: $actionLocation")
-                    println("player: ${body.position}")
+                    println("actionLocation: $actionLocation, player: ${body.position}")
                     actionLocation = null
                 }
             }
