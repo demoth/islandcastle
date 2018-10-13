@@ -30,7 +30,13 @@ class Physical(
         val collide: ((self: Entity, other: Entity) -> Unit)? = null
 ) : Component
 
-class Animated(val sheets: SpriteSheets, val duration: Float, val mode: Animation.PlayMode, var animation: Animation<TextureRegion>? = null) : Component
+class Animated(
+        val sheets: SpriteSheets,
+        val duration: Float,
+        val mode: Animation.PlayMode,
+        var startTime: Float,
+        val disposeAfterAnimationFinished: Boolean = true,
+        var animation: Animation<TextureRegion>? = null) : Component
 
 class Textured(val texture: Sprites) : Component
 

@@ -10,7 +10,8 @@ enum class Sounds(val filename: String) {
     PLAYER_DIE("SCREAM_Male_B_06_mono.wav"),
     VICTORY("EXCLAMATION_Male_B_Woooho_mono.wav"),
     GAME_OVER("VOICE_ROBOTIC_MALE_Game_Over_1_Aggressive_stereo.wav"),
-    MONSTER_DIE("VOICE_Male_41yo_Scream_01_Shot_mono.wav")
+    MONSTER_DIE("VOICE_Male_41yo_Scream_01_Shot_mono.wav"),
+    EXPLOSION("EXPLOSION_Short_Smooth_Crackle_stereo.wav")
 }
 
 val HURT = listOf(Sounds.HURT1, Sounds.HURT2, Sounds.HURT3, Sounds.HURT4)

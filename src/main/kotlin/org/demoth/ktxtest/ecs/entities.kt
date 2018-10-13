@@ -116,7 +116,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
                             isSensor = true
                         }
                     },
-                    collide = ::destroyFireball,
+                    collide = ::destroyFireballWithExplosion,
                     collisionClass = DEAL_DAMAGE,
                     collidesWith = RECEIVE_DAMAGE or SOLID))
             add(HasDamage(3070, owner))
@@ -127,7 +127,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
     fun createRotatingFireBall(velocity: Vector2, origin: Vector2, owner: Entity) {
         engine.entity().apply {
             add(Named("fireball"))
-            add(Animated(SpriteSheets.FIRE_SPIRALS, 0.1f, Animation.PlayMode.LOOP))
+            add(Animated(SpriteSheets.FIRE_SPIRALS, 0.1f, Animation.PlayMode.LOOP, 0f))
             add(Physical(
                     body = world.body {
                         userData = this@apply
@@ -199,6 +199,20 @@ class EntityFactory(private val engine: Engine, private val world: World) {
         val physical = self.get<Physical>()
         if (physical != null && damage != null && other !== damage.owner) {
             physical.toBeRemoved = true
+        }
+    }
+
+    private fun destroyFireballWithExplosion(self: Entity, other: Entity) {
+        val damage = self.get<HasDamage>()
+        val physical = self.get<Physical>()
+        if (physical != null && damage != null && other !== damage.owner) {
+            physical.toBeRemoved = true
+
+            engine.entity().apply {
+                add(Positioned(physical.body.position.cpy()))
+                add(Animated(SpriteSheets.FIRE_EXPLOSION, 0.1f, Animation.PlayMode.NORMAL, 0f))
+                add(HasSound(Sounds.EXPLOSION))
+            }
         }
     }
 

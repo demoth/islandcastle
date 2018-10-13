@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Camera
 import com.badlogic.gdx.graphics.Texture
+import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
@@ -114,27 +115,38 @@ class BatchDrawSystem(
                 val animated = animatedMapper[e]
                 val position = physicMapper[e]?.body?.position ?: positionMapper[e].position
                 if (texture != null) {
-                    // TODO check if object is visible from current viewport
                     batch.draw(texture,
                             position.x * PPM - texture.width / 2,
                             position.y * PPM - texture.height / 2)
-                }
-                if (animated != null && animated.animation == null) {
-                    animated.animation = createAnimation(
-                            spriteSheetMap[animated.sheets]!!,
-                            animated.sheets.cols,
-                            animated.sheets.rows,
-                            animated.duration,
-                            animated.mode)
-                }
-                val keyFrame = animated?.animation?.getKeyFrame(time)
-                if (keyFrame != null) {
-                    batch.draw(keyFrame,
-                            position.x * PPM - keyFrame.regionWidth / 2,
-                            position.y * PPM - keyFrame.regionHeight / 2)
+                } else {
+                    if (animated != null) {
+
+                        if (animated.animation == null) {
+                            animated.startTime = time
+                            animated.animation = createAnimation(
+                                    spriteSheetMap[animated.sheets]!!,
+                                    animated.sheets.cols,
+                                    animated.sheets.rows,
+                                    animated.duration,
+                                    animated.mode)
+                        }
+                        if (animated.disposeAfterAnimationFinished
+                                && animated.mode == Animation.PlayMode.NORMAL
+                                && animated.animation!!.isAnimationFinished(time - animated.startTime)) {
+                            engine.removeEntity(e)
+                        } else {
+                            val keyFrame = animated.animation?.getKeyFrame(time)
+                            if (keyFrame != null) {
+                                batch.draw(keyFrame,
+                                        position.x * PPM - keyFrame.regionWidth / 2,
+                                        position.y * PPM - keyFrame.regionHeight / 2)
+                            }
+                        }
+                    }
                 }
             }
         }
+
         if (drawNames) {
             engine.getEntitiesFor(drawableNames).forEach { e ->
                 val name = namedMapper[e].name
