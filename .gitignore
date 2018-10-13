@@ -2,3 +2,4 @@
 out
 build
 staging_resources
+.gradle
