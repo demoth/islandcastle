@@ -25,9 +25,9 @@ import ktx.box2d.createWorld
 import ktx.graphics.use
 import org.demoth.ktxtest.ecs.BatchDrawSystem
 import org.demoth.ktxtest.ecs.CameraSystem
+import org.demoth.ktxtest.ecs.EntitiesCleanupSystem
 import org.demoth.ktxtest.ecs.EntityFactory
 import org.demoth.ktxtest.ecs.MonsterAiSystem
-import org.demoth.ktxtest.ecs.PhysicalSystem
 import org.demoth.ktxtest.ecs.PlayerControlSystem
 import org.demoth.ktxtest.ecs.SoundSystem
 
@@ -88,7 +88,7 @@ class Game2dTest : KtxApplicationAdapter {
         engine.addSystem(playerControlSystem)
         engine.addSystem(batchDrawSystem)
         engine.addSystem(CameraSystem(camera))
-        engine.addSystem(PhysicalSystem(world))
+        engine.addSystem(EntitiesCleanupSystem(world))
         engine.addSystem(MonsterAiSystem(world, entityFactory))
         soundSystem = SoundSystem()
         engine.addSystem(soundSystem)

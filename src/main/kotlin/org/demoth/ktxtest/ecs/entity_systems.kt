@@ -36,6 +36,7 @@ val monsterMapper = mapperFor<MonsterStationaryRanged>()
 val floatingUpLabelMapper = mapperFor<FloatingUpLabel>()
 val healthMapper = mapperFor<HasHealth>()
 val soundMapper = mapperFor<HasSound>()
+val ttlMapper = mapperFor<TTL>()
 
 /**
  * Moves player in the physical world
@@ -120,9 +121,7 @@ class BatchDrawSystem(
                             position.y * PPM - texture.height / 2)
                 } else {
                     if (animated != null) {
-
                         if (animated.animation == null) {
-                            animated.startTime = time
                             animated.animation = createAnimation(
                                     spriteSheetMap[animated.sheets]!!,
                                     animated.sheets.cols,
@@ -130,12 +129,13 @@ class BatchDrawSystem(
                                     animated.duration,
                                     animated.mode)
                         }
+                        animated.currentTime += deltaTime
                         if (animated.disposeAfterAnimationFinished
                                 && animated.mode == Animation.PlayMode.NORMAL
-                                && animated.animation!!.isAnimationFinished(time - animated.startTime)) {
+                                && animated.animation!!.isAnimationFinished(animated.currentTime)) {
                             engine.removeEntity(e)
                         } else {
-                            val keyFrame = animated.animation?.getKeyFrame(time)
+                            val keyFrame = animated.animation?.getKeyFrame(animated.currentTime)
                             if (keyFrame != null) {
                                 batch.draw(keyFrame,
                                         position.x * PPM - keyFrame.regionWidth / 2,
@@ -156,8 +156,8 @@ class BatchDrawSystem(
                     font.draw(batch, g, position.x * PPM - g.width / 2, position.y * PPM)
                 }
             }
-
         }
+
         engine.getEntitiesFor(floatingLabels).forEach {
             val floating = floatingUpLabelMapper[it]
             val positioned = positionMapper[it]
@@ -203,13 +203,22 @@ class CameraSystem(private val camera: Camera) : EntitySystem() {
     }
 }
 
-class PhysicalSystem(private val world: World) : EntitySystem() {
+class EntitiesCleanupSystem(private val world: World) : EntitySystem() {
     override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(physicalBodiesCleanup).forEach { e ->
+        engine.getEntitiesFor(entityCleanup).forEach { e ->
             val physical = physicMapper[e]
-            if (physical.toBeRemoved) {
+            val ttl = ttlMapper[e]
+            if (physical != null && physical.toBeRemoved) {
                 world.destroyBody(physical.body)
                 engine.removeEntity(e)
+            }
+            if (ttl != null) {
+                ttl.ttl -= deltaTime
+                if (ttl.ttl < 0) {
+                    engine.removeEntity(e)
+                    if (physical != null)
+                        world.destroyBody(physical.body)
+                }
             }
         }
     }

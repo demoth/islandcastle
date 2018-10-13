@@ -11,7 +11,7 @@ val drawables = oneOf(Textured::class, Animated::class).oneOf(Physical::class, P
 val drawableNames = allOf(Named::class).oneOf(Physical::class, Positioned::class).get()
 val floatingLabels = allOf(FloatingUpLabel::class, Positioned::class, Named::class).get()
 
-val physicalBodiesCleanup = allOf(Physical::class).get()
+val entityCleanup = oneOf(Physical::class, TTL::class).get()
 
 val stationaryMonsters = allOf(MonsterStationaryRanged::class, Physical::class, HasHealth::class).get()
 

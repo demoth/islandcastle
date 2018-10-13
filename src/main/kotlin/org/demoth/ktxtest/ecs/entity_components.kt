@@ -34,7 +34,7 @@ class Animated(
         val sheets: SpriteSheets,
         val duration: Float,
         val mode: Animation.PlayMode,
-        var startTime: Float,
+        var currentTime: Float = 0f,
         val disposeAfterAnimationFinished: Boolean = true,
         var animation: Animation<TextureRegion>? = null) : Component
 
@@ -50,6 +50,7 @@ class MonsterStationaryRanged(var fireRate: Float = 1f, var currentTime: Float =
 /**
  * Used for damage labels - they float up a bit then disappear
  */
+// move to TTL
 class FloatingUpLabel(var ttl: Float = 2f) : Component
 
 class HasDamage(val value: Int, val owner: Entity) : Component
@@ -57,3 +58,5 @@ class HasDamage(val value: Int, val owner: Entity) : Component
 class HasHealth(var value: Int) : Component
 
 class HasSound(val name: Sounds, var id: Long = 0) : Component
+
+class TTL(var ttl: Float) : Component

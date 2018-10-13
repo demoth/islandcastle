@@ -121,13 +121,14 @@ class EntityFactory(private val engine: Engine, private val world: World) {
                     collidesWith = RECEIVE_DAMAGE or SOLID))
             add(HasDamage(3070, owner))
             add(HasSound(Sounds.FIREBALL))
+            add(TTL(2f))
         }
     }
 
     fun createRotatingFireBall(velocity: Vector2, origin: Vector2, owner: Entity) {
         engine.entity().apply {
-            add(Named("fireball"))
-            add(Animated(SpriteSheets.FIRE_SPIRALS, 0.1f, Animation.PlayMode.LOOP, 0f))
+            add(Named("fire-sprirals"))
+            add(Animated(SpriteSheets.FIRE_SPIRALS, 0.1f, Animation.PlayMode.LOOP))
             add(Physical(
                     body = world.body {
                         userData = this@apply
@@ -142,6 +143,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
                     collisionClass = DEAL_DAMAGE,
                     collidesWith = RECEIVE_DAMAGE or SOLID))
             add(HasDamage(1000, owner))
+            add(TTL(2f))
         }
     }
 
@@ -190,7 +192,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
             if (position != null) {
                 createFloatingLabel(damage.value.toString(), position.cpy())
             }
-            engine.entity().add(HasSound(HURT[Random().nextInt(4)]))
+            engine.entity().add(HasSound(HURT[Random().nextInt(HURT.size)]))
         }
     }
 
@@ -210,7 +212,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
 
             engine.entity().apply {
                 add(Positioned(physical.body.position.cpy()))
-                add(Animated(SpriteSheets.FIRE_EXPLOSION, 0.1f, Animation.PlayMode.NORMAL, 0f))
+                add(Animated(SpriteSheets.FIRE_EXPLOSION, 0.1f, Animation.PlayMode.NORMAL))
                 add(HasSound(Sounds.EXPLOSION))
             }
         }
