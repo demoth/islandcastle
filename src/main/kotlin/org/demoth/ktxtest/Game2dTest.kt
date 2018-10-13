@@ -70,7 +70,7 @@ class Game2dTest : KtxApplicationAdapter {
 
         batch = SpriteBatch()
 
-        map = TmxMapLoader().load(mapname)
+        map = TmxMapLoader().load("maps/$mapname")
         tileRenderer = OrthogonalTiledMapRenderer(map, 1f)
 
         camera = OrthographicCamera(TILE_SIZE, TILE_SIZE)

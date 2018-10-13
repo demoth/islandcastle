@@ -22,7 +22,7 @@ enum class Sprites(val filename: String) {
     KNIGHT("knight32.png")
 }
 
-enum class SpriteSheet(val filename: String, val rows: Int, val cols: Int) {
-    FIRE_SPIRALS("sprites/Sprite_FX_Fire_0004_FIX.png", 1, 4),
-    FIRE_EXPLOSION("sprites/Sprite_FX_Explosion_0041_FIX.png", 1, 5)
+enum class SpriteSheets(val filename: String, val rows: Int, val cols: Int) {
+    FIRE_SPIRALS("Sprite_FX_Fire_0004_FIX.png", 1, 4),
+    FIRE_EXPLOSION("Sprite_FX_Explosion_0041_FIX.png", 1, 5)
 }

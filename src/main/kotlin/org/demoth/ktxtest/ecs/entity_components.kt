@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import org.demoth.ktxtest.NO_COLLISION
 import org.demoth.ktxtest.Sounds
+import org.demoth.ktxtest.SpriteSheets
 import org.demoth.ktxtest.Sprites
 import java.util.*
 
@@ -29,7 +30,7 @@ class Physical(
         val collide: ((self: Entity, other: Entity) -> Unit)? = null
 ) : Component
 
-class Animated(val animation: Animation<TextureRegion>) : Component
+class Animated(val sheets: SpriteSheets, val duration: Float, val mode: Animation.PlayMode, var animation: Animation<TextureRegion>? = null) : Component
 
 class Textured(val texture: Sprites) : Component
 

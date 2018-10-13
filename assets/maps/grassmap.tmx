@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="left-up" width="34" height="35" tilewidth="32" tileheight="32" infinite="0" nextobjectid="32">
- <tileset firstgid="1" source="dusk/dusk_castle.tsx"/>
- <tileset firstgid="257" source="dusk/dusk2.tsx"/>
+ <tileset firstgid="1" source="../tilesets/dusk/dusk_castle.tsx"/>
+ <tileset firstgid="257" source="../tilesets/dusk/dusk2.tsx"/>
  <layer name="water" width="34" height="35" offsetx="35" offsety="110.5">
   <data encoding="csv">
 193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,

@@ -19,8 +19,10 @@ import ktx.math.minus
 import org.demoth.ktxtest.MAX_SPEED
 import org.demoth.ktxtest.PPM
 import org.demoth.ktxtest.Sounds
+import org.demoth.ktxtest.SpriteSheets
 import org.demoth.ktxtest.Sprites
 import org.demoth.ktxtest.WALK_FORCE
+import org.demoth.ktxtest.createAnimation
 import java.util.*
 
 val physicMapper = mapperFor<Physical>()
@@ -100,7 +102,8 @@ class BatchDrawSystem(
     private val font = BitmapFont()
     var time = 0f
 
-    private val spriteMap = Sprites.values().map { it to Texture(Gdx.files.internal(it.filename)) }.toMap()
+    private val spriteMap = Sprites.values().map { it to Texture(Gdx.files.internal("sprites/${it.filename}")) }.toMap()
+    private val spriteSheetMap = SpriteSheets.values().map { it to Texture(Gdx.files.internal("spriteSheets/${it.filename}")) }.toMap()
 
     override fun update(deltaTime: Float) {
         time += deltaTime
@@ -115,6 +118,14 @@ class BatchDrawSystem(
                     batch.draw(texture,
                             position.x * PPM - texture.width / 2,
                             position.y * PPM - texture.height / 2)
+                }
+                if (animated != null && animated.animation == null) {
+                    animated.animation = createAnimation(
+                            spriteSheetMap[animated.sheets]!!,
+                            animated.sheets.cols,
+                            animated.sheets.rows,
+                            animated.duration,
+                            animated.mode)
                 }
                 val keyFrame = animated?.animation?.getKeyFrame(time)
                 if (keyFrame != null) {
@@ -163,6 +174,7 @@ class BatchDrawSystem(
 
     override fun dispose() {
         spriteMap.values.forEach { it.dispose() }
+        spriteSheetMap.values.forEach { it.dispose() }
     }
 }
 

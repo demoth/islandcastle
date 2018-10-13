@@ -3,7 +3,6 @@ package org.demoth.ktxtest.ecs
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
@@ -20,9 +19,9 @@ import org.demoth.ktxtest.SOLID
 import org.demoth.ktxtest.SOLID_INVISIBLE
 import org.demoth.ktxtest.SPEED_DECEL
 import org.demoth.ktxtest.Sounds
+import org.demoth.ktxtest.SpriteSheets
 import org.demoth.ktxtest.Sprites
 import org.demoth.ktxtest.TRIGGER
-import org.demoth.ktxtest.createAnimation
 import org.demoth.ktxtest.getCentralPoint
 import java.util.*
 
@@ -126,9 +125,7 @@ fun createFireBall(engine: Engine, world: World, velocity: Vector2, origin: Vect
 fun createRotatingFireBall(engine: Engine, world: World, velocity: Vector2, origin: Vector2, owner: Entity) {
     engine.entity().apply {
         add(Named("fireball"))
-        add(Animated(createAnimation(
-                Texture(Gdx.files.internal("sprites/Sprite_FX_Fire_0004_FIX.png")),
-                4, 1, 0.1f, Animation.PlayMode.LOOP)))
+        add(Animated(SpriteSheets.FIRE_SPIRALS, 0.1f, Animation.PlayMode.LOOP))
         add(Physical(
                 body = world.body {
                     userData = this@apply

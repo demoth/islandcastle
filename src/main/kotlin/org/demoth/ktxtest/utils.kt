@@ -34,8 +34,11 @@ open class ContactAdapter : ContactListener {
     }
 }
 
-fun createAnimation(sheet: Texture, cols: Int, rows: Int, duration: Float, mode: Animation.PlayMode): Animation<TextureRegion> {
-    val flameFrames = TextureRegion.split(sheet, sheet.width / cols, sheet.height / rows).flatten()
+fun createAnimation(spriteSheet: Texture, cols: Int, rows: Int, duration: Float, mode: Animation.PlayMode): Animation<TextureRegion> {
+    val flameFrames = TextureRegion.split(
+            spriteSheet,
+            spriteSheet.width / cols,
+            spriteSheet.height / rows).flatten()
     val animation = Animation(duration, *flameFrames.toTypedArray())
     animation.playMode = mode
     return animation
