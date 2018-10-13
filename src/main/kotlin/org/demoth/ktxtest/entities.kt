@@ -16,7 +16,7 @@ import java.util.*
 
 fun createPlayerEntity(engine: Engine, world: World, location: Vector2) {
     engine.entity().apply {
-        add(Textured(Texture(Gdx.files.internal("knight32.png"))))
+        add(Textured(Sprites.KNIGHT))
         add(Player())
         add(Named("player"))
         add(HasHealth(9000))
@@ -43,7 +43,7 @@ fun createEyeMonster(engine: Engine, world: World, x: Float, y: Float) {
         add(Named("eyelander"))
         add(MonsterStationaryRanged())
         add(HasHealth(1000))
-        add(Textured(Texture(Gdx.files.internal("eye_monsters/eyelander.png"))))
+        add(Textured(Sprites.EYE_BOT))
         add(Physical(
                 body = world.body {
                     userData = this@apply
@@ -92,7 +92,7 @@ private fun createWall(engine: Engine, layer: String, world: World, rect: Rectan
 fun createFireBall(engine: Engine, world: World, velocity: Vector2, origin: Vector2, owner: Entity) {
     engine.entity().apply {
         add(Named("fireball"))
-        add(Textured(Texture(Gdx.files.internal("Ardentryst-MagicSpriteEffects/Ardentryst-rfireball.png"))))
+        add(Textured(Sprites.FIREBALL))
         add(Physical(
                 body = world.body {
                     userData = this@apply

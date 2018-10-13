@@ -14,3 +14,15 @@ enum class Sounds(val filename: String) {
 }
 
 val HURT = listOf(Sounds.HURT1, Sounds.HURT2, Sounds.HURT3, Sounds.HURT4)
+
+enum class Sprites(val filename: String) {
+    FIREBALL("Ardentryst-MagicSpriteEffects/Ardentryst-rfireball.png"),
+    EYE_BOT("eye_monsters/eyebot.png"),
+    EYE_LANDER("eye_monsters/eyelander.png"),
+    KNIGHT("knight32.png")
+}
+
+enum class SpriteSheet(val filename: String, val rows: Int, val cols: Int) {
+    FIRE_SPIRALS("sprites/Sprite_FX_Fire_0004_FIX.png", 1, 4),
+    FIRE_EXPLOSION("sprites/Sprite_FX_Explosion_0041_FIX.png", 1, 5)
+}

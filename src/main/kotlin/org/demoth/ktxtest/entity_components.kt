@@ -2,7 +2,6 @@ package org.demoth.ktxtest
 
 import com.badlogic.ashley.core.Component
 import com.badlogic.ashley.core.Entity
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
@@ -29,7 +28,7 @@ class Physical(
 
 class Animated(val animation: Animation<TextureRegion>) : Component
 
-class Textured(val texture: Texture) : Component
+class Textured(val texture: Sprites) : Component
 
 class Named(val name: String) : Component
 

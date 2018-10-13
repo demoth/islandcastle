@@ -131,6 +131,7 @@ class Game2dTest : KtxApplicationAdapter {
         batch.dispose()
         engine.removeAllEntities()
         soundSystem.dispose()
+        batchDrawSystem.dispose()
     }
 
     override fun render() {

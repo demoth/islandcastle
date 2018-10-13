@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Camera
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
@@ -91,16 +92,18 @@ class BatchDrawSystem(
         private val viewport: Viewport,
         var drawSprites: Boolean = true,
         var drawNames: Boolean = false
-) : EntitySystem() {
+) : EntitySystem(), Disposable {
     private val font = BitmapFont()
     var time = 0f
+
+    private val spriteMap = Sprites.values().map { it to Texture(Gdx.files.internal(it.filename)) }.toMap()
 
     override fun update(deltaTime: Float) {
         time += deltaTime
 
         if (drawSprites) {
             engine.getEntitiesFor(oneOf(Textured::class, Animated::class).oneOf(Physical::class, Positioned::class).get()).forEach { e ->
-                val texture = texMapper[e]?.texture
+                val texture = spriteMap[texMapper[e]?.texture]
                 val animated = animatedMapper[e]
                 val position = physicMapper[e]?.body?.position ?: positionMapper[e].position
                 if (texture != null) {
@@ -153,6 +156,10 @@ class BatchDrawSystem(
             font.draw(batch, h, viewport.camera.position.x - h.width / 2, viewport.camera.position.y - viewport.screenHeight * 0.23f)
             player.score--
         }
+    }
+
+    override fun dispose() {
+        spriteMap.values.forEach { it.dispose() }
     }
 }
 
