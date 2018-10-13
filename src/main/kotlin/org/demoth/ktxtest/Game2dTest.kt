@@ -23,6 +23,14 @@ import ktx.app.KtxApplicationAdapter
 import ktx.ashley.entity
 import ktx.box2d.createWorld
 import ktx.graphics.use
+import org.demoth.ktxtest.ecs.BatchDrawSystem
+import org.demoth.ktxtest.ecs.CameraSystem
+import org.demoth.ktxtest.ecs.MonsterAiSystem
+import org.demoth.ktxtest.ecs.PhysicalSystem
+import org.demoth.ktxtest.ecs.PlayerControlSystem
+import org.demoth.ktxtest.ecs.SoundSystem
+import org.demoth.ktxtest.ecs.createMapObject
+import org.demoth.ktxtest.ecs.createPlayerEntity
 
 
 const val MAX_SPEED = 10f

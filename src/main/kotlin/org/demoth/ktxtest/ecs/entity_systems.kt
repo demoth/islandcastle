@@ -1,4 +1,4 @@
-package org.demoth.ktxtest
+package org.demoth.ktxtest.ecs
 
 import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.gdx.Gdx
@@ -15,8 +15,12 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.ashley.allOf
 import ktx.ashley.entity
 import ktx.ashley.mapperFor
-import ktx.ashley.oneOf
 import ktx.math.minus
+import org.demoth.ktxtest.MAX_SPEED
+import org.demoth.ktxtest.PPM
+import org.demoth.ktxtest.Sounds
+import org.demoth.ktxtest.Sprites
+import org.demoth.ktxtest.WALK_FORCE
 import java.util.*
 
 val physicMapper = mapperFor<Physical>()
@@ -40,7 +44,7 @@ class PlayerControlSystem(private val world: World) : EntitySystem() {
     var actionLocation: Vector2? = null
 
     override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(allOf(Physical::class, Player::class, HasHealth::class).get()).firstOrNull()?.let { playerEntity ->
+        engine.getEntitiesFor(playerEntities).firstOrNull()?.let { playerEntity ->
             // this may be used later to affect how controls are used
             val player = playerMapper[playerEntity]
             val health = healthMapper[playerEntity]
@@ -102,7 +106,7 @@ class BatchDrawSystem(
         time += deltaTime
 
         if (drawSprites) {
-            engine.getEntitiesFor(oneOf(Textured::class, Animated::class).oneOf(Physical::class, Positioned::class).get()).forEach { e ->
+            engine.getEntitiesFor(drawables).forEach { e ->
                 val texture = spriteMap[texMapper[e]?.texture]
                 val animated = animatedMapper[e]
                 val position = physicMapper[e]?.body?.position ?: positionMapper[e].position
@@ -121,18 +125,17 @@ class BatchDrawSystem(
             }
         }
         if (drawNames) {
-            engine.getEntitiesFor(allOf(Named::class).oneOf(Physical::class, Positioned::class).get()).forEach { e ->
+            engine.getEntitiesFor(drawableNames).forEach { e ->
                 val name = namedMapper[e].name
                 val position = physicMapper[e]?.body?.position ?: positionMapper[e].position
                 if (name.isNotBlank()) {
-                    // TODO check if object is visible from current viewport
                     val g = GlyphLayout(font, name)
                     font.draw(batch, g, position.x * PPM - g.width / 2, position.y * PPM)
                 }
             }
 
         }
-        engine.getEntitiesFor(allOf(FloatingUpLabel::class, Positioned::class, Named::class).get()).forEach {
+        engine.getEntitiesFor(floatingLabels).forEach {
             val floating = floatingUpLabelMapper[it]
             val positioned = positionMapper[it]
             val named = namedMapper[it]
@@ -146,7 +149,7 @@ class BatchDrawSystem(
             }
         }
 
-        engine.getEntitiesFor(allOf(Player::class, HasHealth::class).get()).firstOrNull()?.let {
+        engine.getEntitiesFor(playerHealthAndScore).firstOrNull()?.let {
             val player = playerMapper[it]
             val health = healthMapper[it]
             val g = GlyphLayout(font, "Score: ${player.score}")
@@ -168,7 +171,7 @@ class BatchDrawSystem(
  */
 class CameraSystem(private val camera: Camera) : EntitySystem() {
     override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(allOf(Physical::class, Player::class).get()).forEach { e ->
+        engine.getEntitiesFor(playerPosition).forEach { e ->
             physicMapper[e]?.body?.let { body ->
                 camera.position.set(body.position.x * PPM, body.position.y * PPM, 0f)
             }
@@ -178,7 +181,7 @@ class CameraSystem(private val camera: Camera) : EntitySystem() {
 
 class PhysicalSystem(private val world: World) : EntitySystem() {
     override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(allOf(Physical::class).get()).forEach { e ->
+        engine.getEntitiesFor(physicalBodiesCleanup).forEach { e ->
             val physical = physicMapper[e]
             if (physical.toBeRemoved) {
                 world.destroyBody(physical.body)
@@ -190,7 +193,7 @@ class PhysicalSystem(private val world: World) : EntitySystem() {
 
 class MonsterAiSystem(private val world: World) : EntitySystem() {
     override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(allOf(MonsterStationaryRanged::class, Physical::class, HasHealth::class).get()).forEach { monsterEntity ->
+        engine.getEntitiesFor(stationaryMonsters).forEach { monsterEntity ->
             val monster = monsterMapper[monsterEntity]
             val monsterPhysics = physicMapper[monsterEntity]
             val health = healthMapper[monsterEntity]
@@ -223,7 +226,7 @@ class SoundSystem : EntitySystem(), Disposable {
     private val soundMap = Sounds.values().map { it to Gdx.audio.newSound(Gdx.files.internal("sounds/${it.filename}")) }.toMap()
 
     override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(allOf(HasSound::class).get()).forEach {
+        engine.getEntitiesFor(allSounds).forEach {
             val sound = soundMapper[it]
             val soundFile = soundMap[sound.name] ?: return
             // todo pan sound depending on location

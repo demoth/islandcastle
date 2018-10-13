@@ -1,4 +1,4 @@
-package org.demoth.ktxtest
+package org.demoth.ktxtest.ecs
 
 import com.badlogic.ashley.core.Component
 import com.badlogic.ashley.core.Entity
@@ -6,6 +6,9 @@ import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
+import org.demoth.ktxtest.NO_COLLISION
+import org.demoth.ktxtest.Sounds
+import org.demoth.ktxtest.Sprites
 import java.util.*
 
 /**

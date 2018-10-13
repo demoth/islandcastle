@@ -3,6 +3,7 @@ package org.demoth.ktxtest
 import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.physics.box2d.Contact
 import ktx.ashley.get
+import org.demoth.ktxtest.ecs.Physical
 
 class CollisionProcessor : ContactAdapter() {
     override fun beginContact(contact: Contact?) {

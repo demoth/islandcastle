@@ -1,4 +1,4 @@
-package org.demoth.ktxtest
+package org.demoth.ktxtest.ecs
 
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
@@ -12,6 +12,18 @@ import com.badlogic.gdx.physics.box2d.World
 import ktx.ashley.entity
 import ktx.ashley.get
 import ktx.box2d.body
+import org.demoth.ktxtest.DEAL_DAMAGE
+import org.demoth.ktxtest.HURT
+import org.demoth.ktxtest.PPM
+import org.demoth.ktxtest.RECEIVE_DAMAGE
+import org.demoth.ktxtest.SOLID
+import org.demoth.ktxtest.SOLID_INVISIBLE
+import org.demoth.ktxtest.SPEED_DECEL
+import org.demoth.ktxtest.Sounds
+import org.demoth.ktxtest.Sprites
+import org.demoth.ktxtest.TRIGGER
+import org.demoth.ktxtest.createAnimation
+import org.demoth.ktxtest.getCentralPoint
 import java.util.*
 
 fun createPlayerEntity(engine: Engine, world: World, location: Vector2) {
