@@ -176,7 +176,7 @@ class Game2dTest : KtxApplicationAdapter {
             batchDrawSystem.drawNames = !batchDrawSystem.drawNames
         if (Gdx.input.isKeyJustPressed(Input.Keys.F5)) {
             dispose()
-            changeLevel("grassmap.tmx", null)
+            changeLevel("test.tmx", null)
             // todo remove hardcoded size
             viewport.update(1000, 1000)
         }
