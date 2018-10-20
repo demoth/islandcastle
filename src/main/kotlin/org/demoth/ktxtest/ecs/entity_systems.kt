@@ -5,7 +5,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Camera
 import com.badlogic.gdx.graphics.Texture
-import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
@@ -23,7 +22,6 @@ import org.demoth.ktxtest.Sounds
 import org.demoth.ktxtest.SpriteSheets
 import org.demoth.ktxtest.Sprites
 import org.demoth.ktxtest.WALK_FORCE
-import org.demoth.ktxtest.createAnimation
 import java.util.*
 
 val physicMapper = mapperFor<Physical>()
@@ -120,25 +118,17 @@ class BatchDrawSystem(
                             position.y * PPM - texture.height / 2)
                 } else {
                     if (animated != null) {
-                        if (animated.animation == null) {
-                            animated.animation = createAnimation(
-                                    spriteSheetMap[animated.sheets]!!,
-                                    animated.sheets.cols,
-                                    animated.sheets.rows,
-                                    animated.duration,
-                                    animated.mode)
+                        if (!animated.isInitialized()) {
+                            animated.initialize(spriteSheetMap[animated.sheets])
                         }
                         animated.currentTime += deltaTime
-                        if (animated.disposeAfterAnimationFinished
-                                && animated.mode == Animation.PlayMode.NORMAL
-                                && animated.animation!!.isAnimationFinished(animated.currentTime)) {
+                        if (animated.isExpired()) {
                             engine.removeEntity(e)
                         } else {
-                            val keyFrame = animated.animation?.getKeyFrame(animated.currentTime)
-                            if (keyFrame != null) {
-                                batch.draw(keyFrame,
-                                        position.x * PPM - keyFrame.regionWidth / 2,
-                                        position.y * PPM - keyFrame.regionHeight / 2)
+                            animated.getKeyFrame()?.let {
+                                batch.draw(it,
+                                        position.x * PPM - it.regionWidth / 2,
+                                        position.y * PPM - it.regionHeight / 2)
                             }
                         }
                     }

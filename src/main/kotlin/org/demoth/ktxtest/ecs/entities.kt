@@ -252,11 +252,15 @@ class EntityFactory(private val engine: Engine, private val world: World) {
         if (physical != null && damage != null && other !== damage.owner) {
             physical.toBeRemoved = true
 
-            engine.entity().apply {
-                add(Positioned(physical.body.position.cpy()))
-                add(Animated(SpriteSheets.FIRE_EXPLOSION, 0.1f, Animation.PlayMode.NORMAL))
-                add(HasSound(Sounds.EXPLOSION))
-            }
+            createExplosion(physical.body.position.cpy())
+        }
+    }
+
+    private fun createExplosion(position: Vector2) {
+        engine.entity().apply {
+            add(Positioned(position))
+            add(Animated(SpriteSheets.FIRE_EXPLOSION, 0.1f, Animation.PlayMode.NORMAL))
+            add(HasSound(Sounds.EXPLOSION))
         }
     }
 

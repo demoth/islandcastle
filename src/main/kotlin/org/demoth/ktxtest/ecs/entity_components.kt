@@ -2,6 +2,7 @@ package org.demoth.ktxtest.ecs
 
 import com.badlogic.ashley.core.Component
 import com.badlogic.ashley.core.Entity
+import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
@@ -10,6 +11,7 @@ import org.demoth.ktxtest.NO_COLLISION
 import org.demoth.ktxtest.Sounds
 import org.demoth.ktxtest.SpriteSheets
 import org.demoth.ktxtest.Sprites
+import org.demoth.ktxtest.createAnimation
 import java.util.*
 
 /**
@@ -32,11 +34,34 @@ class Physical(
 
 class Animated(
         val sheets: SpriteSheets,
-        val duration: Float,
-        val mode: Animation.PlayMode,
+        private val duration: Float,
+        private val mode: Animation.PlayMode,
         var currentTime: Float = 0f,
-        val disposeAfterAnimationFinished: Boolean = true,
-        var animation: Animation<TextureRegion>? = null) : Component
+        private var animation: Animation<TextureRegion>? = null) : Component {
+
+    fun isInitialized(): Boolean {
+        return animation != null
+    }
+
+    fun initialize(texture: Texture?) {
+        animation = createAnimation(texture!!, sheets.cols, sheets.rows, duration, mode)
+    }
+
+    /**
+     * For one time animations, when it is finished, it will be disposed
+     */
+    fun isExpired(): Boolean {
+        if (animation == null)
+            return false
+        return mode == Animation.PlayMode.NORMAL
+                && animation!!.isAnimationFinished(currentTime)
+    }
+
+    fun getKeyFrame(): TextureRegion? {
+        return animation?.getKeyFrame(currentTime)
+    }
+
+}
 
 class Textured(val texture: Sprites) : Component
 
