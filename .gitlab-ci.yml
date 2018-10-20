@@ -1,6 +1,7 @@
 image: java:8-jdk
 
 stages:
+- test
 - build
 
 before_script:
@@ -12,6 +13,15 @@ cache:
   paths:
   - .gradle/wrapper
   - .gradle/caches
+
+test:
+  stage: test
+  script:
+  - ./gradlew test
+  artifacts:
+    paths:
+    - build/reports/tests/test
+    expire_in: 1 week
 
 build:
   stage: build
