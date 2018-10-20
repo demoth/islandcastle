@@ -17,7 +17,7 @@ cache:
 test:
   stage: test
   script:
-  - ./gradlew test
+  - ./gradlew test --stacktrace
   artifacts:
     paths:
     - build/reports/tests/test
