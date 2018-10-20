@@ -7,11 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
-import org.demoth.ktxtest.NO_COLLISION
-import org.demoth.ktxtest.Sounds
-import org.demoth.ktxtest.SpriteSheets
-import org.demoth.ktxtest.Sprites
-import org.demoth.ktxtest.createAnimation
+import org.demoth.ktxtest.*
 import java.util.*
 
 /**
@@ -70,7 +66,12 @@ class Named(val name: String) : Component
 /**
  * will fire fireRate/sec towards player
  */
-class MonsterStationaryRanged(var fireRate: Float = 1f, var currentTime: Float = Random().nextFloat()) : Component
+class MonsterFiring(var fireRate: Float = 1f, var currentTime: Float = Random().nextFloat()) : Component
+
+/**
+ * will magnetize monster towards player
+ */
+class MonsterWalking(var speed: Float = 3f, var distance: Float = 2f) : Component
 
 /**
  * Used for damage labels - they float up a bit then disappear

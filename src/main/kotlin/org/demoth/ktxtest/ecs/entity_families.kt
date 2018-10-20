@@ -13,6 +13,6 @@ val floatingLabels = allOf(FloatingUpLabel::class, Positioned::class, Named::cla
 
 val entityCleanup = oneOf(Physical::class, TTL::class).get()
 
-val stationaryMonsters = allOf(MonsterStationaryRanged::class, Physical::class, HasHealth::class).get()
+val monsters = allOf(MonsterFiring::class, MonsterWalking::class, Physical::class, HasHealth::class).get()
 
 val allSounds = allOf(HasSound::class).get()

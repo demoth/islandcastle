@@ -12,19 +12,7 @@ import com.badlogic.gdx.physics.box2d.World
 import ktx.ashley.entity
 import ktx.ashley.get
 import ktx.box2d.body
-import org.demoth.ktxtest.DEAL_DAMAGE
-import org.demoth.ktxtest.HURT
-import org.demoth.ktxtest.PPM
-import org.demoth.ktxtest.RECEIVE_DAMAGE
-import org.demoth.ktxtest.SOLID
-import org.demoth.ktxtest.SOLID_INVISIBLE
-import org.demoth.ktxtest.SPEED_DECEL
-import org.demoth.ktxtest.Sounds
-import org.demoth.ktxtest.SpriteSheets
-import org.demoth.ktxtest.Sprites
-import org.demoth.ktxtest.TRIGGER
-import org.demoth.ktxtest.debug
-import org.demoth.ktxtest.getCentralPoint
+import org.demoth.ktxtest.*
 import java.util.*
 
 class EntityFactory(private val engine: Engine, private val world: World) {
@@ -57,7 +45,8 @@ class EntityFactory(private val engine: Engine, private val world: World) {
         debug("Spawning eye monster at: ($x, $y)")
         engine.entity().apply {
             add(Named("eyelander"))
-            add(MonsterStationaryRanged())
+            add(MonsterFiring())
+            add(MonsterWalking())
             add(HasHealth(1000))
             add(Textured(Sprites.EYE_BOT))
             add(Physical(

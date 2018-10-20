@@ -16,12 +16,7 @@ import ktx.ashley.allOf
 import ktx.ashley.entity
 import ktx.ashley.mapperFor
 import ktx.math.minus
-import org.demoth.ktxtest.MAX_SPEED
-import org.demoth.ktxtest.PPM
-import org.demoth.ktxtest.Sounds
-import org.demoth.ktxtest.SpriteSheets
-import org.demoth.ktxtest.Sprites
-import org.demoth.ktxtest.WALK_FORCE
+import org.demoth.ktxtest.*
 import java.util.*
 
 val physicMapper = mapperFor<Physical>()
@@ -30,7 +25,8 @@ val texMapper = mapperFor<Textured>()
 val positionMapper = mapperFor<Positioned>()
 val namedMapper = mapperFor<Named>()
 val animatedMapper = mapperFor<Animated>()
-val monsterMapper = mapperFor<MonsterStationaryRanged>()
+val monsterMapper = mapperFor<MonsterFiring>()
+val walkMapper = mapperFor<MonsterWalking>()
 val floatingUpLabelMapper = mapperFor<FloatingUpLabel>()
 val healthMapper = mapperFor<HasHealth>()
 val soundMapper = mapperFor<HasSound>()
@@ -216,18 +212,30 @@ class EntitiesCleanupSystem(private val world: World) : EntitySystem() {
 
 class MonsterAiSystem(private val world: World, private val entityFactory: EntityFactory) : EntitySystem() {
     override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(stationaryMonsters).forEach { monsterEntity ->
+        val playerEntity = engine.getEntitiesFor(allOf(Player::class, Physical::class).get()).firstOrNull()
+
+        engine.getEntitiesFor(monsters).forEach { monsterEntity ->
             val monster = monsterMapper[monsterEntity]
+            val walk = walkMapper[monsterEntity]
             val monsterPhysics = physicMapper[monsterEntity]
             val health = healthMapper[monsterEntity]
             monster.currentTime += deltaTime
+            if (playerEntity != null && walk != null) {
+                val playerPhysical = physicMapper[playerEntity]
+                val monsterLocation = monsterPhysics.body.position
+                val distanceVector = playerPhysical.body.position.cpy().minus(monsterLocation)
+                if (distanceVector.len() > walk.distance) {
+                    val distance = distanceVector.setLength(walk.speed)
+                    monsterPhysics.body.applyForceToCenter(distance, true)
+                }
+            }
+
             if (health.value < 0) {
                 engine.entity().add(HasSound(Sounds.MONSTER_DIE))
                 engine.removeEntity(monsterEntity)
                 world.destroyBody(monsterPhysics.body)
             } else if (monster.currentTime > monster.fireRate) {
                 monster.currentTime = 0f
-                val playerEntity = engine.getEntitiesFor(allOf(Player::class, Physical::class).get()).firstOrNull()
                 if (playerEntity != null) {
                     val playerPhysical = physicMapper[playerEntity]
                     val monsterLocation = monsterPhysics.body.position
