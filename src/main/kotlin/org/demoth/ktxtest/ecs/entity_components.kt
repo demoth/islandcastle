@@ -75,8 +75,7 @@ class MonsterStationaryRanged(var fireRate: Float = 1f, var currentTime: Float =
 /**
  * Used for damage labels - they float up a bit then disappear
  */
-// move to TTL
-class FloatingUpLabel(var ttl: Float = 2f) : Component
+class FloatingUpLabel(val speed: Vector2) : Component
 
 class HasDamage(val value: Int, val owner: Entity) : Component
 

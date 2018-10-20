@@ -54,11 +54,7 @@ class PlayerControlSystem(private val world: World, private val entityFactory: E
 
             if (health.value < 0) {
                 engine.entity().add(HasSound(Sounds.PLAYER_DIE))
-                engine.entity().apply {
-                    add(FloatingUpLabel(10f))
-                    add(Named("You have died! Press F5 to restart. Score: ${player.score}"))
-                    add(Positioned(playerPhysics.body.position.cpy()))
-                }
+                entityFactory.createFloatingLabel("You have died! Press F5 to restart. Score: ${player.score}", playerPhysics.body.position.cpy(), 10f)
                 engine.removeEntity(playerEntity)
                 world.destroyBody(playerPhysics.body)
                 return
@@ -87,6 +83,7 @@ class PlayerControlSystem(private val world: World, private val entityFactory: E
             }
         }
     }
+
 }
 
 /**
@@ -147,17 +144,21 @@ class BatchDrawSystem(
             }
         }
 
+        // todo: split into named, ttl and has speed
         engine.getEntitiesFor(floatingLabels).forEach {
             val floating = floatingUpLabelMapper[it]
             val positioned = positionMapper[it]
             val named = namedMapper[it]
-            floating.ttl -= deltaTime
-            if (floating.ttl > 0) {
-                positioned.position.y += 0.01f
-                val g = GlyphLayout(font, named.name)
-                font.draw(batch, g, positioned.position.x * PPM - g.width / 2, positioned.position.y * PPM)
-            } else {
-                engine.removeEntity(it)
+            val ttl = ttlMapper[it]
+            if (floating != null && positioned != null && named != null && ttl != null) {
+                ttl.ttl -= deltaTime
+                if (ttl.ttl > 0) {
+                    positioned.position.add(floating.speed)
+                    val g = GlyphLayout(font, named.name)
+                    font.draw(batch, g, positioned.position.x * PPM - g.width / 2, positioned.position.y * PPM)
+                } else {
+                    engine.removeEntity(it)
+                }
             }
         }
 
@@ -230,9 +231,10 @@ class MonsterAiSystem(private val world: World, private val entityFactory: Entit
                 if (playerEntity != null) {
                     val playerPhysical = physicMapper[playerEntity]
                     val monsterLocation = monsterPhysics.body.position
-                    entityFactory.createRotatingFireBall(playerPhysical.body.position.cpy() - monsterLocation,
-                            monsterLocation,
-                            monsterEntity)
+                    if (playerPhysical.body.position.cpy().minus(monsterLocation).len() < 10f)
+                        entityFactory.createRotatingFireBall(playerPhysical.body.position.cpy() - monsterLocation,
+                                monsterLocation,
+                                monsterEntity)
                 }
             }
         }

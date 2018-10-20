@@ -193,10 +193,11 @@ class EntityFactory(private val engine: Engine, private val world: World) {
         }
     }
 
-    fun createFloatingLabel(text: String, location: Vector2) {
+    fun createFloatingLabel(text: String, location: Vector2, ttl: Float) {
         engine.entity().apply {
             add(Named(text))
-            add(FloatingUpLabel())
+            add(FloatingUpLabel(Vector2(0f, 0.01f)))
+            add(TTL(ttl))
             add(Positioned(location))
         }
     }
@@ -232,7 +233,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
         if (damage != null && damage.owner !== self && health != null) {
             health.value -= damage.value
             if (position != null) {
-                createFloatingLabel(damage.value.toString(), position.cpy())
+                createFloatingLabel(damage.value.toString(), position.cpy(), 2f)
             }
             engine.entity().add(HasSound(HURT[Random().nextInt(HURT.size)]))
         }
