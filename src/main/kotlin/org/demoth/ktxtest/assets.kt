@@ -20,7 +20,8 @@ enum class Sprites(val filename: String) {
     FIREBALL("Sprite_FX_Explosion_0041_ball.png"),
     EYE_BOT("eye_monsters/eyebot.png"),
     EYE_LANDER("eye_monsters/eyelander.png"),
-    KNIGHT("knight32.png")
+    KNIGHT("knight32.png"),
+    SKELETON("skeleton_dummy.png")
 }
 
 enum class SpriteSheets(val filename: String, val rows: Int, val cols: Int) {

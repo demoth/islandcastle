@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="left-up" width="16" height="16" tilewidth="32" tileheight="32" infinite="0" nextobjectid="2">
+<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="left-up" width="16" height="16" tilewidth="32" tileheight="32" infinite="0" nextobjectid="11">
  <tileset firstgid="1" source="../tilesets/dusk/dusk2.tsx"/>
  <layer name="Tile Layer 1" width="16" height="16">
   <data encoding="csv">
@@ -43,6 +43,15 @@
  </layer>
  <objectgroup name="entities">
   <object id="1" name="start" x="259.5" y="187.5">
+   <point/>
+  </object>
+  <object id="2" name="dummy" x="421" y="212">
+   <point/>
+  </object>
+  <object id="9" name="dummy" x="445" y="318">
+   <point/>
+  </object>
+  <object id="10" name="dummy" x="109.5" y="252">
    <point/>
   </object>
  </objectgroup>

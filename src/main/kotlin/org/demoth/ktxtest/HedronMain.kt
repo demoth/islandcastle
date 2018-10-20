@@ -10,6 +10,6 @@ fun main(args: Array<String>) {
     config.height = 1000
     config.forceExit = false
     config.resizable = false
-    LwjglApplication(Game2dTest(), config)
+    LwjglApplication(Game2dTest(args.getOrNull(0)), config)
 }
 

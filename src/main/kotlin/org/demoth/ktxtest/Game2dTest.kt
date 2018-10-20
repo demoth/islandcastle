@@ -38,7 +38,8 @@ const val TILE_SIZE = 32f
 const val WALK_FORCE = 20f
 const val PPM = 32f // 1 meter - 32 pixels
 
-class Game2dTest : KtxApplicationAdapter {
+class Game2dTest(startMap: String?) : KtxApplicationAdapter {
+    private val startMapName = startMap ?: "grassmap.tmx"
     private lateinit var world: World
     private lateinit var batch: SpriteBatch
     private lateinit var viewport: Viewport
@@ -117,7 +118,6 @@ class Game2dTest : KtxApplicationAdapter {
     override fun create() {
         Box2D.init()
         debug("Box2D initialized")
-        val startMapName = "grassmap.tmx"
         debug("Starting game in $startMapName")
         changeLevel(startMapName, null)
     }
@@ -176,7 +176,7 @@ class Game2dTest : KtxApplicationAdapter {
             batchDrawSystem.drawNames = !batchDrawSystem.drawNames
         if (Gdx.input.isKeyJustPressed(Input.Keys.F5)) {
             dispose()
-            changeLevel("test.tmx", null)
+            changeLevel(startMapName, null)
             // todo remove hardcoded size
             viewport.update(1000, 1000)
         }

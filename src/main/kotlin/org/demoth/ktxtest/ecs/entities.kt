@@ -76,6 +76,28 @@ class EntityFactory(private val engine: Engine, private val world: World) {
         }
     }
 
+    fun createDummyMonster(x: Float, y: Float) {
+        debug("Spawning dummy at: ($x, $y)")
+        engine.entity().apply {
+            add(Named("dummy"))
+            add(HasHealth(1000))
+            add(Textured(Sprites.SKELETON))
+            add(Physical(
+                    body = world.body {
+                        userData = this@apply
+                        position.x = x
+                        position.y = y
+                        type = BodyDef.BodyType.DynamicBody
+                        linearDamping = SPEED_DECEL
+                        fixedRotation = true
+                        circle(0.7f)
+                    },
+                    collide = { self, other -> damageHealth(self, other) },
+                    collisionClass = RECEIVE_DAMAGE,
+                    collidesWith = DEAL_DAMAGE))
+        }
+    }
+
     fun loadMap(map: TiledMap, previousMapName: String?, transition: (String) -> Unit) {
         debug("Creating entities:")
         val startPosition =
@@ -96,6 +118,8 @@ class EntityFactory(private val engine: Engine, private val world: World) {
             layer.objects.getByType<RectangleMapObject>(RectangleMapObject::class.java).forEach { obj ->
                 if (obj.name == "spawn_eyelander") {
                     createEyeMonster(obj.rectangle.x / PPM, obj.rectangle.y / PPM)
+                } else if (obj.name == "dummy") {
+                    createDummyMonster(obj.rectangle.x / PPM, obj.rectangle.y / PPM)
                 } else if (obj.name == "exit_to") {
                     val nextMap = obj.properties["to"] as String
                     createTransition("exit to $nextMap", nextMap, obj.rectangle, transition)
