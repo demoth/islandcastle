@@ -12,11 +12,14 @@ import org.demoth.ktxtest.ecs.HasHealth
 import org.demoth.ktxtest.ecs.MonsterDeathSystem
 import org.demoth.ktxtest.ecs.MonsterFiring
 import org.demoth.ktxtest.ecs.MonsterFiringSystem
+import org.demoth.ktxtest.ecs.MonsterWalkSystem
 import org.demoth.ktxtest.ecs.MonsterWalking
 import org.demoth.ktxtest.ecs.Named
 import org.demoth.ktxtest.ecs.Physical
 import org.demoth.ktxtest.ecs.TTL
 import org.demoth.ktxtest.ecs.monstersMortal
+import org.demoth.ktxtest.ecs.monstersWalking
+import org.demoth.ktxtest.ecs.physicMapper
 import org.junit.Assert
 import org.junit.Test
 
@@ -61,7 +64,7 @@ class SystemTest {
     }
 
     @Test
-    fun `monsters do not strike ball when nobady is nearby`() {
+    fun `monsters do not strike ball when nobody is nearby`() {
         val engine = PooledEngine()
         val world = createWorld()
         val entityFactory = EntityFactory(engine, world)
@@ -88,5 +91,40 @@ class SystemTest {
         engine.update(1f)
 
         Assert.assertTrue("Fireball is not fired", engine.getEntitiesFor(fireball).size() != 0)
+    }
+
+    @Test
+    fun `monster walks towards the player`() {
+        val engine = PooledEngine()
+        val world = createWorld()
+        val entityFactory = EntityFactory(engine, world)
+        engine.addSystem(MonsterWalkSystem())
+        entityFactory.createEyeMonster(0f, 0f, 1000)
+        entityFactory.createPlayerEntity(Vector2(10f, 0f))
+
+        val monsterEntity = engine.getEntitiesFor(monstersWalking).firstOrNull()
+        val monsterPhysics = physicMapper[monsterEntity]
+        val monsterLocation = monsterPhysics.body.position
+
+        engine.update(1f)
+        world.step(1f, 6, 2)
+        engine.update(1f) // TODO cannot be understood why it is needed again
+
+        Assert.assertTrue("Monster should walk towards the player",
+                monsterLocation.x > 0f && monsterLocation.y == 0f)
+    }
+
+    @Test
+    fun `monster stays still when nobody in the map`() {
+        val engine = PooledEngine()
+        val world = createWorld()
+        val entityFactory = EntityFactory(engine, world)
+        engine.addSystem(MonsterWalkSystem())
+        entityFactory.createEyeMonster(0f, 0f, 1000)
+        engine.update(1f)
+        val monsterEntity = engine.getEntitiesFor(monstersWalking).firstOrNull()
+        val monsterPhysics = physicMapper[monsterEntity]
+        val monsterLocation = monsterPhysics.body.position
+        Assert.assertTrue("Monster should not walk", monsterLocation == Vector2(0f, 0f))
     }
 }
