@@ -26,5 +26,6 @@ enum class Sprites(val filename: String) {
 
 enum class SpriteSheets(val filename: String, val rows: Int, val cols: Int) {
     FIRE_SPIRALS("Sprite_FX_Fire_0004_FIX.png", 1, 4),
-    FIRE_EXPLOSION("Sprite_FX_Explosion_0041_FIX.png", 1, 5)
+    FIRE_EXPLOSION("Sprite_FX_Explosion_0041_FIX.png", 1, 5),
+    PLAYER("Thorsten_Rantanen.png", 21, 13)
 }

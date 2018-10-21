@@ -16,7 +16,12 @@ import ktx.ashley.allOf
 import ktx.ashley.entity
 import ktx.ashley.mapperFor
 import ktx.math.minus
-import org.demoth.ktxtest.*
+import org.demoth.ktxtest.MAX_SPEED
+import org.demoth.ktxtest.PPM
+import org.demoth.ktxtest.Sounds
+import org.demoth.ktxtest.SpriteSheets
+import org.demoth.ktxtest.Sprites
+import org.demoth.ktxtest.WALK_FORCE
 import java.util.*
 
 val physicMapper = mapperFor<Physical>()
@@ -24,7 +29,8 @@ val playerMapper = mapperFor<Player>()
 val texMapper = mapperFor<Textured>()
 val positionMapper = mapperFor<Positioned>()
 val namedMapper = mapperFor<Named>()
-val animatedMapper = mapperFor<Animated>()
+val animatedMapper = mapperFor<SimpleAnimation>()
+val characterAnimationMapper = mapperFor<CharacterAnimation>()
 val monsterMapper = mapperFor<MonsterFiring>()
 val walkMapper = mapperFor<MonsterWalking>()
 val floatingUpLabelMapper = mapperFor<FloatingUpLabel>()
@@ -47,6 +53,7 @@ class PlayerControlSystem(private val world: World, private val entityFactory: E
             val player = playerMapper[playerEntity]
             val health = healthMapper[playerEntity]
             val playerPhysics = physicMapper[playerEntity]
+            val playerAnimation = characterAnimationMapper[playerEntity]
 
             if (health.value < 0) {
                 engine.entity().add(HasSound(Sounds.PLAYER_DIE))
@@ -59,15 +66,19 @@ class PlayerControlSystem(private val world: World, private val entityFactory: E
             playerPhysics?.body?.let { body ->
                 if (Gdx.input.isKeyPressed(Input.Keys.W) && body.linearVelocity.y < MAX_SPEED) {
                     body.applyForceToCenter(0f, WALK_FORCE, true)
+                    playerAnimation.currentDirection = Direction.UP
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.A) && body.linearVelocity.x > -MAX_SPEED) {
                     body.applyForceToCenter(-WALK_FORCE, 0f, true)
+                    playerAnimation.currentDirection = Direction.LEFT
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.S) && body.linearVelocity.y > -MAX_SPEED) {
                     body.applyForceToCenter(0f, -WALK_FORCE, true)
+                    playerAnimation.currentDirection = Direction.DOWN
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.D) && body.linearVelocity.x < MAX_SPEED) {
                     body.applyForceToCenter(WALK_FORCE, 0f, true)
+                    playerAnimation.currentDirection = Direction.RIGHT
                 }
 
                 if (actionLocation != null) {
@@ -103,7 +114,7 @@ class BatchDrawSystem(
         if (drawSprites) {
             engine.getEntitiesFor(drawables).forEach { e ->
                 val texture = spriteMap[texMapper[e]?.texture]
-                val animated = animatedMapper[e]
+                val animated: Animated? = animatedMapper[e] ?: characterAnimationMapper[e]
                 val position = physicMapper[e]?.body?.position ?: positionMapper[e].position
                 if (texture != null) {
                     batch.draw(texture,
@@ -112,7 +123,7 @@ class BatchDrawSystem(
                 } else {
                     if (animated != null) {
                         if (!animated.isInitialized()) {
-                            animated.initialize(spriteSheetMap[animated.sheets])
+                            animated.initialize(spriteSheetMap[animated.sheets]!!)
                         }
                         animated.currentTime += deltaTime
                         if (animated.isExpired()) {

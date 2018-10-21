@@ -12,14 +12,26 @@ import com.badlogic.gdx.physics.box2d.World
 import ktx.ashley.entity
 import ktx.ashley.get
 import ktx.box2d.body
-import org.demoth.ktxtest.*
+import org.demoth.ktxtest.DEAL_DAMAGE
+import org.demoth.ktxtest.HURT
+import org.demoth.ktxtest.PPM
+import org.demoth.ktxtest.RECEIVE_DAMAGE
+import org.demoth.ktxtest.SOLID
+import org.demoth.ktxtest.SOLID_INVISIBLE
+import org.demoth.ktxtest.SPEED_DECEL
+import org.demoth.ktxtest.Sounds
+import org.demoth.ktxtest.SpriteSheets
+import org.demoth.ktxtest.Sprites
+import org.demoth.ktxtest.TRIGGER
+import org.demoth.ktxtest.debug
+import org.demoth.ktxtest.getCentralPoint
 import java.util.*
 
 class EntityFactory(private val engine: Engine, private val world: World) {
 
     fun createPlayerEntity(location: Vector2) {
         engine.entity().apply {
-            add(Textured(Sprites.KNIGHT))
+            add(CharacterAnimation(SpriteSheets.PLAYER))
             add(Player())
             add(Named("player"))
             add(HasHealth(9000))
@@ -163,7 +175,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
     fun createRotatingFireBall(velocity: Vector2, origin: Vector2, owner: Entity) {
         engine.entity().apply {
             add(Named("fire-sprirals"))
-            add(Animated(SpriteSheets.FIRE_SPIRALS, 0.1f, Animation.PlayMode.LOOP))
+            add(SimpleAnimation(SpriteSheets.FIRE_SPIRALS, 0.1f, Animation.PlayMode.LOOP))
             add(Physical(
                     body = world.body {
                         userData = this@apply
@@ -249,7 +261,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
     private fun createExplosion(position: Vector2) {
         engine.entity().apply {
             add(Positioned(position))
-            add(Animated(SpriteSheets.FIRE_EXPLOSION, 0.1f, Animation.PlayMode.NORMAL))
+            add(SimpleAnimation(SpriteSheets.FIRE_EXPLOSION, 0.1f, Animation.PlayMode.NORMAL))
             add(HasSound(Sounds.EXPLOSION))
         }
     }
