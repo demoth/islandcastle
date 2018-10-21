@@ -53,13 +53,13 @@ class EntityFactory(private val engine: Engine, private val world: World) {
 
     }
 
-    fun createEyeMonster(x: Float, y: Float) {
+    fun createEyeMonster(x: Float, y: Float, health: Int = 1000) {
         debug("Spawning eye monster at: ($x, $y)")
         engine.entity().apply {
             add(Named("eyelander"))
             add(MonsterFiring())
             add(MonsterWalking())
-            add(HasHealth(1000))
+            add(HasHealth(health))
             add(Textured(Sprites.EYE_BOT))
             add(Physical(
                     body = world.body {
@@ -77,11 +77,11 @@ class EntityFactory(private val engine: Engine, private val world: World) {
         }
     }
 
-    fun createDummyMonster(x: Float, y: Float) {
+    fun createDummyMonster(x: Float, y: Float, heath: Int = 1000) {
         debug("Spawning dummy at: ($x, $y)")
         engine.entity().apply {
             add(Named("dummy"))
-            add(HasHealth(1000))
+            add(HasHealth(heath))
             add(MonsterWalking())
             add(Textured(Sprites.SKELETON))
             add(Physical(
