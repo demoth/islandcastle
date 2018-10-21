@@ -24,7 +24,9 @@ import org.demoth.ktxtest.ecs.BatchDrawSystem
 import org.demoth.ktxtest.ecs.CameraSystem
 import org.demoth.ktxtest.ecs.EntitiesCleanupSystem
 import org.demoth.ktxtest.ecs.EntityFactory
-import org.demoth.ktxtest.ecs.MonsterAiSystem
+import org.demoth.ktxtest.ecs.MonsterDeathSystem
+import org.demoth.ktxtest.ecs.MonsterFiringSystem
+import org.demoth.ktxtest.ecs.MonsterWalkSystem
 import org.demoth.ktxtest.ecs.PlayerControlSystem
 import org.demoth.ktxtest.ecs.SoundSystem
 
@@ -89,7 +91,9 @@ class Game2dTest(startMap: String?) : KtxApplicationAdapter {
         engine.addSystem(batchDrawSystem)
         engine.addSystem(CameraSystem(camera))
         engine.addSystem(EntitiesCleanupSystem(world))
-        engine.addSystem(MonsterAiSystem(world, entityFactory))
+        engine.addSystem(MonsterWalkSystem())
+        engine.addSystem(MonsterFiringSystem(entityFactory))
+        engine.addSystem(MonsterDeathSystem(world))
         engine.addSystem(soundSystem)
 
         entityFactory.loadMap(map, previousMapName) { nextMap ->
