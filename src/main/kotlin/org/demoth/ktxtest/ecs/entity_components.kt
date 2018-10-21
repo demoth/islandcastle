@@ -7,7 +7,12 @@ import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
-import org.demoth.ktxtest.*
+import org.demoth.ktxtest.NO_COLLISION
+import org.demoth.ktxtest.Sounds
+import org.demoth.ktxtest.SpriteSheets
+import org.demoth.ktxtest.Sprites
+import org.demoth.ktxtest.createAnimationFromFrames
+import org.demoth.ktxtest.createSimpleAnimation
 import java.util.*
 
 /**
@@ -28,35 +33,110 @@ class Physical(
         val collide: ((self: Entity, other: Entity) -> Unit)? = null
 ) : Component
 
-class Animated(
-        val sheets: SpriteSheets,
-        private val duration: Float,
-        private val mode: Animation.PlayMode,
-        var currentTime: Float = 0f,
-        private var animation: Animation<TextureRegion>? = null) : Component {
-
-    fun isInitialized(): Boolean {
-        return animation != null
-    }
-
-    fun initialize(texture: Texture?) {
-        animation = createAnimation(texture!!, sheets.cols, sheets.rows, duration, mode)
-    }
-
+interface Animated : Component {
+    fun isInitialized(): Boolean
+    fun initialize(texture: Texture)
     /**
      * For one time animations, when it is finished, it will be disposed
      */
-    fun isExpired(): Boolean {
+    fun isExpired(): Boolean
+
+    fun getKeyFrame(): TextureRegion?
+    var currentTime: Float
+    val sheets: SpriteSheets
+}
+
+/**
+ * Animations that have no state
+ */
+class SimpleAnimation(
+        override val sheets: SpriteSheets,
+        private val frameDuration: Float,
+        private val mode: Animation.PlayMode,
+        override var currentTime: Float = 0f) : Animated {
+
+    private var animation: Animation<TextureRegion>? = null
+
+    override fun isInitialized(): Boolean {
+        return animation != null
+    }
+
+    override fun initialize(texture: Texture) {
+        animation = createSimpleAnimation(texture, sheets.cols, sheets.rows, frameDuration, mode)
+    }
+
+    override fun isExpired(): Boolean {
         if (animation == null)
             return false
         return mode == Animation.PlayMode.NORMAL
                 && animation!!.isAnimationFinished(currentTime)
     }
 
-    fun getKeyFrame(): TextureRegion? {
+    override fun getKeyFrame(): TextureRegion? {
         return animation?.getKeyFrame(currentTime)
     }
 
+}
+
+enum class AnimationSequences(val frames: Int) {
+    CAST(7),
+    THRUST(8),
+    WALK(9),
+    SLASH(6),
+    SHOOT(13),
+    //HURT(6)
+}
+
+enum class Direction {
+    UP, LEFT, DOWN, RIGHT
+}
+
+class CharacterAnimation(
+        override val sheets: SpriteSheets,
+        override var currentTime: Float = 0f) : Animated {
+
+    private val sequences: EnumMap<AnimationSequences, EnumMap<Direction, Animation<TextureRegion>>> = EnumMap(AnimationSequences::class.java)
+
+    var currentDirection = Direction.DOWN
+
+    var currentSequence: AnimationSequences = AnimationSequences.WALK
+        set(value) {
+            field = value
+            currentTime = 0f
+        }
+
+    private fun getCurrentAnimation(): Animation<TextureRegion> {
+        return sequences[currentSequence]!![currentDirection]!!
+    }
+
+    override fun isInitialized(): Boolean {
+        return !sequences.isEmpty()
+    }
+
+    override fun initialize(texture: Texture) {
+        // iterate over sequences
+        // iterate over directions
+        val regions = TextureRegion.split(
+                texture,
+                texture.width / sheets.cols,
+                texture.height / sheets.rows).flatten()
+        AnimationSequences.values().forEach { sequence ->
+            sequences[sequence] = EnumMap(Direction::class.java)
+            Direction.values().forEach { dir ->
+                val startIndex = (sequence.ordinal * 4 + dir.ordinal) * sheets.cols
+                val frames = startIndex..(startIndex + sequence.frames - 1)
+                sequences[sequence]!![dir] = createAnimationFromFrames(regions, 0.1f, frames.toList())
+            }
+        }
+    }
+
+    override fun isExpired(): Boolean {
+        return false
+    }
+
+    override fun getKeyFrame(): TextureRegion? {
+        return getCurrentAnimation().getKeyFrame(currentTime)
+    }
 }
 
 class Textured(val texture: Sprites) : Component

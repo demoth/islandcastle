@@ -34,13 +34,19 @@ open class ContactAdapter : ContactListener {
     }
 }
 
-fun createAnimation(spriteSheet: Texture, cols: Int, rows: Int, duration: Float, mode: Animation.PlayMode): Animation<TextureRegion> {
+fun createSimpleAnimation(spriteSheet: Texture, cols: Int, rows: Int, duration: Float, mode: Animation.PlayMode): Animation<TextureRegion> {
     val flameFrames = TextureRegion.split(
             spriteSheet,
             spriteSheet.width / cols,
             spriteSheet.height / rows).flatten()
     val animation = Animation(duration, *flameFrames.toTypedArray())
     animation.playMode = mode
+    return animation
+}
+
+fun createAnimationFromFrames(regions: List<TextureRegion>, duration: Float, frameIndices: List<Int>): Animation<TextureRegion> {
+    val animation = Animation(duration, *frameIndices.map { regions[it] }.toTypedArray())
+    animation.playMode = Animation.PlayMode.LOOP
     return animation
 }
 
