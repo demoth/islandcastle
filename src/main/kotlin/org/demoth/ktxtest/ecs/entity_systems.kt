@@ -22,7 +22,7 @@ import org.demoth.ktxtest.Sounds
 import org.demoth.ktxtest.SpriteSheets
 import org.demoth.ktxtest.Sprites
 import org.demoth.ktxtest.WALK_FORCE
-import java.util.*
+import java.util.Random
 
 val physicMapper = mapperFor<Physical>()
 val playerMapper = mapperFor<Player>()

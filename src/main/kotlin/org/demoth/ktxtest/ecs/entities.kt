@@ -25,7 +25,7 @@ import org.demoth.ktxtest.Sprites
 import org.demoth.ktxtest.TRIGGER
 import org.demoth.ktxtest.debug
 import org.demoth.ktxtest.getCentralPoint
-import java.util.*
+import java.util.Random
 
 class EntityFactory(private val engine: Engine, private val world: World) {
 

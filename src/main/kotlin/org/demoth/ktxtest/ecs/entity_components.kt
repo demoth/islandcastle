@@ -11,9 +11,9 @@ import org.demoth.ktxtest.NO_COLLISION
 import org.demoth.ktxtest.Sounds
 import org.demoth.ktxtest.SpriteSheets
 import org.demoth.ktxtest.Sprites
-import org.demoth.ktxtest.createAnimationFromFrames
-import org.demoth.ktxtest.createSimpleAnimation
-import java.util.*
+import org.demoth.ktxtest.createAnimation
+import java.util.Random
+
 
 /**
  * Marker used by PlayerControlSystem to control player movements
