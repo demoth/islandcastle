@@ -83,7 +83,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
             add(Named("dummy"))
             add(HasHealth(heath))
             add(MonsterWalking())
-            add(Textured(Sprites.SKELETON))
+            add(CharacterAnimation(SpriteSheets.SKELETON))
             add(Physical(
                     body = world.body {
                         userData = this@apply

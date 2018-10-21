@@ -269,11 +269,24 @@ class MonsterWalkSystem : EntitySystem() {
             if (playerEntity != null) {
                 val monsterPhysics = physicMapper[monsterEntity]
                 val playerPhysical = physicMapper[playerEntity]
+                val monsterAnimation = characterAnimationMapper[monsterEntity]
                 val monsterLocation = monsterPhysics.body.position
                 val distanceVector = playerPhysical.body.position.cpy().minus(monsterLocation)
                 if (distanceVector.len() > walk.distance) {
                     val distance = distanceVector.setLength(walk.speed)
                     monsterPhysics.body.applyForceToCenter(distance, true)
+                    if (monsterAnimation != null) {
+                        distance.rotate(45f)
+                        monsterAnimation.currentDirection =
+                                if (distance.x > 0 && distance.y > 0)
+                                    Direction.LEFT
+                                else if (distance.x < 0 && distance.y > 0)
+                                    Direction.DOWN
+                                else if (distance.x < 0 && distance.y < 0)
+                                    Direction.RIGHT
+                                else
+                                    Direction.UP
+                    }
                 }
             }
         }
