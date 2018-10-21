@@ -25,7 +25,7 @@ import org.demoth.ktxtest.Sprites
 import org.demoth.ktxtest.TRIGGER
 import org.demoth.ktxtest.debug
 import org.demoth.ktxtest.getCentralPoint
-import java.util.*
+import java.util.Random
 
 class EntityFactory(private val engine: Engine, private val world: World) {
 
@@ -82,6 +82,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
         engine.entity().apply {
             add(Named("dummy"))
             add(HasHealth(1000))
+            add(MonsterWalking())
             add(Textured(Sprites.SKELETON))
             add(Physical(
                     body = world.body {

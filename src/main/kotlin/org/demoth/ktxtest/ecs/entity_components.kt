@@ -13,7 +13,9 @@ import org.demoth.ktxtest.SpriteSheets
 import org.demoth.ktxtest.Sprites
 import org.demoth.ktxtest.createAnimationFromFrames
 import org.demoth.ktxtest.createSimpleAnimation
-import java.util.*
+import java.util.EnumMap
+import java.util.Random
+
 
 /**
  * Marker used by PlayerControlSystem to control player movements

@@ -22,7 +22,7 @@ import org.demoth.ktxtest.Sounds
 import org.demoth.ktxtest.SpriteSheets
 import org.demoth.ktxtest.Sprites
 import org.demoth.ktxtest.WALK_FORCE
-import java.util.*
+import java.util.Random
 
 val physicMapper = mapperFor<Physical>()
 val playerMapper = mapperFor<Player>()
@@ -221,39 +221,59 @@ class EntitiesCleanupSystem(private val world: World) : EntitySystem() {
     }
 }
 
-class MonsterAiSystem(private val world: World, private val entityFactory: EntityFactory) : EntitySystem() {
+class MonsterFiringSystem(private val entityFactory: EntityFactory) : EntitySystem() {
     override fun update(deltaTime: Float) {
         val playerEntity = engine.getEntitiesFor(allOf(Player::class, Physical::class).get()).firstOrNull()
 
-        engine.getEntitiesFor(monsters).forEach { monsterEntity ->
+        engine.getEntitiesFor(monstersFiring).forEach { monsterEntity ->
             val monster = monsterMapper[monsterEntity]
-            val walk = walkMapper[monsterEntity]
+            val monsterPhysics = physicMapper[monsterEntity]
+            monster.currentTime += deltaTime
+
+            if (monster.currentTime > monster.fireRate) {
+                monster.currentTime = 0f
+                if (playerEntity != null) {
+                    val playerPhysical = physicMapper[playerEntity]
+                    val monsterPosition = monsterPhysics.body.position
+                    val playerPosition = playerPhysical.body.position.cpy()
+                    if (playerPosition.minus(monsterPosition).len() < 10f)
+                        entityFactory.createRotatingFireBall(playerPosition - monsterPosition,
+                                monsterPosition,
+                                monsterEntity)
+                }
+            }
+        }
+    }
+}
+
+class MonsterDeathSystem(private val world: World) : EntitySystem() {
+    override fun update(deltaTime: Float) {
+        engine.getEntitiesFor(monstersMortal).forEach { monsterEntity ->
             val monsterPhysics = physicMapper[monsterEntity]
             val health = healthMapper[monsterEntity]
-            monster.currentTime += deltaTime
-            if (playerEntity != null && walk != null) {
+            if (health.value <= 0) {
+                engine.entity().add(HasSound(Sounds.MONSTER_DIE))
+                engine.removeEntity(monsterEntity)
+                world.destroyBody(monsterPhysics.body)
+            }
+        }
+    }
+}
+
+class MonsterWalkSystem : EntitySystem() {
+    override fun update(deltaTime: Float) {
+        val playerEntity = engine.getEntitiesFor(allOf(Player::class, Physical::class).get()).firstOrNull()
+
+        engine.getEntitiesFor(monstersWalking).forEach { monsterEntity ->
+            val walk = walkMapper[monsterEntity]
+            if (playerEntity != null) {
+                val monsterPhysics = physicMapper[monsterEntity]
                 val playerPhysical = physicMapper[playerEntity]
                 val monsterLocation = monsterPhysics.body.position
                 val distanceVector = playerPhysical.body.position.cpy().minus(monsterLocation)
                 if (distanceVector.len() > walk.distance) {
                     val distance = distanceVector.setLength(walk.speed)
                     monsterPhysics.body.applyForceToCenter(distance, true)
-                }
-            }
-
-            if (health.value < 0) {
-                engine.entity().add(HasSound(Sounds.MONSTER_DIE))
-                engine.removeEntity(monsterEntity)
-                world.destroyBody(monsterPhysics.body)
-            } else if (monster.currentTime > monster.fireRate) {
-                monster.currentTime = 0f
-                if (playerEntity != null) {
-                    val playerPhysical = physicMapper[playerEntity]
-                    val monsterLocation = monsterPhysics.body.position
-                    if (playerPhysical.body.position.cpy().minus(monsterLocation).len() < 10f)
-                        entityFactory.createRotatingFireBall(playerPhysical.body.position.cpy() - monsterLocation,
-                                monsterLocation,
-                                monsterEntity)
                 }
             }
         }
