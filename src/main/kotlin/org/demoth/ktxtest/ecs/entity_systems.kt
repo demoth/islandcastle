@@ -22,6 +22,7 @@ import org.demoth.ktxtest.Sounds
 import org.demoth.ktxtest.SpriteSheets
 import org.demoth.ktxtest.Sprites
 import org.demoth.ktxtest.WALK_FORCE
+import org.demoth.ktxtest.debug
 import java.util.Random
 
 val physicMapper = mapperFor<Physical>()
@@ -236,10 +237,11 @@ class MonsterFiringSystem(private val entityFactory: EntityFactory) : EntitySyst
                     val playerPhysical = physicMapper[playerEntity]
                     val monsterPosition = monsterPhysics.body.position
                     val playerPosition = playerPhysical.body.position.cpy()
-                    if (playerPosition.minus(monsterPosition).len() < 10f)
+                    if (playerPosition.minus(monsterPosition).len() < 10f)   //TODO move constant to monster
                         entityFactory.createRotatingFireBall(playerPosition - monsterPosition,
                                 monsterPosition,
                                 monsterEntity)
+                    debug("spawned fireball to player at (${playerPosition.x}, ${playerPosition.y})")
                 }
             }
         }
