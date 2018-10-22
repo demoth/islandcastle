@@ -42,7 +42,7 @@ val ttlMapper = mapperFor<TTL>()
 /**
  * Moves player in the physical world
  */
-class PlayerControlSystem(private val world: World, private val entityFactory: EntityFactory) : EntitySystem() {
+class PlayerControlSystem(private val entityFactory: EntityFactory) : EntitySystem() {
     /**
      * location relative to player (center)
      */
@@ -52,17 +52,8 @@ class PlayerControlSystem(private val world: World, private val entityFactory: E
         engine.getEntitiesFor(playerEntities).firstOrNull()?.let { playerEntity ->
             // this may be used later to affect how controls are used
             val player = playerMapper[playerEntity]
-            val health = healthMapper[playerEntity]
             val playerPhysics = physicMapper[playerEntity]
             val playerAnimation = characterAnimationMapper[playerEntity]
-
-            if (health.value < 0) {
-                engine.entity().add(HasSound(Sounds.PLAYER_DIE))
-                entityFactory.createFloatingLabel("You have died! Press F5 to restart. Score: ${player.score}", playerPhysics.body.position.cpy(), 10f)
-                engine.removeEntity(playerEntity)
-                world.destroyBody(playerPhysics.body)
-                return
-            }
 
             playerPhysics?.body?.let { body ->
                 if (Gdx.input.isKeyPressed(Input.Keys.W) && body.linearVelocity.y < MAX_SPEED) {
@@ -248,15 +239,22 @@ class MonsterFiringSystem(private val entityFactory: EntityFactory) : EntitySyst
     }
 }
 
-class MonsterDeathSystem(private val world: World) : EntitySystem() {
+class DeathSystem(private val world: World, private val entityFactory: EntityFactory) : EntitySystem() {
     override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(monstersMortal).forEach { monsterEntity ->
-            val monsterPhysics = physicMapper[monsterEntity]
-            val health = healthMapper[monsterEntity]
+        engine.getEntitiesFor(monstersMortal).forEach { e ->
+            val physics = physicMapper[e]
+            val health = healthMapper[e]
+            val player = playerMapper[e]
             if (health.value <= 0) {
-                engine.entity().add(HasSound(Sounds.MONSTER_DIE))
-                engine.removeEntity(monsterEntity)
-                world.destroyBody(monsterPhysics.body)
+                engine.removeEntity(e)
+                world.destroyBody(physics.body)
+                if (player != null) {
+                    engine.entity().add(HasSound(Sounds.PLAYER_DIE))
+                    entityFactory.createFloatingLabel("You have died! Press F5 to restart. Score: ${player.score}", physics.body.position.cpy(), 10f)
+                } else {
+                    // monster
+                    engine.entity().add(HasSound(Sounds.MONSTER_DIE))
+                }
             }
         }
     }

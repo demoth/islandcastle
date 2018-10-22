@@ -6,10 +6,10 @@ import ktx.ashley.allOf
 import ktx.ashley.entity
 import ktx.box2d.body
 import ktx.box2d.createWorld
+import org.demoth.ktxtest.ecs.DeathSystem
 import org.demoth.ktxtest.ecs.EntityFactory
 import org.demoth.ktxtest.ecs.HasDamage
 import org.demoth.ktxtest.ecs.HasHealth
-import org.demoth.ktxtest.ecs.MonsterDeathSystem
 import org.demoth.ktxtest.ecs.MonsterFiring
 import org.demoth.ktxtest.ecs.MonsterFiringSystem
 import org.demoth.ktxtest.ecs.MonsterWalkSystem
@@ -31,7 +31,7 @@ class SystemTest {
     fun `death system removes dead monster`() {
         val engine = PooledEngine()
         val world = createWorld()
-        engine.addSystem(MonsterDeathSystem(world))
+        engine.addSystem(DeathSystem(world, EntityFactory(engine, world)))
 
         engine.entity().apply {
             add(Named("eyelander"))
@@ -54,7 +54,7 @@ class SystemTest {
         val engine = PooledEngine()
         val world = createWorld()
         val entityFactory = EntityFactory(engine, world)
-        engine.addSystem(MonsterDeathSystem(world))
+        engine.addSystem(DeathSystem(world, entityFactory))
 
         entityFactory.createEyeMonster(0f, 0f, -1)
         Assert.assertTrue("Monster is not found in the engine", engine.getEntitiesFor(monstersMortal).size() != 0)

@@ -22,9 +22,9 @@ import ktx.box2d.createWorld
 import ktx.graphics.use
 import org.demoth.ktxtest.ecs.BatchDrawSystem
 import org.demoth.ktxtest.ecs.CameraSystem
+import org.demoth.ktxtest.ecs.DeathSystem
 import org.demoth.ktxtest.ecs.EntitiesCleanupSystem
 import org.demoth.ktxtest.ecs.EntityFactory
-import org.demoth.ktxtest.ecs.MonsterDeathSystem
 import org.demoth.ktxtest.ecs.MonsterFiringSystem
 import org.demoth.ktxtest.ecs.MonsterWalkSystem
 import org.demoth.ktxtest.ecs.PlayerControlSystem
@@ -83,7 +83,7 @@ class Game2dTest(startMap: String?) : KtxApplicationAdapter {
         collisionListener = CollisionProcessor()
         world.setContactListener(collisionListener)
 
-        playerControlSystem = PlayerControlSystem(world, entityFactory)
+        playerControlSystem = PlayerControlSystem(entityFactory)
         batchDrawSystem = BatchDrawSystem(batch, viewport)
         soundSystem = SoundSystem()
 
@@ -93,7 +93,7 @@ class Game2dTest(startMap: String?) : KtxApplicationAdapter {
         engine.addSystem(EntitiesCleanupSystem(world))
         engine.addSystem(MonsterWalkSystem())
         engine.addSystem(MonsterFiringSystem(entityFactory))
-        engine.addSystem(MonsterDeathSystem(world))
+        engine.addSystem(DeathSystem(world, entityFactory))
         engine.addSystem(soundSystem)
 
         entityFactory.loadMap(map, previousMapName) { nextMap ->
