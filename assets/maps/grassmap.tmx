@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="left-up" width="34" height="35" tilewidth="32" tileheight="32" infinite="0" nextobjectid="34">
+<map version="1.2" tiledversion="1.2.0" orientation="orthogonal" renderorder="left-up" width="34" height="35" tilewidth="32" tileheight="32" infinite="0" nextlayerid="7" nextobjectid="34">
  <tileset firstgid="1" source="../tilesets/dusk/dusk_castle.tsx"/>
  <tileset firstgid="257" source="../tilesets/dusk/dusk2.tsx"/>
- <layer name="water" width="34" height="35" locked="1" offsetx="35" offsety="110.5">
+ <layer id="1" name="water" width="34" height="35" locked="1" offsetx="35" offsety="110.5">
   <data encoding="csv">
 193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,
 193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,
@@ -41,7 +41,7 @@
 193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193,193
 </data>
  </layer>
- <layer name="floor" width="34" height="35" locked="1">
+ <layer id="2" name="floor" width="34" height="35" locked="1">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -80,7 +80,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <layer name="entries" width="34" height="35">
+ <layer id="3" name="entries" width="34" height="35">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -119,7 +119,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <layer name="walls" width="34" height="35">
+ <layer id="4" name="walls" width="34" height="35">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -158,7 +158,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup name="solid_obstacles" locked="1">
+ <objectgroup id="5" name="solid_obstacles" locked="1">
   <object id="1" name="tower" x="655.5" y="774" width="133.5" height="58.5"/>
   <object id="2" name="lamp2" x="614" y="817.5" width="23.5" height="20.5"/>
   <object id="3" name="lamp1" x="805" y="812" width="27" height="24.5"/>
@@ -172,13 +172,16 @@
   <object id="18" x="970.5" y="257.5" width="56" height="102"/>
   <object id="19" x="904.5" y="260.5" width="63" height="37"/>
  </objectgroup>
- <objectgroup name="entities" locked="1">
+ <objectgroup id="6" name="entities" locked="1">
   <object id="8" name="exit_to" x="678.542" y="833.792" width="88.5" height="23.5">
    <properties>
     <property name="to" value="castle1.tmx"/>
    </properties>
   </object>
   <object id="25" name="spawn_eyelander" x="389.925" y="299.606">
+   <properties>
+    <property name="health" type="int" value="2345"/>
+   </properties>
    <point/>
   </object>
   <object id="27" name="start" x="936" y="334">

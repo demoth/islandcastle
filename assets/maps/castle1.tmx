@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" tiledversion="1.1.6" orientation="orthogonal" renderorder="left-up" width="16" height="16" tilewidth="32" tileheight="32" infinite="0" nextobjectid="31">
+<map version="1.2" tiledversion="1.2.0" orientation="orthogonal" renderorder="left-up" width="16" height="16" tilewidth="32" tileheight="32" infinite="0" nextlayerid="8" nextobjectid="31">
  <tileset firstgid="1" source="../tilesets/dusk/dusk_castle.tsx"/>
  <tileset firstgid="257" source="../tilesets/dusk/dusk2.tsx"/>
- <layer name="floor" width="16" height="16" locked="1">
+ <layer id="1" name="floor" width="16" height="16" locked="1">
   <data encoding="csv">
 184,184,184,184,184,184,184,184,184,184,184,184,184,184,184,184,
 184,184,184,184,184,184,184,184,184,184,184,184,184,184,184,184,
@@ -22,7 +22,7 @@
 184,184,184,184,184,184,184,184,184,184,184,184,184,184,184,184
 </data>
  </layer>
- <layer name="shadows" width="16" height="16" locked="1">
+ <layer id="2" name="shadows" width="16" height="16" locked="1">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -42,7 +42,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <layer name="walls" width="16" height="16" locked="1">
+ <layer id="3" name="walls" width="16" height="16" locked="1">
   <data encoding="csv">
 40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,40,
 56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,56,
@@ -62,7 +62,7 @@
 8,8,9,8,8,8,8,8,8,8,8,8,8,8,8,9
 </data>
  </layer>
- <layer name="towers" width="16" height="16" locked="1">
+ <layer id="4" name="towers" width="16" height="16" locked="1">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 7,9,10,0,0,0,0,0,0,0,0,0,0,7,9,10,
@@ -82,7 +82,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <layer name="banners" width="16" height="16" locked="1">
+ <layer id="5" name="banners" width="16" height="16" locked="1">
   <data encoding="csv">
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 0,0,0,0,0,0,99,0,0,0,121,0,0,0,0,0,
@@ -102,7 +102,7 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
- <objectgroup name="solid_obstacles">
+ <objectgroup id="6" name="solid_obstacles">
   <object id="1" name="wall" x="-5.33333" y="31.3333" width="515.667" height="128"/>
   <object id="2" x="8.54167" y="160.167" width="76.3333" height="62.6667"/>
   <object id="3" x="419.333" y="161.333" width="85.3333" height="61.6667"/>
@@ -121,8 +121,10 @@
   <object id="20" x="31" y="360.667" width="63.6667" height="21.3333"/>
   <object id="21" x="1.33333" y="288" width="26.6667" height="190"/>
   <object id="22" x="32.6667" y="451.667" width="29.3333" height="24.3333"/>
+  <object id="29" x="-30.3333" y="155.333" width="35" height="352.333"/>
+  <object id="30" x="510.333" y="153.333" width="23.3333" height="294.333"/>
  </objectgroup>
- <objectgroup name="entities">
+ <objectgroup id="7" name="entities">
   <object id="23" name="exit_to" x="238.424" y="164.97" width="66.6667" height="23.6667">
    <properties>
     <property name="to" value="grassmap.tmx"/>
@@ -137,7 +139,5 @@
   <object id="28" name="start" x="252.667" y="311">
    <point/>
   </object>
-  <object id="29" x="-30.3333" y="155.333" width="35" height="352.333"/>
-  <object id="30" x="510.333" y="153.333" width="23.3333" height="294.333"/>
  </objectgroup>
 </map>

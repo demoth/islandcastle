@@ -119,7 +119,8 @@ class EntityFactory(private val engine: Engine, private val world: World) {
         map.layers.forEach { layer ->
             layer.objects.getByType<RectangleMapObject>(RectangleMapObject::class.java).forEach { obj ->
                 if (obj.name == "spawn_eyelander") {
-                    createEyeMonster(obj.rectangle.x / PPM, obj.rectangle.y / PPM)
+                    val health = obj.properties["health"] as Int? ?: 1000
+                    createEyeMonster(obj.rectangle.x / PPM, obj.rectangle.y / PPM, health)
                 } else if (obj.name == "dummy") {
                     createDummyMonster(obj.rectangle.x / PPM, obj.rectangle.y / PPM)
                 } else if (obj.name == "exit_to") {
