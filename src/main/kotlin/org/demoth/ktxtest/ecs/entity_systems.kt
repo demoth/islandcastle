@@ -144,6 +144,8 @@ class BatchDrawSystem(
         }
 
         // todo: split into named, ttl and has speed
+        // todo: moving should be done separately
+        // todo: removing should be done separately
         engine.getEntitiesFor(floatingLabels).forEach {
             val floating = floatingUpLabelMapper[it]
             val positioned = positionMapper[it]
@@ -169,7 +171,7 @@ class BatchDrawSystem(
 
             font.draw(batch, g, viewport.camera.position.x - g.width / 2, viewport.camera.position.y - viewport.screenHeight * 0.2f)
             font.draw(batch, h, viewport.camera.position.x - h.width / 2, viewport.camera.position.y - viewport.screenHeight * 0.23f)
-            player.score--
+            player.score-- // TODO: stats change should be done separately!!!
         }
     }
 
@@ -192,6 +194,9 @@ class CameraSystem(private val camera: Camera) : EntitySystem() {
     }
 }
 
+/**
+ * Cleans up entities marked as to be removed or temporary entites
+ */
 class EntitiesCleanupSystem(private val world: World) : EntitySystem() {
     override fun update(deltaTime: Float) {
         engine.getEntitiesFor(entityCleanup).forEach { e ->
@@ -213,6 +218,9 @@ class EntitiesCleanupSystem(private val world: World) : EntitySystem() {
     }
 }
 
+/**
+ * If not in a cooldown, find a player and shoot towards player's position
+ */
 class MonsterFiringSystem(private val entityFactory: EntityFactory) : EntitySystem() {
     override fun update(deltaTime: Float) {
         val playerEntity = engine.getEntitiesFor(allOf(Player::class, Physical::class).get()).firstOrNull()
@@ -239,6 +247,9 @@ class MonsterFiringSystem(private val entityFactory: EntityFactory) : EntitySyst
     }
 }
 
+/**
+ * Checks health and if < 0 - kill
+ */
 class DeathSystem(private val world: World, private val entityFactory: EntityFactory) : EntitySystem() {
     override fun update(deltaTime: Float) {
         engine.getEntitiesFor(monstersMortal).forEach { e ->
@@ -260,6 +271,9 @@ class DeathSystem(private val world: World, private val entityFactory: EntityFac
     }
 }
 
+/**
+ * Pushes monster towards player's position. Updates animation
+ */
 class MonsterWalkSystem : EntitySystem() {
     override fun update(deltaTime: Float) {
         val playerEntity = engine.getEntitiesFor(allOf(Player::class, Physical::class).get()).firstOrNull()
@@ -293,6 +307,9 @@ class MonsterWalkSystem : EntitySystem() {
     }
 }
 
+/**
+ * Plays sounds and removes them
+ */
 class SoundSystem : EntitySystem(), Disposable {
     override fun dispose() {
         soundMap.values.forEach { it.dispose() }
