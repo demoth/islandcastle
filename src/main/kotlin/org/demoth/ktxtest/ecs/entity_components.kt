@@ -18,7 +18,7 @@ import java.util.Random
 
 
 /**
- * Marker used by PlayerControlSystem to control player movements
+ * Marker used by PlayerControlSystem to control player movements, by MonsterSystems to find player's position
  */
 class Player(var score: Int = 666 * 30) : Component
 
@@ -49,7 +49,7 @@ interface Animated : Component {
 }
 
 /**
- * Animations that have no state
+ * Animations that have no state, like explosions
  */
 class SimpleAnimation(
         override val sheets: SpriteSheets,
@@ -101,6 +101,9 @@ class CharacterAnimation(
 
     var currentDirection = Direction.DOWN
 
+    /**
+     * when we change animation we reset current playtime
+     */
     var currentSequence: AnimationSequences = AnimationSequences.WALK
         set(value) {
             field = value
@@ -160,10 +163,16 @@ class MonsterWalking(var speed: Float = 3f, var distance: Float = 2f) : Componen
  */
 class FloatingUpLabel(val speed: Vector2) : Component
 
+/**
+ * Projectiles have damage
+ */
 class HasDamage(val value: Int, val owner: Entity) : Component
 
 class HasHealth(var value: Int) : Component
 
 class HasSound(val name: Sounds, var id: Long = 0) : Component
 
+/**
+ * Time To Live - temporary entities (like floating labels)
+ */
 class TTL(var ttl: Float) : Component
