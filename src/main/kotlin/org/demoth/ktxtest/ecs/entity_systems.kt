@@ -248,7 +248,7 @@ class MonsterFiringSystem(private val entityFactory: EntityFactory) : EntitySyst
 }
 
 /**
- * Checks health and if < 0 - kill
+ * Checks health and if <= 0 - kill
  */
 class DeathSystem(private val world: World, private val entityFactory: EntityFactory) : EntitySystem() {
     override fun update(deltaTime: Float) {
