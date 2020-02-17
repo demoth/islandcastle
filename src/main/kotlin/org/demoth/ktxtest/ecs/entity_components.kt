@@ -49,7 +49,7 @@ interface Animated : Component {
 }
 
 /**
- * Animations that have no state, like explotions
+ * Animations that have no state, like explosions
  */
 class SimpleAnimation(
         override val sheets: SpriteSheets,
