@@ -9,9 +9,9 @@ apply plugin: 'application'
 mainClassName = "org.demoth.ktxtest.HedronMainKt"
 
 ext  {
-    kotlinVersion = '1.3.61'
-    libgdxVersion = '1.9.10'
-    libktxVersion = "$libgdxVersion-b4"
+    kotlinVersion = '1.3.71'
+    libgdxVersion = '1.9.8'
+    libktxVersion = "$libgdxVersion-b5"
     ashleyVersion = '1.7.3'
     kotlinJvmVersion = '1.8'
 }
