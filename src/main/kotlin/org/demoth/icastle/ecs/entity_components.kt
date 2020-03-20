@@ -1,4 +1,4 @@
-package org.demoth.ktxtest.ecs
+package org.demoth.icastle.ecs
 
 import com.badlogic.ashley.core.Component
 import com.badlogic.ashley.core.Entity
@@ -7,12 +7,12 @@ import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
-import org.demoth.ktxtest.NO_COLLISION
-import org.demoth.ktxtest.Sounds
-import org.demoth.ktxtest.SpriteSheets
-import org.demoth.ktxtest.Sprites
-import org.demoth.ktxtest.createAnimationFromFrames
-import org.demoth.ktxtest.createSimpleAnimation
+import org.demoth.icastle.NO_COLLISION
+import org.demoth.icastle.Sounds
+import org.demoth.icastle.SpriteSheets
+import org.demoth.icastle.Sprites
+import org.demoth.icastle.createAnimationFromFrames
+import org.demoth.icastle.createSimpleAnimation
 import java.util.EnumMap
 import java.util.Random
 

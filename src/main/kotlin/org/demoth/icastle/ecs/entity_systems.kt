@@ -1,4 +1,4 @@
-package org.demoth.ktxtest.ecs
+package org.demoth.icastle.ecs
 
 import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.gdx.Gdx
@@ -16,13 +16,13 @@ import ktx.ashley.allOf
 import ktx.ashley.entity
 import ktx.ashley.mapperFor
 import ktx.math.minus
-import org.demoth.ktxtest.MAX_SPEED
-import org.demoth.ktxtest.PPM
-import org.demoth.ktxtest.Sounds
-import org.demoth.ktxtest.SpriteSheets
-import org.demoth.ktxtest.Sprites
-import org.demoth.ktxtest.WALK_FORCE
-import org.demoth.ktxtest.debug
+import org.demoth.icastle.MAX_SPEED
+import org.demoth.icastle.PPM
+import org.demoth.icastle.Sounds
+import org.demoth.icastle.SpriteSheets
+import org.demoth.icastle.Sprites
+import org.demoth.icastle.WALK_FORCE
+import org.demoth.icastle.debug
 import java.util.Random
 
 val physicMapper = mapperFor<Physical>()

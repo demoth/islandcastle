@@ -1,4 +1,4 @@
-package org.demoth.ktxtest
+package org.demoth.icastle
 
 const val NO_COLLISION = 0L
 const val DEAL_DAMAGE = 1L

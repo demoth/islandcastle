@@ -1,4 +1,4 @@
-package org.demoth.ktxtest.ecs
+package org.demoth.icastle.ecs
 
 import com.badlogic.ashley.core.Engine
 import com.badlogic.ashley.core.Entity
@@ -12,19 +12,19 @@ import com.badlogic.gdx.physics.box2d.World
 import ktx.ashley.entity
 import ktx.ashley.get
 import ktx.box2d.body
-import org.demoth.ktxtest.DEAL_DAMAGE
-import org.demoth.ktxtest.HURT
-import org.demoth.ktxtest.PPM
-import org.demoth.ktxtest.RECEIVE_DAMAGE
-import org.demoth.ktxtest.SOLID
-import org.demoth.ktxtest.SOLID_INVISIBLE
-import org.demoth.ktxtest.SPEED_DECEL
-import org.demoth.ktxtest.Sounds
-import org.demoth.ktxtest.SpriteSheets
-import org.demoth.ktxtest.Sprites
-import org.demoth.ktxtest.TRIGGER
-import org.demoth.ktxtest.debug
-import org.demoth.ktxtest.getCentralPoint
+import org.demoth.icastle.DEAL_DAMAGE
+import org.demoth.icastle.HURT
+import org.demoth.icastle.PPM
+import org.demoth.icastle.RECEIVE_DAMAGE
+import org.demoth.icastle.SOLID
+import org.demoth.icastle.SOLID_INVISIBLE
+import org.demoth.icastle.SPEED_DECEL
+import org.demoth.icastle.Sounds
+import org.demoth.icastle.SpriteSheets
+import org.demoth.icastle.Sprites
+import org.demoth.icastle.TRIGGER
+import org.demoth.icastle.debug
+import org.demoth.icastle.getCentralPoint
 import java.util.Random
 
 class EntityFactory(private val engine: Engine, private val world: World) {

@@ -1,4 +1,4 @@
-package org.demoth.ktxtest.ecs
+package org.demoth.icastle.ecs
 
 import ktx.ashley.allOf
 import ktx.ashley.oneOf

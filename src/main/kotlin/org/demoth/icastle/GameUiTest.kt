@@ -1,4 +1,4 @@
-package org.demoth.ktxtest
+package org.demoth.icastle
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20

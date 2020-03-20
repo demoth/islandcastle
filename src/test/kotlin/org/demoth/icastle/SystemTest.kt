@@ -1,4 +1,4 @@
-package org.demoth.ktxtest
+package org.demoth.icastle
 
 import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.math.Vector2
@@ -6,20 +6,20 @@ import ktx.ashley.allOf
 import ktx.ashley.entity
 import ktx.box2d.body
 import ktx.box2d.createWorld
-import org.demoth.ktxtest.ecs.DeathSystem
-import org.demoth.ktxtest.ecs.EntityFactory
-import org.demoth.ktxtest.ecs.HasDamage
-import org.demoth.ktxtest.ecs.HasHealth
-import org.demoth.ktxtest.ecs.MonsterFiring
-import org.demoth.ktxtest.ecs.MonsterFiringSystem
-import org.demoth.ktxtest.ecs.MonsterWalkSystem
-import org.demoth.ktxtest.ecs.MonsterWalking
-import org.demoth.ktxtest.ecs.Named
-import org.demoth.ktxtest.ecs.Physical
-import org.demoth.ktxtest.ecs.TTL
-import org.demoth.ktxtest.ecs.monstersMortal
-import org.demoth.ktxtest.ecs.monstersWalking
-import org.demoth.ktxtest.ecs.physicMapper
+import org.demoth.icastle.ecs.DeathSystem
+import org.demoth.icastle.ecs.EntityFactory
+import org.demoth.icastle.ecs.HasDamage
+import org.demoth.icastle.ecs.HasHealth
+import org.demoth.icastle.ecs.MonsterFiring
+import org.demoth.icastle.ecs.MonsterFiringSystem
+import org.demoth.icastle.ecs.MonsterWalkSystem
+import org.demoth.icastle.ecs.MonsterWalking
+import org.demoth.icastle.ecs.Named
+import org.demoth.icastle.ecs.Physical
+import org.demoth.icastle.ecs.TTL
+import org.demoth.icastle.ecs.monstersMortal
+import org.demoth.icastle.ecs.monstersWalking
+import org.demoth.icastle.ecs.physicMapper
 import org.junit.Assert
 import org.junit.Test
 

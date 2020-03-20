@@ -1,4 +1,4 @@
-package org.demoth.ktxtest
+package org.demoth.icastle
 
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Animation

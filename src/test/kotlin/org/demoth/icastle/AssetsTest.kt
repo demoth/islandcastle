@@ -1,4 +1,4 @@
-package org.demoth.ktxtest
+package org.demoth.icastle
 
 import org.junit.Assert.assertTrue
 import org.junit.Test

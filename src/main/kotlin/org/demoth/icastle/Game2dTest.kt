@@ -1,4 +1,4 @@
-package org.demoth.ktxtest
+package org.demoth.icastle
 
 import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.Gdx
@@ -20,15 +20,15 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.app.KtxApplicationAdapter
 import ktx.box2d.createWorld
 import ktx.graphics.use
-import org.demoth.ktxtest.ecs.BatchDrawSystem
-import org.demoth.ktxtest.ecs.CameraSystem
-import org.demoth.ktxtest.ecs.DeathSystem
-import org.demoth.ktxtest.ecs.EntitiesCleanupSystem
-import org.demoth.ktxtest.ecs.EntityFactory
-import org.demoth.ktxtest.ecs.MonsterFiringSystem
-import org.demoth.ktxtest.ecs.MonsterWalkSystem
-import org.demoth.ktxtest.ecs.PlayerControlSystem
-import org.demoth.ktxtest.ecs.SoundSystem
+import org.demoth.icastle.ecs.BatchDrawSystem
+import org.demoth.icastle.ecs.CameraSystem
+import org.demoth.icastle.ecs.DeathSystem
+import org.demoth.icastle.ecs.EntitiesCleanupSystem
+import org.demoth.icastle.ecs.EntityFactory
+import org.demoth.icastle.ecs.MonsterFiringSystem
+import org.demoth.icastle.ecs.MonsterWalkSystem
+import org.demoth.icastle.ecs.PlayerControlSystem
+import org.demoth.icastle.ecs.SoundSystem
 
 
 const val MAX_SPEED = 10f
