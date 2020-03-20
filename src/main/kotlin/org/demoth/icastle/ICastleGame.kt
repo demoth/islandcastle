@@ -4,6 +4,8 @@ import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputAdapter
+import com.badlogic.gdx.backends.lwjgl.LwjglApplication
+import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
@@ -40,7 +42,7 @@ const val TILE_SIZE = 32f
 const val WALK_FORCE = 20f
 const val PPM = 32f // 1 meter - 32 pixels
 
-class Game2dTest(startMap: String?) : KtxApplicationAdapter {
+class ICastleGame(startMap: String?) : KtxApplicationAdapter {
     private val startMapName = startMap ?: "grassmap.tmx"
     private lateinit var world: World
     private lateinit var batch: SpriteBatch
@@ -197,4 +199,15 @@ class Game2dTest(startMap: String?) : KtxApplicationAdapter {
     override fun resize(width: Int, height: Int) {
         viewport.update(width, height)
     }
+
+}
+
+fun main(args: Array<String>) {
+    val config = LwjglApplicationConfiguration()
+    config.title = "IslandCastle 0.1.2"
+    config.width = 1000
+    config.height = 1000
+    config.forceExit = false
+    config.resizable = false
+    LwjglApplication(ICastleGame(args.getOrNull(0)), config)
 }
