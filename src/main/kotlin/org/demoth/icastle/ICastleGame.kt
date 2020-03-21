@@ -5,7 +5,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication
-import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
@@ -22,15 +21,7 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.app.KtxApplicationAdapter
 import ktx.box2d.createWorld
 import ktx.graphics.use
-import org.demoth.icastle.ecs.BatchDrawSystem
-import org.demoth.icastle.ecs.CameraSystem
-import org.demoth.icastle.ecs.DeathSystem
-import org.demoth.icastle.ecs.EntitiesCleanupSystem
-import org.demoth.icastle.ecs.EntityFactory
-import org.demoth.icastle.ecs.MonsterFiringSystem
-import org.demoth.icastle.ecs.MonsterWalkSystem
-import org.demoth.icastle.ecs.PlayerControlSystem
-import org.demoth.icastle.ecs.SoundSystem
+import org.demoth.icastle.ecs.*
 
 
 const val MAX_SPEED = 10f
@@ -203,11 +194,5 @@ class ICastleGame(startMap: String?) : KtxApplicationAdapter {
 }
 
 fun main(args: Array<String>) {
-    val config = LwjglApplicationConfiguration()
-    config.title = "IslandCastle 0.1.2"
-    config.width = 1000
-    config.height = 1000
-    config.forceExit = false
-    config.resizable = false
-    LwjglApplication(ICastleGame(args.getOrNull(0)), config)
+    LwjglApplication(ICastleGame(args.getOrNull(0)), createConfiguration())
 }

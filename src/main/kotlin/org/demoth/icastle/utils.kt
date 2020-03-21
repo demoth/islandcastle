@@ -1,5 +1,6 @@
 package org.demoth.icastle
 
+import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.TextureRegion
@@ -53,4 +54,12 @@ fun createAnimationFromFrames(regions: List<TextureRegion>, duration: Float, fra
 
 fun debug(message: String) {
     println(message)
+}
+
+fun createConfiguration(): LwjglApplicationConfiguration = LwjglApplicationConfiguration().apply {
+    title = "IslandCastle 0.1.2"
+    width = 1000
+    height = 1000
+    forceExit = false
+    resizable = false
 }
