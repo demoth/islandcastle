@@ -11,19 +11,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.Disposable
-import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.ashley.allOf
 import ktx.ashley.entity
 import ktx.ashley.mapperFor
 import ktx.math.minus
-import org.demoth.icastle.MAX_SPEED
-import org.demoth.icastle.PPM
-import org.demoth.icastle.Sounds
-import org.demoth.icastle.SpriteSheets
-import org.demoth.icastle.Sprites
-import org.demoth.icastle.WALK_FORCE
-import org.demoth.icastle.debug
-import java.util.Random
+import org.demoth.icastle.*
+import java.util.*
 
 val physicMapper = mapperFor<Physical>()
 val playerMapper = mapperFor<Player>()
@@ -85,12 +78,24 @@ class PlayerControlSystem(private val entityFactory: EntityFactory) : EntitySyst
 
 }
 
+class PlayerHudUpdateSystem(private val hud: IngameHud) : EntitySystem() {
+    override fun update(deltaTime: Float) {
+        engine.getEntitiesFor(playerHealthAndScore).firstOrNull()?.let {
+            val player = playerMapper[it]
+            val health = healthMapper[it]
+
+            hud.setValues(health.value, player.score)
+
+            player.score-- // TODO: stats change should be done separately!!!
+        }
+    }
+}
+
 /**
  * Draw everything that has a position, and texture or name
  */
 class BatchDrawSystem(
         private val batch: SpriteBatch,
-        private val viewport: Viewport,
         var drawSprites: Boolean = true,
         var drawNames: Boolean = false
 ) : EntitySystem(), Disposable {
@@ -163,16 +168,6 @@ class BatchDrawSystem(
             }
         }
 
-        engine.getEntitiesFor(playerHealthAndScore).firstOrNull()?.let {
-            val player = playerMapper[it]
-            val health = healthMapper[it]
-            val g = GlyphLayout(font, "Score: ${player.score}")
-            val h = GlyphLayout(font, "HasHealth: ${health.value}")
-
-            font.draw(batch, g, viewport.camera.position.x - g.width / 2, viewport.camera.position.y - viewport.screenHeight * 0.2f)
-            font.draw(batch, h, viewport.camera.position.x - h.width / 2, viewport.camera.position.y - viewport.screenHeight * 0.23f)
-            player.score-- // TODO: stats change should be done separately!!!
-        }
     }
 
     override fun dispose() {

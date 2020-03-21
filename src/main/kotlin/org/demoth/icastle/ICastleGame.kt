@@ -4,6 +4,7 @@ import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputAdapter
+import com.badlogic.gdx.Screen
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -18,7 +19,7 @@ import com.badlogic.gdx.physics.box2d.ContactListener
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import ktx.app.KtxApplicationAdapter
+import ktx.app.KtxGame
 import ktx.box2d.createWorld
 import ktx.graphics.use
 import org.demoth.icastle.ecs.*
@@ -33,7 +34,7 @@ const val TILE_SIZE = 32f
 const val WALK_FORCE = 20f
 const val PPM = 32f // 1 meter - 32 pixels
 
-class ICastleGame(startMap: String?) : KtxApplicationAdapter {
+class ICastleGame(startMap: String?) : KtxGame<Screen>() {
     private val startMapName = startMap ?: "grassmap.tmx"
     private lateinit var world: World
     private lateinit var batch: SpriteBatch
@@ -48,6 +49,8 @@ class ICastleGame(startMap: String?) : KtxApplicationAdapter {
     private lateinit var collisionListener: ContactListener
     private lateinit var soundSystem: SoundSystem
     private lateinit var entityFactory: EntityFactory
+
+    private lateinit var ingameHud: IngameHud
 
     var drawDebug = false
     var drawTiles = true
@@ -77,7 +80,7 @@ class ICastleGame(startMap: String?) : KtxApplicationAdapter {
         world.setContactListener(collisionListener)
 
         playerControlSystem = PlayerControlSystem(entityFactory)
-        batchDrawSystem = BatchDrawSystem(batch, viewport)
+        batchDrawSystem = BatchDrawSystem(batch)
         soundSystem = SoundSystem()
 
         engine.addSystem(playerControlSystem)
@@ -88,6 +91,10 @@ class ICastleGame(startMap: String?) : KtxApplicationAdapter {
         engine.addSystem(MonsterFiringSystem(entityFactory))
         engine.addSystem(DeathSystem(world, entityFactory))
         engine.addSystem(soundSystem)
+
+        ingameHud = IngameHud()
+
+        engine.addSystem(PlayerHudUpdateSystem(ingameHud))
 
         entityFactory.loadMap(map, previousMapName) { nextMap ->
             previousLevel = currentMap
@@ -159,6 +166,7 @@ class ICastleGame(startMap: String?) : KtxApplicationAdapter {
             // scale with PPM
             box2dRenderer.render(world, camera.combined.scl(PPM))
         }
+        ingameHud.render()
 
     }
 
