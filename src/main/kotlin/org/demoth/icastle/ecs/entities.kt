@@ -48,6 +48,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
             add(Named("eyelander"))
             add(MonsterFiring())
             add(MonsterWalking())
+            add(Movement(Vector2.Zero, MovementType.FORCE))
             add(HasHealth(health))
             add(Textured(Sprites.EYE_BOT))
             add(Physical(
@@ -72,6 +73,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
             add(Named("dummy"))
             add(HasHealth(heath))
             add(MonsterWalking())
+            add(Movement(Vector2.Zero, MovementType.FORCE))
             add(CharacterAnimation(SpriteSheets.SKELETON))
             add(Physical(
                     body = world.body {
