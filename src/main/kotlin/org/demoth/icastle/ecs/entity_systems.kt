@@ -3,7 +3,6 @@ package org.demoth.icastle.ecs
 import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
-import com.badlogic.gdx.graphics.Camera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
@@ -31,6 +30,7 @@ val floatingUpLabelMapper = mapperFor<FloatingUpLabel>()
 val healthMapper = mapperFor<HasHealth>()
 val soundMapper = mapperFor<HasSound>()
 val ttlMapper = mapperFor<TTL>()
+val movementMapper = mapperFor<Movement>()
 
 /**
  * Moves player in the physical world
@@ -47,25 +47,29 @@ class PlayerControlSystem(private val entityFactory: EntityFactory) : EntitySyst
             val player = playerMapper[playerEntity]
             val playerPhysics = physicMapper[playerEntity]
             val playerAnimation = characterAnimationMapper[playerEntity]
+            val movement = movementMapper[playerEntity]
 
             playerPhysics?.body?.let { body ->
+                var movementX = 0f
+                var movementY = 0f
+
                 if (Gdx.input.isKeyPressed(Input.Keys.W) && body.linearVelocity.y < MAX_SPEED) {
-                    body.applyForceToCenter(0f, WALK_FORCE, true)
+                    movementY = WALK_FORCE
                     playerAnimation.currentDirection = Direction.UP
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.A) && body.linearVelocity.x > -MAX_SPEED) {
-                    body.applyForceToCenter(-WALK_FORCE, 0f, true)
+                    movementX = -WALK_FORCE
                     playerAnimation.currentDirection = Direction.LEFT
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.S) && body.linearVelocity.y > -MAX_SPEED) {
-                    body.applyForceToCenter(0f, -WALK_FORCE, true)
+                    movementY = -WALK_FORCE
                     playerAnimation.currentDirection = Direction.DOWN
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.D) && body.linearVelocity.x < MAX_SPEED) {
-                    body.applyForceToCenter(WALK_FORCE, 0f, true)
+                    movementX = WALK_FORCE
                     playerAnimation.currentDirection = Direction.RIGHT
                 }
-
+                movement.value = Vector2(movementX, movementY)
                 if (actionLocation != null) {
                     player.score -= 3070
                     entityFactory.createFireBall(actionLocation!!, body.position, playerEntity)
@@ -75,7 +79,21 @@ class PlayerControlSystem(private val entityFactory: EntityFactory) : EntitySyst
             }
         }
     }
+}
 
+class MovementSystem : EntitySystem() {
+    override fun update(deltaTime: Float) {
+        engine.getEntitiesFor(movables).forEach {
+            val movement = movementMapper[it]
+            val physical = physicMapper[it]
+            when (movement.type) {
+                MovementType.LINEAR_VELOCITY -> TODO()
+                MovementType.FORCE -> {
+                    physical.body.applyForceToCenter(movement.value, true)
+                }
+            }
+        }
+    }
 }
 
 class PlayerHudUpdateSystem(private val hud: IngameHud) : EntitySystem() {
@@ -173,19 +191,6 @@ class BatchDrawSystem(
     override fun dispose() {
         spriteMap.values.forEach { it.dispose() }
         spriteSheetMap.values.forEach { it.dispose() }
-    }
-}
-
-/**
- * Moves camera view to center on player
- */
-class CameraSystem(private val camera: Camera) : EntitySystem() {
-    override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(playerPosition).forEach { e ->
-            physicMapper[e]?.body?.let { body ->
-                camera.position.set(body.position.x * PPM, body.position.y * PPM, 0f)
-            }
-        }
     }
 }
 

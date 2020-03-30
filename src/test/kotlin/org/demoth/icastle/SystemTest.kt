@@ -6,20 +6,7 @@ import ktx.ashley.allOf
 import ktx.ashley.entity
 import ktx.box2d.body
 import ktx.box2d.createWorld
-import org.demoth.icastle.ecs.DeathSystem
-import org.demoth.icastle.ecs.EntityFactory
-import org.demoth.icastle.ecs.HasDamage
-import org.demoth.icastle.ecs.HasHealth
-import org.demoth.icastle.ecs.MonsterFiring
-import org.demoth.icastle.ecs.MonsterFiringSystem
-import org.demoth.icastle.ecs.MonsterWalkSystem
-import org.demoth.icastle.ecs.MonsterWalking
-import org.demoth.icastle.ecs.Named
-import org.demoth.icastle.ecs.Physical
-import org.demoth.icastle.ecs.TTL
-import org.demoth.icastle.ecs.monstersMortal
-import org.demoth.icastle.ecs.monstersWalking
-import org.demoth.icastle.ecs.physicMapper
+import org.demoth.icastle.ecs.*
 import org.junit.Assert
 import org.junit.Test
 
@@ -40,7 +27,7 @@ class SystemTest {
             add(HasHealth(-1))
             add(Physical(
                     body = world.body { },
-                    collide = { _, _ -> {} },
+                    collide = { _, _ -> run {} },
                     collisionClass = RECEIVE_DAMAGE,
                     collidesWith = DEAL_DAMAGE or TRIGGER))
         }

@@ -7,14 +7,8 @@ import com.badlogic.gdx.graphics.g2d.Animation
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
-import org.demoth.icastle.NO_COLLISION
-import org.demoth.icastle.Sounds
-import org.demoth.icastle.SpriteSheets
-import org.demoth.icastle.Sprites
-import org.demoth.icastle.createAnimationFromFrames
-import org.demoth.icastle.createSimpleAnimation
-import java.util.EnumMap
-import java.util.Random
+import org.demoth.icastle.*
+import java.util.*
 
 
 /**
@@ -26,6 +20,13 @@ class Player(var score: Int = 666 * 30) : Component
  * Position in physical space units
  */
 class Positioned(val position: Vector2) : Component
+
+class Movement(var value: Vector2, val type: MovementType) : Component
+
+enum class MovementType {
+    LINEAR_VELOCITY,
+    FORCE,
+}
 
 class Physical(
         val body: Body,
@@ -156,7 +157,7 @@ class MonsterFiring(var fireRate: Float = 1f, var currentTime: Float = Random().
 /**
  * will magnetize monster towards player
  */
-class MonsterWalking(var speed: Float = 3f, var distance: Float = 2f) : Component
+class MonsterWalking(var speed: Float = 15f, var distance: Float = 2f) : Component
 
 /**
  * Used for damage labels - they float up a bit then disappear

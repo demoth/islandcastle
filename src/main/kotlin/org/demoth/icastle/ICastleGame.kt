@@ -23,15 +23,16 @@ import ktx.app.KtxGame
 import ktx.box2d.createWorld
 import ktx.graphics.use
 import org.demoth.icastle.ecs.*
+import org.demoth.icastle.ecs.systems.CameraSystem
 
 
 const val MAX_SPEED = 10f
-const val SPEED_DECEL = 5f
+const val SPEED_DECEL = 25f
 // how many tiles we see around
 const val SIGHT_RADIUS = 16
 // size of tiles in pixels
 const val TILE_SIZE = 32f
-const val WALK_FORCE = 20f
+const val WALK_FORCE = 100f
 const val PPM = 32f // 1 meter - 32 pixels
 
 class ICastleGame(startMap: String?) : KtxGame<Screen>() {
@@ -91,6 +92,7 @@ class ICastleGame(startMap: String?) : KtxGame<Screen>() {
         engine.addSystem(MonsterFiringSystem(entityFactory))
         engine.addSystem(DeathSystem(world, entityFactory))
         engine.addSystem(soundSystem)
+        engine.addSystem(MovementSystem())
 
         ingameHud = IngameHud()
 

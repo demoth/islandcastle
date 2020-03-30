@@ -12,20 +12,8 @@ import com.badlogic.gdx.physics.box2d.World
 import ktx.ashley.entity
 import ktx.ashley.get
 import ktx.box2d.body
-import org.demoth.icastle.DEAL_DAMAGE
-import org.demoth.icastle.HURT
-import org.demoth.icastle.PPM
-import org.demoth.icastle.RECEIVE_DAMAGE
-import org.demoth.icastle.SOLID
-import org.demoth.icastle.SOLID_INVISIBLE
-import org.demoth.icastle.SPEED_DECEL
-import org.demoth.icastle.Sounds
-import org.demoth.icastle.SpriteSheets
-import org.demoth.icastle.Sprites
-import org.demoth.icastle.TRIGGER
-import org.demoth.icastle.debug
-import org.demoth.icastle.getCentralPoint
-import java.util.Random
+import org.demoth.icastle.*
+import java.util.*
 
 class EntityFactory(private val engine: Engine, private val world: World) {
 
@@ -35,6 +23,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
             add(Player())
             add(Named("player"))
             add(HasHealth(9000))
+            add(Movement(Vector2.Zero, MovementType.FORCE))
             add(Physical(
                     body = world.body {
                         userData = this@apply
@@ -146,7 +135,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
                     }, collisionClass = if (name.isNullOrBlank()) SOLID_INVISIBLE else SOLID))
 
             if (!name.isNullOrBlank()) {
-                add(Named(name!!))
+                add(Named(name))
             }
         }
     }
