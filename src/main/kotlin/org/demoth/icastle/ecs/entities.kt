@@ -23,7 +23,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
             add(Player())
             add(Named("player"))
             add(HasHealth(9000))
-            add(Movement(Vector2.Zero, MovementType.FORCE, -1f, 25f))
+            add(Movement(Vector2.Zero, MovementType.FORCE, -1f, 100f))
             add(Physical(
                     body = world.body {
                         userData = this@apply

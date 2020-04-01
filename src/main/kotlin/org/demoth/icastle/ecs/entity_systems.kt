@@ -46,31 +46,41 @@ class PlayerControlSystem(private val entityFactory: EntityFactory) : EntitySyst
         engine.getEntitiesFor(playerEntities).firstOrNull()?.let { playerEntity ->
             // this may be used later to affect how controls are used
             val player = playerMapper[playerEntity]
-            val playerPhysics = physicMapper[playerEntity]
-            val playerAnimation = characterAnimationMapper[playerEntity]
-            val movement = movementMapper[playerEntity]
+            val physics = physicMapper[playerEntity]
 
-            playerPhysics?.body?.let { body ->
-                var movementX = 0f
-                var movementY = 0f
+            physics?.body?.let { body ->
+                var movementX: Float? = null
+                var movementY: Float? = null
 
                 if (Gdx.input.isKeyPressed(Input.Keys.W) && body.linearVelocity.y < MAX_SPEED) {
                     movementY = WALK_FORCE
-                    playerAnimation.currentDirection = Direction.UP
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.A) && body.linearVelocity.x > -MAX_SPEED) {
                     movementX = -WALK_FORCE
-                    playerAnimation.currentDirection = Direction.LEFT
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.S) && body.linearVelocity.y > -MAX_SPEED) {
                     movementY = -WALK_FORCE
-                    playerAnimation.currentDirection = Direction.DOWN
                 }
                 if (Gdx.input.isKeyPressed(Input.Keys.D) && body.linearVelocity.x < MAX_SPEED) {
                     movementX = WALK_FORCE
-                    playerAnimation.currentDirection = Direction.RIGHT
                 }
-                movement.value = Vector2(movementX, movementY)
+                val direction = if (movementX != null) {
+                    if (movementY != null) {
+                        Vector2(movementX, movementY)
+                    } else {
+                        Vector2(movementX, 0f)
+                    }
+                } else {
+                    if (movementY != null) {
+                        Vector2(0f, movementY)
+                    } else {
+                        null
+                    }
+                }
+                val targetLocation = direction?.add(body.position)
+                updateWalkDirection(playerEntity, targetLocation)
+
+                // todo move to actions
                 if (actionLocation != null) {
                     player.score -= 3070
                     entityFactory.createFireBall(actionLocation!!, body.position, playerEntity)
@@ -273,7 +283,7 @@ class DeathSystem(private val world: World, private val entityFactory: EntityFac
 }
 
 /**
- * Pushes monster towards player's position. Updates animation
+ * Tries to direct monsters towards player
  */
 class MonsterWalkSystem : EntitySystem() {
     override fun update(deltaTime: Float) {
@@ -289,42 +299,43 @@ class MonsterWalkSystem : EntitySystem() {
         }
     }
 
-    /**
-     * Checks that entity is not closer that `minDistance`, normalizes speed to max speed and updates animation direction
-     */
-    private fun updateWalkDirection(entity: Entity, targetLocation: Vector2?) {
-        val movement = movementMapper[entity]
-        movement.value = if (targetLocation != null) {
-            val physics = physicMapper[entity]
-            val charAnimation = characterAnimationMapper[entity]
-            val currentLocation = physics.body.position
-            val distanceVector = targetLocation.minus(currentLocation)
-            if (movement.minDistance > 0f && distanceVector.len() > movement.minDistance || movement.minDistance <= 0f) {
-                val walkVector = distanceVector.setLength(movement.maxSpeed)
-                charAnimation?.currentDirection = getDirectionFromVector(walkVector.cpy())
-                Vector2(walkVector.x, walkVector.y)
-            } else {
-                // close enough
-                Vector2.Zero
-            }
+}
+
+/**
+ * Checks that entity is not closer that `minDistance`, normalizes speed to max speed and updates animation direction.
+ * Required Components: Phisycal, Movement
+ */
+private fun updateWalkDirection(entity: Entity, targetLocation: Vector2?) {
+    val movement = movementMapper[entity]
+    val currentLocation = physicMapper[entity].body.position
+    movement.value = if (targetLocation != null) {
+        val charAnimation = characterAnimationMapper[entity]
+        val distanceVector = targetLocation.minus(currentLocation)
+        if (movement.minDistance > 0f && distanceVector.len() > movement.minDistance || movement.minDistance <= 0f) {
+            val walkVector = distanceVector.setLength(movement.maxSpeed)
+            charAnimation?.currentDirection = getDirectionFromVector(walkVector.cpy())
+            Vector2(walkVector.x, walkVector.y)
         } else {
-            // no target to follow
+            // close enough
             Vector2.Zero
         }
+    } else {
+        // no target to follow
+        Vector2.Zero
     }
+}
 
-    // todo: remove mutation
-    private fun getDirectionFromVector(dir: Vector2): Direction {
-        dir.rotate(45f)
-        return if (dir.x > 0 && dir.y > 0)
-            Direction.RIGHT
-        else if (dir.x < 0 && dir.y > 0)
-            Direction.UP
-        else if (dir.x < 0 && dir.y < 0)
-            Direction.LEFT
-        else
-            Direction.DOWN
-    }
+// todo: remove mutation
+private fun getDirectionFromVector(dir: Vector2): Direction {
+    dir.rotate(45f)
+    return if (dir.x > 0 && dir.y > 0)
+        Direction.RIGHT
+    else if (dir.x < 0 && dir.y > 0)
+        Direction.UP
+    else if (dir.x < 0 && dir.y < 0)
+        Direction.LEFT
+    else
+        Direction.DOWN
 }
 
 /**
