@@ -21,7 +21,12 @@ class Player(var score: Int = 666 * 30) : Component
  */
 class Positioned(val position: Vector2) : Component
 
-class Movement(var value: Vector2, val type: MovementType) : Component
+class Movement(
+        var value: Vector2,
+        val type: MovementType = MovementType.FORCE,
+        val minDistance: Float = -1f,
+        val maxSpeed: Float = 15f
+) : Component
 
 enum class MovementType {
     LINEAR_VELOCITY,
@@ -155,9 +160,9 @@ class Named(val name: String) : Component
 class MonsterFiring(var fireRate: Float = 1f, var currentTime: Float = Random().nextFloat()) : Component
 
 /**
- * will magnetize monster towards player
+ * Marker component, will magnetize monster towards player
  */
-class MonsterWalking(var speed: Float = 15f, var distance: Float = 2f) : Component
+class MonsterWalking : Component
 
 /**
  * Used for damage labels - they float up a bit then disappear

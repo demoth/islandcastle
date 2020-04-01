@@ -1,5 +1,6 @@
 package org.demoth.icastle.ecs
 
+import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
@@ -278,36 +279,51 @@ class MonsterWalkSystem : EntitySystem() {
     override fun update(deltaTime: Float) {
         val playerEntity = engine.getEntitiesFor(allOf(Player::class, Physical::class).get()).firstOrNull()
 
-        engine.getEntitiesFor(monstersWalking).forEach { monsterEntity ->
-            val walk = walkMapper[monsterEntity]
-            if (playerEntity != null) {
-                val monsterPhysics = physicMapper[monsterEntity]
-                val playerPhysical = physicMapper[playerEntity]
-                val monsterAnimation = characterAnimationMapper[monsterEntity]
-                val monsterLocation = monsterPhysics.body.position
-                val distanceVector = playerPhysical.body.position.cpy().minus(monsterLocation)
-                val movement = movementMapper[monsterEntity]
-
-                if (distanceVector.len() > walk.distance) {
-                    val distance = distanceVector.setLength(walk.speed)
-                    movement.value = Vector2(distance.x, distance.y)
-                    if (monsterAnimation != null) {
-                        distance.rotate(45f)
-                        monsterAnimation.currentDirection =
-                                if (distance.x > 0 && distance.y > 0)
-                                    Direction.RIGHT
-                                else if (distance.x < 0 && distance.y > 0)
-                                    Direction.UP
-                                else if (distance.x < 0 && distance.y < 0)
-                                    Direction.LEFT
-                                else
-                                    Direction.DOWN
-                    }
-                } else {
-                    movement.value = Vector2.Zero
-                }
+        engine.getEntitiesFor(monstersWalking).forEach { entity ->
+            val targetLocation = if (playerEntity != null) {
+                physicMapper[playerEntity].body.position.cpy()
+            } else {
+                null
             }
+            updateWalkDirection(entity, targetLocation)
         }
+    }
+
+    /**
+     * Checks that entity is not closer that `minDistance`, normalizes speed to max speed and updates animation direction
+     */
+    private fun updateWalkDirection(entity: Entity, targetLocation: Vector2?) {
+        val movement = movementMapper[entity]
+        movement.value = if (targetLocation != null) {
+            val physics = physicMapper[entity]
+            val charAnimation = characterAnimationMapper[entity]
+            val currentLocation = physics.body.position
+            val distanceVector = targetLocation.minus(currentLocation)
+            if (movement.minDistance > 0f && distanceVector.len() > movement.minDistance || movement.minDistance <= 0f) {
+                val walkVector = distanceVector.setLength(movement.maxSpeed)
+                charAnimation?.currentDirection = getDirectionFromVector(walkVector.cpy())
+                Vector2(walkVector.x, walkVector.y)
+            } else {
+                // close enough
+                Vector2.Zero
+            }
+        } else {
+            // no target to follow
+            Vector2.Zero
+        }
+    }
+
+    // todo: remove mutation
+    private fun getDirectionFromVector(dir: Vector2): Direction {
+        dir.rotate(45f)
+        return if (dir.x > 0 && dir.y > 0)
+            Direction.RIGHT
+        else if (dir.x < 0 && dir.y > 0)
+            Direction.UP
+        else if (dir.x < 0 && dir.y < 0)
+            Direction.LEFT
+        else
+            Direction.DOWN
     }
 }
 
