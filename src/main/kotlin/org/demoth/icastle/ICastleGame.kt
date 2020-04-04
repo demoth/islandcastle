@@ -103,16 +103,16 @@ class ICastleGame(startMap: String?) : KtxGame<Screen>() {
             nextLevel = nextMap
         }
 
+        // todo multiplex with ui
         Gdx.input.inputProcessor = object : InputAdapter() {
             override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
                 if (button == Input.Buttons.LEFT) {
                     println("clicked! screen coords:  $screenX, $screenY")
-                    playerControlSystem.actionLocation = screenToWorld(screenX, screenY)
+                    playerControlSystem.leftClick = screenToWorld(screenX, screenY)
                 }
                 return true
             }
         }
-
     }
 
     private fun screenToWorld(screenX: Int, screenY: Int): Vector2 {

@@ -157,7 +157,11 @@ class Named(val name: String) : Component
 /**
  * will fire fireRate/sec towards player
  */
-class MonsterFiring(var fireRate: Float = 1f, var currentTime: Float = Random().nextFloat()) : Component
+class MonsterFiring(
+        var fireRate: Float = 1f,
+        var firingDistance: Float = 10f,
+        var currentTime: Float = Random().nextFloat()
+) : Component
 
 /**
  * Marker component, will magnetize monster towards player

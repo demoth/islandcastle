@@ -2,8 +2,7 @@ package org.demoth.icastle.ecs.systems
 
 import com.badlogic.ashley.core.EntitySystem
 import ktx.ashley.allOf
-import ktx.math.minus
-import org.demoth.icastle.debug
+import ktx.ashley.get
 import org.demoth.icastle.ecs.*
 
 /**
@@ -35,20 +34,11 @@ class MonsterFiringSystem(private val entityFactory: EntityFactory) : EntitySyst
             val monster = monsterMapper[monsterEntity]
             val monsterPhysics = physicMapper[monsterEntity]
             monster.currentTime += deltaTime
-
             if (monster.currentTime > monster.fireRate) {
-                monster.currentTime = 0f
-                if (playerEntity != null) {
-                    val playerPhysical = physicMapper[playerEntity]
-                    val monsterPosition = monsterPhysics.body.position
-                    val playerPosition = playerPhysical.body.position.cpy()
-                    if (playerPosition.minus(monsterPosition).len() < 10f)   //TODO move constant to monster
-                        entityFactory.createRotatingFireBall(playerPosition - monsterPosition,
-                                monsterPosition,
-                                monsterEntity)
-                    debug("spawned fireball to player at (${playerPosition.x}, ${playerPosition.y})")
-                }
+                val playerPosition = playerEntity?.get(physicMapper)?.body?.position
+                fireMonsterAction(monster, playerPosition?.cpy(), monsterPhysics.body.position, monsterEntity, entityFactory)
             }
         }
     }
+
 }
