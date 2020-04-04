@@ -1,20 +1,19 @@
 package org.demoth.icastle.ecs
 
-import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.Disposable
-import ktx.ashley.allOf
 import ktx.ashley.entity
 import ktx.ashley.mapperFor
-import ktx.math.minus
-import org.demoth.icastle.*
+import org.demoth.icastle.PPM
+import org.demoth.icastle.Sounds
+import org.demoth.icastle.SpriteSheets
+import org.demoth.icastle.Sprites
 import java.util.*
 
 val physicMapper = mapperFor<Physical>()
@@ -30,22 +29,6 @@ val healthMapper = mapperFor<HasHealth>()
 val soundMapper = mapperFor<HasSound>()
 val ttlMapper = mapperFor<TTL>()
 val movementMapper = mapperFor<Movement>()
-
-
-class MovementSystem : EntitySystem() {
-    override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(movables).forEach {
-            val movement = movementMapper[it]
-            val physical = physicMapper[it]
-            when (movement.type) {
-                MovementType.LINEAR_VELOCITY -> TODO()
-                MovementType.FORCE -> {
-                    physical.body.applyForceToCenter(movement.value, true)
-                }
-            }
-        }
-    }
-}
 
 /**
  * Draw everything that has a position, and texture or name
@@ -157,35 +140,6 @@ class EntitiesCleanupSystem(private val world: World) : EntitySystem() {
 }
 
 /**
- * If not in a cooldown, find a player and shoot towards player's position
- */
-class MonsterFiringSystem(private val entityFactory: EntityFactory) : EntitySystem() {
-    override fun update(deltaTime: Float) {
-        val playerEntity = engine.getEntitiesFor(allOf(Player::class, Physical::class).get()).firstOrNull()
-
-        engine.getEntitiesFor(monstersFiring).forEach { monsterEntity ->
-            val monster = monsterMapper[monsterEntity]
-            val monsterPhysics = physicMapper[monsterEntity]
-            monster.currentTime += deltaTime
-
-            if (monster.currentTime > monster.fireRate) {
-                monster.currentTime = 0f
-                if (playerEntity != null) {
-                    val playerPhysical = physicMapper[playerEntity]
-                    val monsterPosition = monsterPhysics.body.position
-                    val playerPosition = playerPhysical.body.position.cpy()
-                    if (playerPosition.minus(monsterPosition).len() < 10f)   //TODO move constant to monster
-                        entityFactory.createRotatingFireBall(playerPosition - monsterPosition,
-                                monsterPosition,
-                                monsterEntity)
-                    debug("spawned fireball to player at (${playerPosition.x}, ${playerPosition.y})")
-                }
-            }
-        }
-    }
-}
-
-/**
  * Checks health and if <= 0 - kill
  */
 class DeathSystem(private val world: World, private val entityFactory: EntityFactory) : EntitySystem() {
@@ -207,63 +161,6 @@ class DeathSystem(private val world: World, private val entityFactory: EntityFac
             }
         }
     }
-}
-
-/**
- * Tries to direct monsters towards player
- */
-class MonsterWalkSystem : EntitySystem() {
-    override fun update(deltaTime: Float) {
-        val playerEntity = engine.getEntitiesFor(allOf(Player::class, Physical::class).get()).firstOrNull()
-
-        engine.getEntitiesFor(monstersWalking).forEach { entity ->
-            val targetLocation = if (playerEntity != null) {
-                physicMapper[playerEntity].body.position.cpy()
-            } else {
-                null
-            }
-            updateWalkDirection(entity, targetLocation)
-        }
-    }
-
-}
-
-/**
- * Checks that entity is not closer that `minDistance`, normalizes speed to max speed and updates animation direction.
- * Required Components: Phisycal, Movement.
- *
- * If targetLocation is null then movement is reset.
- */
-internal fun updateWalkDirection(entity: Entity, targetLocation: Vector2?) {
-    val movement = movementMapper[entity]
-    val currentLocation = physicMapper[entity].body.position
-    movement.value = if (targetLocation != null) {
-        val charAnimation = characterAnimationMapper[entity]
-        val distanceVector = targetLocation.minus(currentLocation)
-        if (movement.minDistance > 0f && distanceVector.len() > movement.minDistance || movement.minDistance <= 0f) {
-            val walkVector = distanceVector.setLength(movement.maxSpeed)
-            charAnimation?.currentDirection = getDirectionFromVector(walkVector.cpy())
-            Vector2(walkVector.x, walkVector.y)
-        } else {
-            // close enough
-            Vector2.Zero
-        }
-    } else {
-        // no target to follow
-        Vector2.Zero
-    }
-}
-
-private fun getDirectionFromVector(dir: Vector2): Direction {
-    return if (dir.x == 0f && dir.y == 0f)
-        Direction.UP
-    else if (dir.y > dir.x && dir.y > -dir.x)
-        Direction.UP
-    else if (dir.y < dir.x && dir.y < -dir.x)
-        Direction.DOWN
-    else if (dir.x >= dir.y && dir.x >= -dir.y)
-        Direction.RIGHT
-    else Direction.LEFT
 }
 
 /**
