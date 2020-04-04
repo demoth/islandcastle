@@ -24,6 +24,8 @@ import ktx.box2d.createWorld
 import ktx.graphics.use
 import org.demoth.icastle.ecs.*
 import org.demoth.icastle.ecs.systems.CameraSystem
+import org.demoth.icastle.ecs.systems.PlayerControlSystem
+import org.demoth.icastle.ecs.systems.PlayerHudUpdateSystem
 
 
 const val MAX_SPEED = 10f

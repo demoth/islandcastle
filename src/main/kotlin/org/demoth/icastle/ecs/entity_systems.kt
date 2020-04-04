@@ -3,7 +3,6 @@ package org.demoth.icastle.ecs
 import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.graphics.g2d.GlyphLayout
@@ -26,71 +25,12 @@ val namedMapper = mapperFor<Named>()
 val animatedMapper = mapperFor<SimpleAnimation>()
 val characterAnimationMapper = mapperFor<CharacterAnimation>()
 val monsterMapper = mapperFor<MonsterFiring>()
-val walkMapper = mapperFor<MonsterWalking>()
 val floatingUpLabelMapper = mapperFor<FloatingUpLabel>()
 val healthMapper = mapperFor<HasHealth>()
 val soundMapper = mapperFor<HasSound>()
 val ttlMapper = mapperFor<TTL>()
 val movementMapper = mapperFor<Movement>()
 
-/**
- * Moves player in the physical world
- */
-class PlayerControlSystem(private val entityFactory: EntityFactory) : EntitySystem() {
-    /**
-     * location relative to player (center)
-     */
-    var actionLocation: Vector2? = null
-
-    override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(playerEntities).firstOrNull()?.let { playerEntity ->
-            // this may be used later to affect how controls are used
-            val player = playerMapper[playerEntity]
-            val physics = physicMapper[playerEntity]
-
-            physics?.body?.let { body ->
-                var movementX: Float? = null
-                var movementY: Float? = null
-
-                if (Gdx.input.isKeyPressed(Input.Keys.W) && body.linearVelocity.y < MAX_SPEED) {
-                    movementY = WALK_FORCE
-                }
-                if (Gdx.input.isKeyPressed(Input.Keys.A) && body.linearVelocity.x > -MAX_SPEED) {
-                    movementX = -WALK_FORCE
-                }
-                if (Gdx.input.isKeyPressed(Input.Keys.S) && body.linearVelocity.y > -MAX_SPEED) {
-                    movementY = -WALK_FORCE
-                }
-                if (Gdx.input.isKeyPressed(Input.Keys.D) && body.linearVelocity.x < MAX_SPEED) {
-                    movementX = WALK_FORCE
-                }
-                val direction = if (movementX != null) {
-                    if (movementY != null) {
-                        Vector2(movementX, movementY)
-                    } else {
-                        Vector2(movementX, 0f)
-                    }
-                } else {
-                    if (movementY != null) {
-                        Vector2(0f, movementY)
-                    } else {
-                        null
-                    }
-                }
-                val targetLocation = direction?.add(body.position)
-                updateWalkDirection(playerEntity, targetLocation)
-
-                // todo move to actions
-                if (actionLocation != null) {
-                    player.score -= 3070
-                    entityFactory.createFireBall(actionLocation!!, body.position, playerEntity)
-                    println("actionLocation: $actionLocation, player: ${body.position}")
-                    actionLocation = null
-                }
-            }
-        }
-    }
-}
 
 class MovementSystem : EntitySystem() {
     override fun update(deltaTime: Float) {
@@ -103,19 +43,6 @@ class MovementSystem : EntitySystem() {
                     physical.body.applyForceToCenter(movement.value, true)
                 }
             }
-        }
-    }
-}
-
-class PlayerHudUpdateSystem(private val hud: IngameHud) : EntitySystem() {
-    override fun update(deltaTime: Float) {
-        engine.getEntitiesFor(playerHealthAndScore).firstOrNull()?.let {
-            val player = playerMapper[it]
-            val health = healthMapper[it]
-
-            hud.setValues(health.value, player.score)
-
-            player.score-- // TODO: stats change should be done separately!!!
         }
     }
 }
@@ -303,9 +230,11 @@ class MonsterWalkSystem : EntitySystem() {
 
 /**
  * Checks that entity is not closer that `minDistance`, normalizes speed to max speed and updates animation direction.
- * Required Components: Phisycal, Movement
+ * Required Components: Phisycal, Movement.
+ *
+ * If targetLocation is null then movement is reset.
  */
-private fun updateWalkDirection(entity: Entity, targetLocation: Vector2?) {
+internal fun updateWalkDirection(entity: Entity, targetLocation: Vector2?) {
     val movement = movementMapper[entity]
     val currentLocation = physicMapper[entity].body.position
     movement.value = if (targetLocation != null) {
@@ -325,17 +254,16 @@ private fun updateWalkDirection(entity: Entity, targetLocation: Vector2?) {
     }
 }
 
-// todo: remove mutation
 private fun getDirectionFromVector(dir: Vector2): Direction {
-    dir.rotate(45f)
-    return if (dir.x > 0 && dir.y > 0)
-        Direction.RIGHT
-    else if (dir.x < 0 && dir.y > 0)
+    return if (dir.x == 0f && dir.y == 0f)
         Direction.UP
-    else if (dir.x < 0 && dir.y < 0)
-        Direction.LEFT
-    else
+    else if (dir.y > dir.x && dir.y > -dir.x)
+        Direction.UP
+    else if (dir.y < dir.x && dir.y < -dir.x)
         Direction.DOWN
+    else if (dir.x >= dir.y && dir.x >= -dir.y)
+        Direction.RIGHT
+    else Direction.LEFT
 }
 
 /**
