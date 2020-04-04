@@ -7,6 +7,9 @@ import ktx.ashley.entity
 import ktx.box2d.body
 import ktx.box2d.createWorld
 import org.demoth.icastle.ecs.*
+import org.demoth.icastle.ecs.systems.MonsterFiringSystem
+import org.demoth.icastle.ecs.systems.MonsterWalkSystem
+import org.demoth.icastle.ecs.systems.MovementSystem
 import org.junit.Assert
 import org.junit.Test
 
@@ -86,6 +89,7 @@ class SystemTest {
         val world = createWorld()
         val entityFactory = EntityFactory(engine, world)
         engine.addSystem(MonsterWalkSystem())
+        engine.addSystem(MovementSystem())
         entityFactory.createEyeMonster(0f, 0f, 1000)
         entityFactory.createPlayerEntity(Vector2(10f, 0f))
 
