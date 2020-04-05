@@ -1,4 +1,4 @@
-package org.demoth.icastle
+package org.demoth.icastle.ui
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
@@ -10,6 +10,9 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label
 import ktx.freetype.loadFreeTypeFont
 import ktx.freetype.registerFreeTypeFontLoaders
 
+/**
+ * Shows stats for player, action bar and similar widgets
+ */
 class IngameHud : ScreenAdapter() {
     private var stage: Stage
     private var assetManager: AssetManager = AssetManager()

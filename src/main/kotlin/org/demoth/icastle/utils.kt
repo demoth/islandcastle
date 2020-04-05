@@ -57,7 +57,7 @@ fun debug(message: String) {
 }
 
 fun createConfiguration(): LwjglApplicationConfiguration = LwjglApplicationConfiguration().apply {
-    title = "IslandCastle 0.1.2"
+    title = "IslandCastle Alpha"
     width = 1000
     height = 1000
     forceExit = false
