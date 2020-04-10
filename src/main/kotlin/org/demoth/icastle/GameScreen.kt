@@ -4,7 +4,7 @@ import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputAdapter
-import com.badlogic.gdx.Screen
+import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
@@ -19,7 +19,6 @@ import com.badlogic.gdx.physics.box2d.ContactListener
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import ktx.app.KtxGame
 import ktx.box2d.createWorld
 import ktx.graphics.use
 import org.demoth.icastle.ecs.*
@@ -29,14 +28,16 @@ import org.demoth.icastle.ui.screens.IngameHud
 
 const val MAX_SPEED = 10f
 const val SPEED_DECEL = 25f
+
 // how many tiles we see around
 const val SIGHT_RADIUS = 16
+
 // size of tiles in pixels
 const val TILE_SIZE = 32f
 const val WALK_FORCE = 100f
 const val PPM = 32f // 1 meter - 32 pixels
 
-class GameScreen(startMap: String?) : KtxGame<Screen>() {
+class GameScreen(startMap: String?) : ScreenAdapter() {
     private val startMapName = startMap ?: "grassmap.tmx"
     private lateinit var world: World
     private lateinit var batch: SpriteBatch
@@ -59,6 +60,13 @@ class GameScreen(startMap: String?) : KtxGame<Screen>() {
     var time = 0f
     var nextLevel: String? = null
     var previousLevel: String? = null
+
+    init {
+        Box2D.init()
+        debug("Box2D initialized")
+        debug("Starting game in $startMapName")
+        changeLevel(startMapName, null)
+    }
 
     fun changeLevel(currentMap: String, previousMapName: String?) {
         previousLevel = currentMap
@@ -122,13 +130,6 @@ class GameScreen(startMap: String?) : KtxGame<Screen>() {
                 -1f * screenY + viewport.screenHeight / 2f).scl(0.5f / PPM)
     }
 
-    override fun create() {
-        Box2D.init()
-        debug("Box2D initialized")
-        debug("Starting game in $startMapName")
-        changeLevel(startMapName, null)
-    }
-
     override fun dispose() {
         world.dispose()
         box2dRenderer.dispose()
@@ -140,7 +141,7 @@ class GameScreen(startMap: String?) : KtxGame<Screen>() {
         batchDrawSystem.dispose()
     }
 
-    override fun render() {
+    override fun render(delta: Float) {
         if (nextLevel != null) {
             changeLevel(nextLevel!!, previousLevel)
             // todo remove hardcoded size
@@ -148,7 +149,7 @@ class GameScreen(startMap: String?) : KtxGame<Screen>() {
             nextLevel = null
             previousLevel = null
         }
-        time += Gdx.graphics.deltaTime
+        time += delta
         handleGlobalInput()
         // update physical world
         world.step(1 / 60f, 6, 2)
@@ -170,9 +171,6 @@ class GameScreen(startMap: String?) : KtxGame<Screen>() {
             box2dRenderer.render(world, camera.combined.scl(PPM))
         }
         ingameHud.render(time)
-
-        currentScreen
-
     }
 
     private fun handleGlobalInput() {
