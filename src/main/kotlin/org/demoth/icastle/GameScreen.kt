@@ -36,7 +36,7 @@ const val TILE_SIZE = 32f
 const val WALK_FORCE = 100f
 const val PPM = 32f // 1 meter - 32 pixels
 
-class ICastleGame(startMap: String?) : KtxGame<Screen>() {
+class GameScreen(startMap: String?) : KtxGame<Screen>() {
     private val startMapName = startMap ?: "grassmap.tmx"
     private lateinit var world: World
     private lateinit var batch: SpriteBatch
@@ -207,5 +207,5 @@ class ICastleGame(startMap: String?) : KtxGame<Screen>() {
 }
 
 fun main(args: Array<String>) {
-    LwjglApplication(ICastleGame(args.getOrNull(0)), createConfiguration())
+    LwjglApplication(GameScreen(args.getOrNull(0)), createConfiguration())
 }
