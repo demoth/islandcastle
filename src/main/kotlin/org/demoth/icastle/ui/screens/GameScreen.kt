@@ -1,4 +1,4 @@
-package org.demoth.icastle
+package org.demoth.icastle.ui.screens
 
 import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.Gdx
@@ -21,9 +21,11 @@ import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.box2d.createWorld
 import ktx.graphics.use
+import org.demoth.icastle.CollisionProcessor
+import org.demoth.icastle.createConfiguration
+import org.demoth.icastle.debug
 import org.demoth.icastle.ecs.*
 import org.demoth.icastle.ecs.systems.*
-import org.demoth.icastle.ui.screens.IngameHud
 
 
 const val MAX_SPEED = 10f

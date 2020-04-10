@@ -2,9 +2,9 @@ package org.demoth.icastle.ecs.systems
 
 import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.gdx.graphics.Camera
-import org.demoth.icastle.PPM
 import org.demoth.icastle.ecs.physicMapper
 import org.demoth.icastle.ecs.playerPosition
+import org.demoth.icastle.ui.screens.PPM
 
 /**
  * Moves camera view to center on player

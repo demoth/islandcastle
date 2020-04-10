@@ -10,10 +10,10 @@ import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.Disposable
 import ktx.ashley.entity
 import ktx.ashley.mapperFor
-import org.demoth.icastle.PPM
 import org.demoth.icastle.Sounds
 import org.demoth.icastle.SpriteSheets
 import org.demoth.icastle.Sprites
+import org.demoth.icastle.ui.screens.PPM
 import java.util.*
 
 val physicMapper = mapperFor<Physical>()

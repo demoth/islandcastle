@@ -13,6 +13,8 @@ import ktx.ashley.entity
 import ktx.ashley.get
 import ktx.box2d.body
 import org.demoth.icastle.*
+import org.demoth.icastle.ui.screens.PPM
+import org.demoth.icastle.ui.screens.SPEED_DECEL
 import java.util.*
 
 class EntityFactory(private val engine: Engine, private val world: World) {
