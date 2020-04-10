@@ -1,4 +1,4 @@
-package org.demoth.icastle.ui
+package org.demoth.icastle.ui.screens
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogic.gdx.scenes.scene2d.ui.Window
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import ktx.actors.onClick
+import org.demoth.icastle.ui.getTestSkin
 
 class MainMenu : ScreenAdapter() {
     private lateinit var currentStage: Stage

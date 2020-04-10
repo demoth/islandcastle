@@ -7,7 +7,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import org.demoth.icastle.WALK_FORCE
 import org.demoth.icastle.ecs.*
-import org.demoth.icastle.ui.IngameHud
+import org.demoth.icastle.ui.screens.IngameHud
 
 /**
  * Moves player in the physical world

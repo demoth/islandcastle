@@ -1,4 +1,4 @@
-package org.demoth.icastle.ui
+package org.demoth.icastle.ui.screens
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
