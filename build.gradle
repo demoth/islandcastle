@@ -36,6 +36,7 @@ dependencies {
     compile "io.github.libktx:ktx-vis:$libktxVersion"
     compile "io.github.libktx:ktx-vis-style:$libktxVersion"
     compile "io.github.libktx:ktx-scene2d:$libktxVersion"
+    compile "io.github.libktx:ktx-style:$libktxVersion"
     compile "io.github.libktx:ktx-app:$libktxVersion"
     compile "io.github.libktx:ktx-ashley:$libktxVersion"
     compile "io.github.libktx:ktx-actors:$libktxVersion"
