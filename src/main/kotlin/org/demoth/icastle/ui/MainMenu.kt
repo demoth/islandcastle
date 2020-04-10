@@ -16,47 +16,73 @@ import ktx.app.KtxGame
 import org.demoth.icastle.createConfiguration
 
 class MainMenu : KtxGame<Screen>() {
-    private lateinit var stage: Stage
+    private lateinit var currentStage: Stage
+    private lateinit var mainMenu: Stage
+    private lateinit var optionsMenu: Stage
 
     override fun create() {
 
         val skin = getTestSkin()
 
-        stage = Stage()
-        Gdx.input.inputProcessor = stage
-
-        stage.addActor(Window("IslandCastle", skin).apply {
-            setFillParent(true)
-            background = TextureRegionDrawable(
-                    TextureRegion(Texture(Gdx.files.internal("sprites/background2.jpg"))))
-            addActor(VerticalGroup().apply {
-                debug = true
+        mainMenu = Stage().apply {
+            addActor(Window("IslandCastle", skin).apply {
                 setFillParent(true)
-                addActor(TextButton("New game", skin).apply {
-                    onClick { println("Started new game") }
-                })
-                addActor(TextButton("Options", skin).apply {
-                    onClick { println("Clicked options menu") }
-                })
-                addActor(TextButton("Exit", skin).apply {
-                    onClick { Gdx.app.exit() }
+                background = TextureRegionDrawable(
+                        TextureRegion(Texture(Gdx.files.internal("sprites/background2.jpg"))))
+                addActor(VerticalGroup().apply {
+                    debug = true
+                    setFillParent(true)
+                    addActor(TextButton("New game", skin).apply {
+                        onClick { println("Started new game") }
+                    })
+                    addActor(TextButton("Options", skin).apply {
+                        onClick {
+                            changeStage(optionsMenu)
+                        }
+                    })
+                    addActor(TextButton("Exit", skin).apply {
+                        onClick { Gdx.app.exit() }
+                    })
                 })
             })
-        })
+        }
+
+        optionsMenu = Stage().apply {
+            addActor(Window("Options", skin).apply {
+                setFillParent(true)
+                background = TextureRegionDrawable(
+                        TextureRegion(Texture(Gdx.files.internal("sprites/background2.jpg"))))
+                addActor(VerticalGroup().apply {
+                    setFillParent(true)
+                    addActor(TextButton("Back", skin).apply {
+                        onClick {
+                            changeStage(mainMenu)
+                        }
+                    })
+                })
+            })
+        }
+
+        changeStage(mainMenu)
     }
 
     override fun resize(width: Int, height: Int) {
-        stage.viewport.update(width, height, true)
+        currentStage.viewport.update(width, height, true)
     }
 
     override fun render() {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
-        stage.act(Gdx.graphics.deltaTime)
-        stage.draw()
+        currentStage.act(Gdx.graphics.deltaTime)
+        currentStage.draw()
     }
 
     override fun dispose() {
-        stage.dispose()
+        currentStage.dispose()
+    }
+
+    fun changeStage(stage: Stage) {
+        currentStage = stage
+        Gdx.input.inputProcessor = stage
     }
 }
 
