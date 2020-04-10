@@ -169,7 +169,9 @@ class ICastleGame(startMap: String?) : KtxGame<Screen>() {
             // scale with PPM
             box2dRenderer.render(world, camera.combined.scl(PPM))
         }
-        ingameHud.render()
+        ingameHud.render(time)
+
+        currentScreen
 
     }
 

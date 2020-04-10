@@ -1,8 +1,7 @@
 package org.demoth.icastle.ui
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Screen
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication
+import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureRegion
@@ -12,17 +11,17 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogic.gdx.scenes.scene2d.ui.Window
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import ktx.actors.onClick
-import ktx.app.KtxGame
-import org.demoth.icastle.createConfiguration
 
-class MainMenu : KtxGame<Screen>() {
+class MainMenu : ScreenAdapter() {
     private lateinit var currentStage: Stage
-    private lateinit var mainMenu: Stage
-    private lateinit var optionsMenu: Stage
+    private val mainMenu: Stage
+    private val optionsMenu: Stage
 
-    override fun create() {
+    init {
 
         val skin = getTestSkin()
+
+        optionsMenu = Stage()
 
         mainMenu = Stage().apply {
             addActor(Window("IslandCastle", skin).apply {
@@ -47,7 +46,7 @@ class MainMenu : KtxGame<Screen>() {
             })
         }
 
-        optionsMenu = Stage().apply {
+        optionsMenu.apply {
             addActor(Window("Options", skin).apply {
                 setFillParent(true)
                 background = TextureRegionDrawable(
@@ -70,7 +69,7 @@ class MainMenu : KtxGame<Screen>() {
         currentStage.viewport.update(width, height, true)
     }
 
-    override fun render() {
+    override fun render(delta: Float) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT)
         currentStage.act(Gdx.graphics.deltaTime)
         currentStage.draw()
@@ -84,8 +83,4 @@ class MainMenu : KtxGame<Screen>() {
         currentStage = stage
         Gdx.input.inputProcessor = stage
     }
-}
-
-fun main() {
-    LwjglApplication(MainMenu(), createConfiguration())
 }

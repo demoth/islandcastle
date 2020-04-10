@@ -52,7 +52,7 @@ class IngameHud : ScreenAdapter() {
         healthLabel.setText("Health: $health")
     }
 
-    fun render() {
+    override fun render(delta: Float) {
         stage.act(Gdx.graphics.deltaTime)
         stage.draw()
     }
