@@ -11,9 +11,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
 import com.badlogic.gdx.scenes.scene2d.ui.Window
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import ktx.actors.onClick
+import org.demoth.icastle.debug
 import org.demoth.icastle.ui.getTestSkin
 
-class MainMenu : ScreenAdapter() {
+class MainMenu(startNewGame: () -> Unit) : ScreenAdapter() {
     private lateinit var currentStage: Stage
     private val mainMenu: Stage
     private val optionsMenu: Stage
@@ -33,7 +34,10 @@ class MainMenu : ScreenAdapter() {
                     debug = true
                     setFillParent(true)
                     addActor(TextButton("New game", skin).apply {
-                        onClick { println("Started new game") }
+                        onClick {
+                            debug("Started new game")
+                            startNewGame()
+                        }
                     })
                     addActor(TextButton("Options", skin).apply {
                         onClick {

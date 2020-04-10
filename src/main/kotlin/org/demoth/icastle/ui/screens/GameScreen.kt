@@ -5,7 +5,6 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.InputAdapter
 import com.badlogic.gdx.ScreenAdapter
-import com.badlogic.gdx.backends.lwjgl.LwjglApplication
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
@@ -22,7 +21,6 @@ import com.badlogic.gdx.utils.viewport.Viewport
 import ktx.box2d.createWorld
 import ktx.graphics.use
 import org.demoth.icastle.CollisionProcessor
-import org.demoth.icastle.createConfiguration
 import org.demoth.icastle.debug
 import org.demoth.icastle.ecs.*
 import org.demoth.icastle.ecs.systems.*
@@ -39,6 +37,9 @@ const val TILE_SIZE = 32f
 const val WALK_FORCE = 100f
 const val PPM = 32f // 1 meter - 32 pixels
 
+/**
+ * Screen with the gameplay - player controls, monsters etc
+ */
 class GameScreen(startMap: String?) : ScreenAdapter() {
     private val startMapName = startMap ?: "grassmap.tmx"
     private lateinit var world: World
@@ -63,11 +64,13 @@ class GameScreen(startMap: String?) : ScreenAdapter() {
     var nextLevel: String? = null
     var previousLevel: String? = null
 
-    init {
+    fun initialize() {
         Box2D.init()
         debug("Box2D initialized")
         debug("Starting game in $startMapName")
         changeLevel(startMapName, null)
+        // fixme why it is not called automatically
+        resize(Gdx.graphics.width, Gdx.graphics.height)
     }
 
     fun changeLevel(currentMap: String, previousMapName: String?) {
@@ -133,6 +136,7 @@ class GameScreen(startMap: String?) : ScreenAdapter() {
     }
 
     override fun dispose() {
+        //fixme: init is called manually but dispose is called by the framework!
         world.dispose()
         box2dRenderer.dispose()
         tileRenderer.dispose()
@@ -206,6 +210,3 @@ class GameScreen(startMap: String?) : ScreenAdapter() {
 
 }
 
-fun main(args: Array<String>) {
-    LwjglApplication(GameScreen(args.getOrNull(0)), createConfiguration())
-}
