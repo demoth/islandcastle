@@ -210,13 +210,6 @@ class GameScreen : ScreenAdapter() {
             batchDrawSystem.drawSprites = !batchDrawSystem.drawSprites
         if (Gdx.input.isKeyJustPressed(Input.Keys.F4))
             batchDrawSystem.drawNames = !batchDrawSystem.drawNames
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F5)) {
-            dispose()
-            // fixme default value, null should never happen
-            changeLevel(currentMap ?: "grassmap.tmx", null)
-            // todo remove hardcoded size
-            viewport.update(1000, 1000)
-        }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             goToMainMenu()
