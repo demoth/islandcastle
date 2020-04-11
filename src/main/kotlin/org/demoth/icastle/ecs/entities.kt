@@ -7,8 +7,10 @@ import com.badlogic.gdx.maps.objects.RectangleMapObject
 import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.World
+import com.badlogic.gdx.utils.Array
 import ktx.ashley.entity
 import ktx.ashley.get
 import ktx.box2d.body
@@ -94,7 +96,16 @@ class EntityFactory(private val engine: Engine, private val world: World) {
     }
 
     fun loadMap(map: TiledMap, previousMapName: String?, transition: (String) -> Unit) {
-        debug("Creating entities:")
+        debug("Cleaning up all entities")
+        engine.removeAllEntities()
+        val allBodies = Array<Body>()
+        world.getBodies(allBodies)
+        debug("Cleaning up all box2d bodies: ${allBodies.size}")
+        allBodies.forEach {
+            world.destroyBody(it)
+        }
+
+        debug("Creating entities")
         val startPosition =
                 if (previousMapName == null) {
                     debug("No previous map, looking for 'start' object...")
@@ -110,7 +121,7 @@ class EntityFactory(private val engine: Engine, private val world: World) {
         if (startPosition == null)
             throw IllegalStateException("Could not find entrance from $previousMapName!dd")
         map.layers.forEach { layer ->
-            layer.objects.getByType<RectangleMapObject>(RectangleMapObject::class.java).forEach { obj ->
+            layer.objects.getByType(RectangleMapObject::class.java).forEach { obj ->
                 if (obj.name == "spawn_eyelander") {
                     val health = obj.properties["health"] as Int? ?: 1000
                     createEyeMonster(obj.rectangle.x / PPM, obj.rectangle.y / PPM, health)

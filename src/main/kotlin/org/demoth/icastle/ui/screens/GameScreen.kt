@@ -14,7 +14,6 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Box2D
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
-import com.badlogic.gdx.physics.box2d.ContactListener
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
@@ -40,8 +39,12 @@ const val PPM = 32f // 1 meter - 32 pixels
 /**
  * Screen with the gameplay - player controls, monsters etc
  */
-class GameScreen(startMap: String?) : ScreenAdapter() {
-    private val startMapName = startMap ?: "grassmap.tmx"
+class GameScreen : ScreenAdapter() {
+
+    // fixme lateinit
+    lateinit var goToMainMenu: () -> Unit
+
+    private var currentMap: String? = null
     private lateinit var world: World
     private lateinit var batch: SpriteBatch
     private lateinit var viewport: Viewport
@@ -52,7 +55,6 @@ class GameScreen(startMap: String?) : ScreenAdapter() {
     private lateinit var batchDrawSystem: BatchDrawSystem
     private lateinit var playerControlSystem: PlayerControlSystem
     private lateinit var engine: PooledEngine
-    private lateinit var collisionListener: ContactListener
     private lateinit var soundSystem: SoundSystem
     private lateinit var entityFactory: EntityFactory
 
@@ -65,52 +67,69 @@ class GameScreen(startMap: String?) : ScreenAdapter() {
     var previousLevel: String? = null
 
     fun initialize() {
+        debug("Initializing box2d")
         Box2D.init()
-        debug("Box2D initialized")
-        debug("Starting game in $startMapName")
-        changeLevel(startMapName, null)
-        // fixme why it is not called automatically
-        resize(Gdx.graphics.width, Gdx.graphics.height)
+
+        debug("Initializing box2d renderer")
+        box2dRenderer = Box2DDebugRenderer()
+
+        debug("Creating world")
+        world = createWorld().apply {
+            setContactListener(CollisionProcessor())
+        }
+
+        debug("Creating sprite batch")
+        batch = SpriteBatch()
+
+        debug("Creating camera")
+        camera = OrthographicCamera(TILE_SIZE, TILE_SIZE)
+
+        debug("Creating viewport")
+        viewport = FitViewport(TILE_SIZE * SIGHT_RADIUS, TILE_SIZE * SIGHT_RADIUS, camera)
+
+        debug("Creating ECS engine")
+        engine = PooledEngine()
+        entityFactory = EntityFactory(engine, world)
+        playerControlSystem = PlayerControlSystem(entityFactory)
+
+
+        batchDrawSystem = BatchDrawSystem(batch)
+        soundSystem = SoundSystem()
+
+        debug("Adding playerControlSystem")
+        engine.addSystem(playerControlSystem)
+        debug("Adding batchDrawSystem")
+        engine.addSystem(batchDrawSystem)
+        debug("Adding CameraSystem")
+        engine.addSystem(CameraSystem(camera))
+        debug("Adding EntitiesCleanupSystem")
+        engine.addSystem(EntitiesCleanupSystem(world))
+        debug("Adding MonsterWalkSystem")
+        engine.addSystem(MonsterWalkSystem())
+        debug("Adding MonsterFiringSystem")
+        engine.addSystem(MonsterFiringSystem(entityFactory))
+        debug("Adding DeathSystem")
+        engine.addSystem(DeathSystem(world, entityFactory))
+        debug("Adding soundSystem")
+        engine.addSystem(soundSystem)
+        debug("Adding MovementSystem")
+        engine.addSystem(MovementSystem())
+
+        debug("Creating IngameHud")
+        ingameHud = IngameHud()
+
+        debug("Adding PlayerHudUpdateSystem")
+        engine.addSystem(PlayerHudUpdateSystem(ingameHud))
     }
 
     fun changeLevel(currentMap: String, previousMapName: String?) {
-        previousLevel = currentMap
-        debug("Changing level to $currentMap...")
-        world = createWorld()
-        debug("Box2 world created")
-        box2dRenderer = Box2DDebugRenderer()
 
-        batch = SpriteBatch()
+        previousLevel = currentMap
+
 
         map = TmxMapLoader().load("maps/$currentMap")
         debug("TmxMapLoader: loaded tiled map: maps/$currentMap")
         tileRenderer = OrthogonalTiledMapRenderer(map, 1f)
-
-        camera = OrthographicCamera(TILE_SIZE, TILE_SIZE)
-        viewport = FitViewport(TILE_SIZE * SIGHT_RADIUS, TILE_SIZE * SIGHT_RADIUS, camera)
-
-        engine = PooledEngine()
-        entityFactory = EntityFactory(engine, world)
-        collisionListener = CollisionProcessor()
-        world.setContactListener(collisionListener)
-
-        playerControlSystem = PlayerControlSystem(entityFactory)
-        batchDrawSystem = BatchDrawSystem(batch)
-        soundSystem = SoundSystem()
-
-        engine.addSystem(playerControlSystem)
-        engine.addSystem(batchDrawSystem)
-        engine.addSystem(CameraSystem(camera))
-        engine.addSystem(EntitiesCleanupSystem(world))
-        engine.addSystem(MonsterWalkSystem())
-        engine.addSystem(MonsterFiringSystem(entityFactory))
-        engine.addSystem(DeathSystem(world, entityFactory))
-        engine.addSystem(soundSystem)
-        engine.addSystem(MovementSystem())
-
-        ingameHud = IngameHud()
-
-        engine.addSystem(PlayerHudUpdateSystem(ingameHud))
 
         entityFactory.loadMap(map, previousMapName) { nextMap ->
             previousLevel = currentMap
@@ -127,6 +146,9 @@ class GameScreen(startMap: String?) : ScreenAdapter() {
                 return true
             }
         }
+
+        // fixme why it is not called automatically
+        resize(Gdx.graphics.width, Gdx.graphics.height)
     }
 
     private fun screenToWorld(screenX: Int, screenY: Int): Vector2 {
@@ -137,12 +159,12 @@ class GameScreen(startMap: String?) : ScreenAdapter() {
 
     override fun dispose() {
         //fixme: init is called manually but dispose is called by the framework!
-        world.dispose()
+        engine.removeAllEntities()
         box2dRenderer.dispose()
+        world.dispose()
         tileRenderer.dispose()
         map.dispose()
         batch.dispose()
-        engine.removeAllEntities()
         soundSystem.dispose()
         batchDrawSystem.dispose()
     }
@@ -190,13 +212,15 @@ class GameScreen(startMap: String?) : ScreenAdapter() {
             batchDrawSystem.drawNames = !batchDrawSystem.drawNames
         if (Gdx.input.isKeyJustPressed(Input.Keys.F5)) {
             dispose()
-            changeLevel(startMapName, null)
+            // fixme default value, null should never happen
+            changeLevel(currentMap ?: "grassmap.tmx", null)
             // todo remove hardcoded size
             viewport.update(1000, 1000)
         }
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE))
-            Gdx.app.exit()
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            goToMainMenu()
+        }
     }
 
     private fun clearScreen() {

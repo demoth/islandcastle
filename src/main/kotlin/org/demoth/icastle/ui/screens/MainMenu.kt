@@ -14,16 +14,19 @@ import ktx.actors.onClick
 import org.demoth.icastle.debug
 import org.demoth.icastle.ui.getTestSkin
 
-class MainMenu(startNewGame: () -> Unit) : ScreenAdapter() {
+class MainMenu(startNewGame: (mapName: String) -> Unit) : ScreenAdapter() {
     private lateinit var currentStage: Stage
     private val mainMenu: Stage
     private val optionsMenu: Stage
+    private val selectLevel: Stage
 
     init {
 
         val skin = getTestSkin()
 
         optionsMenu = Stage()
+
+        selectLevel = Stage()
 
         mainMenu = Stage().apply {
             addActor(Window("IslandCastle", skin).apply {
@@ -36,12 +39,17 @@ class MainMenu(startNewGame: () -> Unit) : ScreenAdapter() {
                     addActor(TextButton("New game", skin).apply {
                         onClick {
                             debug("Started new game")
-                            startNewGame()
+                            startNewGame("grassmap.tmx")
                         }
                     })
                     addActor(TextButton("Options", skin).apply {
                         onClick {
                             changeStage(optionsMenu)
+                        }
+                    })
+                    addActor(TextButton("Select level", skin).apply {
+                        onClick {
+                            changeStage(selectLevel)
                         }
                     })
                     addActor(TextButton("Exit", skin).apply {
@@ -67,6 +75,35 @@ class MainMenu(startNewGame: () -> Unit) : ScreenAdapter() {
             })
         }
 
+        selectLevel.apply {
+            addActor(Window("Select level", skin).apply {
+                setFillParent(true)
+                background = TextureRegionDrawable(
+                        TextureRegion(Texture(Gdx.files.internal("sprites/background2.jpg"))))
+                addActor(VerticalGroup().apply {
+                    setFillParent(true)
+
+                    Gdx.files.internal("maps").list().forEach { map ->
+                        if (map.name().endsWith("tmx")) {
+                            addActor(TextButton(map.name(), skin).apply {
+                                onClick {
+                                    startNewGame(map.name())
+                                }
+                            })
+
+                        }
+                    }
+
+                    addActor(TextButton("Back", skin).apply {
+                        onClick {
+                            changeStage(mainMenu)
+                        }
+                    })
+                })
+            })
+
+        }
+
         changeStage(mainMenu)
     }
 
@@ -87,5 +124,9 @@ class MainMenu(startNewGame: () -> Unit) : ScreenAdapter() {
     fun changeStage(stage: Stage) {
         currentStage = stage
         Gdx.input.inputProcessor = stage
+    }
+
+    fun enableInput() {
+        Gdx.input.inputProcessor = currentStage
     }
 }

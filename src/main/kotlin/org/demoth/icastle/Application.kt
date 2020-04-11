@@ -8,14 +8,22 @@ import org.demoth.icastle.ui.screens.MainMenu
 
 class Application : KtxGame<Screen>() {
     override fun create() {
-        val gameScreen = GameScreen(null)
+        val gameScreen = GameScreen()
+        gameScreen.initialize()
         screens.put(GameScreen::class.java, gameScreen)
-        val mainMenu = MainMenu {
-            gameScreen.initialize()
+
+        val mainMenu = MainMenu { mapName ->
+            gameScreen.changeLevel(mapName, null)
             currentScreen = screens[GameScreen::class.java]
         }
+
+        gameScreen.goToMainMenu = {
+            currentScreen = mainMenu
+            mainMenu.enableInput()
+        }
+
         screens.put(MainMenu::class.java, mainMenu)
-        currentScreen = screens[MainMenu::class.java]
+        currentScreen = mainMenu
     }
 }
 
