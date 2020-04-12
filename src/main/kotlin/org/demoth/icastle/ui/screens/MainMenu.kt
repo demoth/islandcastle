@@ -6,9 +6,7 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.Stage
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton
-import com.badlogic.gdx.scenes.scene2d.ui.VerticalGroup
-import com.badlogic.gdx.scenes.scene2d.ui.Window
+import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import ktx.actors.onClick
 import org.demoth.icastle.debug
@@ -17,14 +15,14 @@ import org.demoth.icastle.ui.getTestSkin
 class MainMenu(startNewGame: (mapName: String) -> Unit) : ScreenAdapter() {
     private lateinit var currentStage: Stage
     private val mainMenu: Stage
-    private val optionsMenu: Stage
+    private val aboutMenu: Stage
     private val selectLevel: Stage
 
     init {
 
         val skin = getTestSkin()
 
-        optionsMenu = Stage()
+        aboutMenu = Stage()
 
         selectLevel = Stage()
 
@@ -33,40 +31,56 @@ class MainMenu(startNewGame: (mapName: String) -> Unit) : ScreenAdapter() {
                 setFillParent(true)
                 background = TextureRegionDrawable(
                         TextureRegion(Texture(Gdx.files.internal("sprites/background2.jpg"))))
-                addActor(VerticalGroup().apply {
-                    debug = true
+                addActor(Table().apply {
                     setFillParent(true)
-                    addActor(TextButton("New game", skin).apply {
+                    defaults().width(128f).height(48f).padBottom(16f).fill()
+                    add(TextButton("New game", skin).apply {
                         onClick {
                             debug("Started new game")
                             startNewGame("grassmap.tmx")
                         }
                     })
-                    addActor(TextButton("Options", skin).apply {
+
+                    row()
+                    add(TextButton("About", skin).apply {
                         onClick {
-                            changeStage(optionsMenu)
+                            changeStage(aboutMenu)
                         }
                     })
-                    addActor(TextButton("Select level", skin).apply {
+
+                    row()
+                    add(TextButton("Select level", skin).apply {
                         onClick {
                             changeStage(selectLevel)
                         }
                     })
-                    addActor(TextButton("Exit", skin).apply {
+
+                    row()
+                    add(TextButton("Exit", skin).apply {
                         onClick { Gdx.app.exit() }
                     })
                 })
             })
         }
 
-        optionsMenu.apply {
-            addActor(Window("Options", skin).apply {
+        aboutMenu.apply {
+            addActor(Window("About", skin).apply {
                 setFillParent(true)
                 background = TextureRegionDrawable(
                         TextureRegion(Texture(Gdx.files.internal("sprites/background2.jpg"))))
-                addActor(VerticalGroup().apply {
+                addActor(Table().apply {
                     setFillParent(true)
-                    addActor(TextButton("Back", skin).apply {
+                    defaults().width(128f).height(48f).padBottom(16f).fill()
+                    add(Label("About", skin))
+
+                    row()
+                    add(TextArea("Hello, This is the game yet not finished" +
+                            "\nHope you enjoy this project" +
+                            "\n\nhttps://demoth.itch.io/topory7/devlog" +
+                            "\n\nDemoth 2020", skin).apply { isDisabled = true })
+                            .height(256f)
+                    row()
+                    add(TextButton("Back", skin).apply {
                         onClick {
                             changeStage(mainMenu)
                         }
@@ -80,21 +94,25 @@ class MainMenu(startNewGame: (mapName: String) -> Unit) : ScreenAdapter() {
                 setFillParent(true)
                 background = TextureRegionDrawable(
                         TextureRegion(Texture(Gdx.files.internal("sprites/background2.jpg"))))
-                addActor(VerticalGroup().apply {
+                addActor(Table().apply {
                     setFillParent(true)
+                    defaults().width(128f).height(48f).padBottom(16f).fill()
+                    add(Label("Select Level", skin))
 
+                    row()
                     Gdx.files.internal("maps").list().forEach { map ->
                         if (map.name().endsWith("tmx")) {
-                            addActor(TextButton(map.name(), skin).apply {
+                            add(TextButton(map.name(), skin).apply {
                                 onClick {
                                     startNewGame(map.name())
                                 }
                             })
+                            row()
 
                         }
                     }
 
-                    addActor(TextButton("Back", skin).apply {
+                    add(TextButton("Back", skin).apply {
                         onClick {
                             changeStage(mainMenu)
                         }

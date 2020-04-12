@@ -49,9 +49,9 @@ class GameScreen : ScreenAdapter() {
     private lateinit var batch: SpriteBatch
     private lateinit var viewport: Viewport
     private lateinit var camera: OrthographicCamera
-    private lateinit var map: TiledMap
     private lateinit var box2dRenderer: Box2DDebugRenderer
-    private lateinit var tileRenderer: OrthogonalTiledMapRenderer
+    private var map: TiledMap? = null
+    private var tileRenderer: OrthogonalTiledMapRenderer? = null
     private lateinit var batchDrawSystem: BatchDrawSystem
     private lateinit var playerControlSystem: PlayerControlSystem
     private lateinit var engine: PooledEngine
@@ -126,12 +126,11 @@ class GameScreen : ScreenAdapter() {
 
         previousLevel = currentMap
 
-
         map = TmxMapLoader().load("maps/$currentMap")
         debug("TmxMapLoader: loaded tiled map: maps/$currentMap")
         tileRenderer = OrthogonalTiledMapRenderer(map, 1f)
 
-        entityFactory.loadMap(map, previousMapName) { nextMap ->
+        entityFactory.loadMap(map!!, previousMapName) { nextMap ->
             previousLevel = currentMap
             nextLevel = nextMap
         }
@@ -162,8 +161,8 @@ class GameScreen : ScreenAdapter() {
         engine.removeAllEntities()
         box2dRenderer.dispose()
         world.dispose()
-        tileRenderer.dispose()
-        map.dispose()
+        tileRenderer?.dispose()
+        map?.dispose()
         batch.dispose()
         soundSystem.dispose()
         batchDrawSystem.dispose()
@@ -186,8 +185,8 @@ class GameScreen : ScreenAdapter() {
         camera.update()
 
         if (drawTiles) {
-            tileRenderer.setView(camera)
-            tileRenderer.render()
+            tileRenderer!!.setView(camera)
+            tileRenderer!!.render()
         }
 
         batch.projectionMatrix = camera.combined
