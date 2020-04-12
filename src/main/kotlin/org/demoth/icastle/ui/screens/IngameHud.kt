@@ -2,13 +2,17 @@ package org.demoth.icastle.ui.screens
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.ScreenAdapter
+import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Sprite
+import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup
+import com.badlogic.gdx.scenes.scene2d.ui.ImageButton
 import com.badlogic.gdx.scenes.scene2d.ui.Table
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import org.demoth.icastle.*
 import org.demoth.icastle.ui.getTestSkin
 
 /**
@@ -16,7 +20,7 @@ import org.demoth.icastle.ui.getTestSkin
  */
 class IngameHud : ScreenAdapter() {
     private var stage: Stage
-//    private var assetManager: AssetManager = AssetManager()
+    private var assetManager: AssetManager = AssetManager()
 //
 //    private val font = "fonts/CinzelDecorative-Regular.ttf"
 //
@@ -25,6 +29,14 @@ class IngameHud : ScreenAdapter() {
 
     init {
         val skin = getTestSkin()
+        assetManager.load(ACTION_BAR, Texture::class.java)
+        assetManager.load(ACTION_ATTACK, Texture::class.java)
+        assetManager.load(ACTION_BOW, Texture::class.java)
+        assetManager.load(ACTION_FIREBALL, Texture::class.java)
+        assetManager.load(ACTION_HEAL, Texture::class.java)
+
+        assetManager.finishLoading()
+        val actionBar = assetManager.get<Texture>(ACTION_BAR)
 //        assetManager.registerFreeTypeFontLoaders()
 //        assetManager.loadFreeTypeFont(font) {
 //            size = 28
@@ -47,18 +59,18 @@ class IngameHud : ScreenAdapter() {
 //        stage.root.addActor(healthLabel)
 
         stage.root.addActor(Table().apply {
-            debug = true
+            //debug = true
             setFillParent(true)
             bottom()
             add(Table().apply {
-                background = SpriteDrawable(Sprite(Texture(Gdx.files.internal("sprites/actions_bar.png"))))
+                background = SpriteDrawable(Sprite(actionBar))
                 add(HorizontalGroup().apply {
-                    addActor(TextButton("1", skin))
-                    addActor(TextButton("2", skin))
-                    addActor(TextButton("3", skin))
-                    addActor(TextButton("4", skin))
-                    addActor(TextButton("5", skin))
-                    addActor(TextButton("6", skin))
+                    space(16f)
+                    left()
+                    addActor(ImageButton(TextureRegionDrawable(TextureRegion(assetManager.get<Texture>(ACTION_ATTACK)))))
+                    addActor(ImageButton(TextureRegionDrawable(TextureRegion(assetManager.get<Texture>(ACTION_BOW)))))
+                    addActor(ImageButton(TextureRegionDrawable(TextureRegion(assetManager.get<Texture>(ACTION_FIREBALL)))))
+                    addActor(ImageButton(TextureRegionDrawable(TextureRegion(assetManager.get<Texture>(ACTION_HEAL)))))
                 })
             }).fillX()
         })

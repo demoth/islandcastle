@@ -29,3 +29,9 @@ enum class SpriteSheets(val filename: String, val rows: Int, val cols: Int) {
     PLAYER("Thorsten_Rantanen.png", 21, 13),
     SKELETON("skeleton_simple.png", 21, 13)
 }
+
+const val ACTION_BAR = "sprites/ui/actions_bar.png"
+const val ACTION_FIREBALL = "sprites/ui/burning-meteor_64.png"
+const val ACTION_BOW = "sprites/ui/high-shot_64.png"
+const val ACTION_HEAL = "sprites/ui/remedy_64.png"
+const val ACTION_ATTACK = "sprites/ui/sword-brandish_64.png"
