@@ -4,15 +4,21 @@ import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.math.Vector2
 import ktx.ashley.get
 import ktx.math.minus
-import org.demoth.icastle.ACTION_FIREBALL
-import org.demoth.icastle.debug
-import org.demoth.icastle.ecs.EntityFactory
-import org.demoth.icastle.ecs.monsterMapper
-import org.demoth.icastle.ecs.physicMapper
-import org.demoth.icastle.ecs.playerMapper
+import org.demoth.icastle.*
+import org.demoth.icastle.ecs.*
 
 abstract class Action(val name: String, val icon: String) {
     abstract fun fire(position: Vector2, owner: Entity, entityFactory: EntityFactory): Unit
+}
+
+class HealAction : Action("Heal", ACTION_HEAL) {
+    override fun fire(position: Vector2, owner: Entity, entityFactory: EntityFactory) {
+        val health = owner[healthMapper] ?: return
+        val playerPosition = owner[physicMapper]?.body?.position ?: return
+        health.value += 1000
+        entityFactory.createFloatingLabel("+1000 hp", playerPosition, 3f)
+        entityFactory.createSound(Sounds.HEAL)
+    }
 }
 
 class FireballAction : Action("Fireball", ACTION_FIREBALL) {
@@ -22,7 +28,7 @@ class FireballAction : Action("Fireball", ACTION_FIREBALL) {
     }
 }
 
-class MonsterFireballAction : Action("MonsterFireball", ACTION_FIREBALL) {
+class MonsterFireballAction : Action("MonsterFireball", ACTION_ATTACK) {
     override fun fire(position: Vector2, owner: Entity, entityFactory: EntityFactory) {
         val monster = owner[monsterMapper] ?: return
         monster.currentTime = 0f

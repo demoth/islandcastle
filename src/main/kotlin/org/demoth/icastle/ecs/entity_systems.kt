@@ -8,7 +8,6 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.Disposable
-import ktx.ashley.entity
 import ktx.ashley.mapperFor
 import org.demoth.icastle.Sounds
 import org.demoth.icastle.SpriteSheets
@@ -152,11 +151,11 @@ class DeathSystem(private val world: World, private val entityFactory: EntityFac
                 engine.removeEntity(e)
                 world.destroyBody(physics.body)
                 if (player != null) {
-                    engine.entity().add(HasSound(Sounds.PLAYER_DIE))
+                    entityFactory.createSound(Sounds.PLAYER_DIE)
                     entityFactory.createFloatingLabel("You have died! Press F5 to restart. Score: ${player.score}", physics.body.position.cpy(), 10f)
                 } else {
                     // monster
-                    engine.entity().add(HasSound(Sounds.MONSTER_DIE))
+                    entityFactory.createSound(Sounds.MONSTER_DIE)
                 }
             }
         }

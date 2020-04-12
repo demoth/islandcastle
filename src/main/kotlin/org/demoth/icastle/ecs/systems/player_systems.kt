@@ -76,12 +76,7 @@ class PlayerControlSystem(private val entityFactory: EntityFactory) : EntitySyst
 class PlayerHudUpdateSystem(private val hud: IngameHud) : EntitySystem() {
     override fun update(deltaTime: Float) {
         engine.getEntitiesFor(playerHealthAndScore).firstOrNull()?.let {
-            val player = playerMapper[it]
-            val health = healthMapper[it]
-
-            hud.setValues(health.value, player.score)
-
-            player.score-- // TODO: stats change should be done separately!!!
+            hud.setValues(it)
         }
     }
 }

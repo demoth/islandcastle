@@ -1,5 +1,6 @@
 package org.demoth.icastle.ui.screens
 
+import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.ScreenAdapter
@@ -10,11 +11,15 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.HorizontalGroup
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton
+import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import ktx.actors.onClick
+import ktx.ashley.get
 import org.demoth.icastle.*
+import org.demoth.icastle.ecs.healthMapper
+import org.demoth.icastle.ecs.playerMapper
 import org.demoth.icastle.ui.getTestSkin
 
 /**
@@ -23,11 +28,13 @@ import org.demoth.icastle.ui.getTestSkin
 class IngameHud : ScreenAdapter() {
     private var stage: Stage
     private var assetManager: AssetManager = AssetManager()
-//
+    private lateinit var actionsBar: HorizontalGroup
+
+    //
 //    private val font = "fonts/CinzelDecorative-Regular.ttf"
 //
 //    private var scoreLabel: Label
-//    private var healthLabel: Label
+    private var healthLabel: Label
 
     init {
         val skin = getTestSkin()
@@ -66,40 +73,38 @@ class IngameHud : ScreenAdapter() {
             bottom()
             add(Table().apply {
                 background = SpriteDrawable(Sprite(actionBar))
-                add(HorizontalGroup().apply {
-                    space(16f)
-                    left()
-                    addActor(ImageButton(TextureRegionDrawable(TextureRegion(assetManager.get<Texture>(ACTION_ATTACK)))).apply {
-                        onClick {
-                            debug("Attack selected")
-                        }
-                    })
-                    addActor(ImageButton(TextureRegionDrawable(TextureRegion(assetManager.get<Texture>(ACTION_BOW)))).apply {
-                        onClick {
-                            debug("Bow selected")
-                        }
-                    })
-                    addActor(ImageButton(TextureRegionDrawable(TextureRegion(assetManager.get<Texture>(ACTION_FIREBALL)))).apply {
-                        onClick {
-                            debug("Fireball selected")
-                        }
-                    })
-                    addActor(ImageButton(TextureRegionDrawable(TextureRegion(assetManager.get<Texture>(ACTION_HEAL)))).apply {
-                        onClick {
-                            debug("Heal selected")
-                        }
-                    })
-                })
+                actionsBar = HorizontalGroup().apply { space(16f) }
+                add(actionsBar)
             }).fillX()
         })
 
+        healthLabel = Label("0", skin)
+        healthLabel.setPosition(64f, 64f)
+
+        stage.root.addActor(healthLabel)
+
     }
 
-    fun setValues(health: Int, score: Int) {
+    fun setValues(playerEntity: Entity) {
 //        scoreLabel.setText("Score: $score")
-//        healthLabel.setText("Health: $health")
+        val health = playerEntity[healthMapper] ?: return
+        healthLabel.setText("${health.value}")
 
         // todo: set available actions
+        val player = playerEntity[playerMapper] ?: return
+
+        if (player.actionsChanged) {
+            actionsBar.clear()
+            player.actions.forEach {
+                actionsBar.addActor(ImageButton(TextureRegionDrawable(TextureRegion(assetManager.get<Texture>(it.icon)))).apply {
+                    onClick {
+                        debug("Action selected: ${it.name}")
+                        player.selectedAction = it
+                    }
+                })
+            }
+            player.actionsChanged = false
+        }
     }
 
     override fun render(delta: Float) {

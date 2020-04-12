@@ -209,6 +209,10 @@ class EntityFactory(private val engine: Engine, private val world: World) {
         }
     }
 
+    fun createSound(sound: Sounds) {
+        engine.entity().add(HasSound(sound))
+    }
+
     fun createTransition(name: String, nextMap: String, rect: Rectangle, action: (String) -> Unit) {
         debug("Creating transition to $nextMap")
         engine.entity().apply {

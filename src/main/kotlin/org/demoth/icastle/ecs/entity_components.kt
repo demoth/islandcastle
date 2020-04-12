@@ -10,6 +10,7 @@ import com.badlogic.gdx.physics.box2d.Body
 import org.demoth.icastle.*
 import org.demoth.icastle.ecs.systems.Action
 import org.demoth.icastle.ecs.systems.FireballAction
+import org.demoth.icastle.ecs.systems.HealAction
 import java.util.*
 
 
@@ -17,8 +18,9 @@ import java.util.*
  * Marker used by PlayerControlSystem to control player movements, by MonsterSystems to find player's position
  */
 class Player(var score: Int = 666 * 30,
-             val actions: MutableList<Action> = mutableListOf(FireballAction()),
-             var selectedAction: Action? = actions.first()) : Component
+             val actions: MutableList<Action> = mutableListOf(FireballAction(), HealAction()),
+             var selectedAction: Action? = actions.first(),
+             var actionsChanged: Boolean = true) : Component
 
 /**
  * Position in physical space units
