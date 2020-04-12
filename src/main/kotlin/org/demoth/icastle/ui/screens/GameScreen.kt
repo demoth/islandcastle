@@ -142,6 +142,7 @@ class GameScreen : ScreenAdapter() {
             }
         }
 
+        // hijack inputprocessor
         Gdx.input.inputProcessor = InputMultiplexer(ingameHud.getInputProcessor(), gameMouseListener)
 
         // fixme why it is not called automatically

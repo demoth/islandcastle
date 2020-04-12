@@ -4,7 +4,6 @@ import com.badlogic.ashley.core.EntitySystem
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Input
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.Body
 import org.demoth.icastle.ecs.*
 import org.demoth.icastle.ui.screens.IngameHud
 import org.demoth.icastle.ui.screens.WALK_FORCE
@@ -24,23 +23,24 @@ class PlayerControlSystem(private val entityFactory: EntityFactory) : EntitySyst
             val player = playerMapper[playerEntity]
             val physics = physicMapper[playerEntity]
 
-            physics?.body?.let { body ->
-                // Walking code
-                updateWalkDirection(playerEntity, getPlayerTargetLocation(body))
+            val playerPosition = physics?.body?.position ?: throw IllegalStateException("No player body")
 
-                // Action code
-                leftClick = leftClick?.let { click ->
-                    firePlayerAction(click, player, body.position, playerEntity, entityFactory)
-                    null
-                }
+            // Walking code
+            updateWalkDirection(playerEntity, getPlayerTargetLocation(playerPosition))
+
+            // Action code
+            leftClick = leftClick?.let { click ->
+                player.selectedAction?.fire(click, playerEntity, entityFactory)
+                null
             }
+
         }
     }
 
     /**
      * calculate where player should move based on the user input
      */
-    private fun getPlayerTargetLocation(body: Body): Vector2? {
+    private fun getPlayerTargetLocation(playerPosition: Vector2): Vector2? {
         var movementX: Float? = null
         var movementY: Float? = null
 
@@ -69,8 +69,7 @@ class PlayerControlSystem(private val entityFactory: EntityFactory) : EntitySyst
                 null
             }
         }
-        val targetLocation = direction?.add(body.position)
-        return targetLocation
+        return direction?.add(playerPosition)
     }
 }
 

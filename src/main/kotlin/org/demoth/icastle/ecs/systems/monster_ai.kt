@@ -35,8 +35,9 @@ class MonsterFiringSystem(private val entityFactory: EntityFactory) : EntitySyst
             val monsterPhysics = physicMapper[monsterEntity]
             monster.currentTime += deltaTime
             if (monster.currentTime > monster.fireRate) {
-                val playerPosition = playerEntity?.get(physicMapper)?.body?.position
-                fireMonsterAction(monster, playerPosition?.cpy(), monsterPhysics.body.position, monsterEntity, entityFactory)
+                val playerPosition = playerEntity?.get(physicMapper)?.body?.position ?: return
+                MonsterFireballAction().fire(playerPosition, monsterEntity, entityFactory)
+//                fireMonsterAction(monster, playerPosition?.cpy(), monsterPhysics.body.position, monsterEntity, entityFactory)
             }
         }
     }
