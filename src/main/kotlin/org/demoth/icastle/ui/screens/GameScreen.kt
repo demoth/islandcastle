@@ -1,10 +1,7 @@
 package org.demoth.icastle.ui.screens
 
 import com.badlogic.ashley.core.PooledEngine
-import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.Input
-import com.badlogic.gdx.InputAdapter
-import com.badlogic.gdx.ScreenAdapter
+import com.badlogic.gdx.*
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
@@ -44,7 +41,6 @@ class GameScreen : ScreenAdapter() {
     // fixme lateinit
     lateinit var goToMainMenu: () -> Unit
 
-    private var currentMap: String? = null
     private lateinit var world: World
     private lateinit var batch: SpriteBatch
     private lateinit var viewport: Viewport
@@ -136,7 +132,7 @@ class GameScreen : ScreenAdapter() {
         }
 
         // todo multiplex with ui
-        Gdx.input.inputProcessor = object : InputAdapter() {
+        val gameMouseListener = object : InputAdapter() {
             override fun touchUp(screenX: Int, screenY: Int, pointer: Int, button: Int): Boolean {
                 if (button == Input.Buttons.LEFT) {
                     println("clicked! screen coords:  $screenX, $screenY")
@@ -145,6 +141,8 @@ class GameScreen : ScreenAdapter() {
                 return true
             }
         }
+
+        Gdx.input.inputProcessor = InputMultiplexer(ingameHud.getInputProcessor(), gameMouseListener)
 
         // fixme why it is not called automatically
         resize(Gdx.graphics.width, Gdx.graphics.height)
@@ -158,13 +156,22 @@ class GameScreen : ScreenAdapter() {
 
     override fun dispose() {
         //fixme: init is called manually but dispose is called by the framework!
+
+        debug("Removing all entities")
         engine.removeAllEntities()
+        debug("Removing box2dRenderer")
         box2dRenderer.dispose()
+        debug("Removing box2d world")
         world.dispose()
+        debug("Removing tileRenderer")
         tileRenderer?.dispose()
+        debug("Removing map")
         map?.dispose()
+        debug("Removing sprite batch")
         batch.dispose()
+        debug("Removing soundSystem")
         soundSystem.dispose()
+        debug("Removing batchDrawSystem")
         batchDrawSystem.dispose()
     }
 

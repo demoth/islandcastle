@@ -1,6 +1,7 @@
 package org.demoth.icastle.ui.screens
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.ScreenAdapter
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.Texture
@@ -12,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton
 import com.badlogic.gdx.scenes.scene2d.ui.Table
 import com.badlogic.gdx.scenes.scene2d.utils.SpriteDrawable
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
+import ktx.actors.onClick
 import org.demoth.icastle.*
 import org.demoth.icastle.ui.getTestSkin
 
@@ -67,10 +69,26 @@ class IngameHud : ScreenAdapter() {
                 add(HorizontalGroup().apply {
                     space(16f)
                     left()
-                    addActor(ImageButton(TextureRegionDrawable(TextureRegion(assetManager.get<Texture>(ACTION_ATTACK)))))
-                    addActor(ImageButton(TextureRegionDrawable(TextureRegion(assetManager.get<Texture>(ACTION_BOW)))))
-                    addActor(ImageButton(TextureRegionDrawable(TextureRegion(assetManager.get<Texture>(ACTION_FIREBALL)))))
-                    addActor(ImageButton(TextureRegionDrawable(TextureRegion(assetManager.get<Texture>(ACTION_HEAL)))))
+                    addActor(ImageButton(TextureRegionDrawable(TextureRegion(assetManager.get<Texture>(ACTION_ATTACK)))).apply {
+                        onClick {
+                            debug("Attack selected")
+                        }
+                    })
+                    addActor(ImageButton(TextureRegionDrawable(TextureRegion(assetManager.get<Texture>(ACTION_BOW)))).apply {
+                        onClick {
+                            debug("Bow selected")
+                        }
+                    })
+                    addActor(ImageButton(TextureRegionDrawable(TextureRegion(assetManager.get<Texture>(ACTION_FIREBALL)))).apply {
+                        onClick {
+                            debug("Fireball selected")
+                        }
+                    })
+                    addActor(ImageButton(TextureRegionDrawable(TextureRegion(assetManager.get<Texture>(ACTION_HEAL)))).apply {
+                        onClick {
+                            debug("Heal selected")
+                        }
+                    })
                 })
             }).fillX()
         })
@@ -80,10 +98,16 @@ class IngameHud : ScreenAdapter() {
     fun setValues(health: Int, score: Int) {
 //        scoreLabel.setText("Score: $score")
 //        healthLabel.setText("Health: $health")
+
+        // todo: set available actions
     }
 
     override fun render(delta: Float) {
         stage.act(Gdx.graphics.deltaTime)
         stage.draw()
+    }
+
+    fun getInputProcessor(): InputProcessor {
+        return stage
     }
 }
