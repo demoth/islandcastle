@@ -1,5 +1,6 @@
 package org.demoth.icastle.ui.screens
 
+import com.badlogic.ashley.core.Entity
 import com.badlogic.ashley.core.PooledEngine
 import com.badlogic.gdx.*
 import com.badlogic.gdx.graphics.GL20
@@ -9,15 +10,18 @@ import com.badlogic.gdx.maps.tiled.TiledMap
 import com.badlogic.gdx.maps.tiled.TmxMapLoader
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.Box2D
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import com.badlogic.gdx.physics.box2d.World
 import com.badlogic.gdx.utils.viewport.FitViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import ktx.ashley.entity
+import ktx.ashley.get
+import ktx.box2d.body
 import ktx.box2d.createWorld
 import ktx.graphics.use
-import org.demoth.icastle.CollisionProcessor
-import org.demoth.icastle.debug
+import org.demoth.icastle.*
 import org.demoth.icastle.ecs.*
 import org.demoth.icastle.ecs.systems.*
 
@@ -147,12 +151,55 @@ class GameScreen : ScreenAdapter() {
 
         // fixme why it is not called automatically
         resize(Gdx.graphics.width, Gdx.graphics.height)
+
+        engine.entity().apply {
+            add(Named("hp +25"))
+            add(Textured(Sprites.FIREBALL))
+            add(HealthOrb(25))
+            add(
+                Physical(
+                    body = world.body {
+                        userData = this@apply
+                        type = BodyDef.BodyType.DynamicBody
+                        this.position.set(Vector2(25f,25f))
+                        circle(0.5f) {
+                            isSensor = true
+                        }
+                    },
+                    collide = ::markAsReachable,
+                    uncollide = ::unmarkAsReachable,
+                    collisionClass = DEAL_DAMAGE,
+                    collidesWith = RECEIVE_DAMAGE or SOLID
+                )
+            )
+        }
+
+
+    }
+
+    fun unmarkAsReachable(self: Entity, other: Entity) {
+        for (e in listOf(self, other)) {
+            if (e.get<HealthOrb>() != null) {
+                println("Can no longer pick up")
+                e.remove(ReachableByPlayer::class.java);
+            }
+        }
+    }
+
+    fun markAsReachable(self: Entity, other: Entity) {
+        for (e in listOf(self, other)) {
+            if (e.get<HealthOrb>() != null) {
+                println("Can now pick up")
+                e.add(ReachableByPlayer());
+            }
+        }
     }
 
     private fun screenToWorld(screenX: Int, screenY: Int): Vector2 {
         return Vector2(
-                1f * screenX - viewport.screenWidth / 2f,
-                -1f * screenY + viewport.screenHeight / 2f).scl(0.5f / PPM)
+            1f * screenX - viewport.screenWidth / 2f,
+            -1f * screenY + viewport.screenHeight / 2f
+        ).scl(0.5f / PPM)
     }
 
     override fun dispose() {

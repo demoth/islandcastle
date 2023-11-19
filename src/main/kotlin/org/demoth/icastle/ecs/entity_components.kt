@@ -44,7 +44,8 @@ class Physical(
         var toBeRemoved: Boolean = false,
         val collisionClass: Long = NO_COLLISION,
         val collidesWith: Long = NO_COLLISION,
-        val collide: ((self: Entity, other: Entity) -> Unit)? = null
+        val collide: ((self: Entity, other: Entity) -> Unit)? = null,
+        val uncollide: ((self: Entity, other: Entity) -> Unit)? = null
 ) : Component
 
 interface Animated : Component {
@@ -192,3 +193,11 @@ class HasSound(val name: Sounds, var id: Long = 0) : Component
  * Time To Live - temporary entities (like floating labels)
  */
 class TTL(var ttl: Float) : Component
+
+
+class HealthOrb(val hp: Int) : Component
+
+/**
+ * For player to pick up
+ */
+class ReachableByPlayer : Component

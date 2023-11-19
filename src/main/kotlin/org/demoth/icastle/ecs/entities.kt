@@ -28,7 +28,8 @@ class EntityFactory(private val engine: Engine, private val world: World) {
             add(Named("player"))
             add(HasHealth(9000))
             add(Movement(Vector2.Zero, MovementType.FORCE, -1f, 100f))
-            add(Physical(
+            add(
+                Physical(
                     body = world.body {
                         userData = this@apply
                         position.x = location.x
@@ -40,7 +41,9 @@ class EntityFactory(private val engine: Engine, private val world: World) {
                     },
                     collide = { self, other -> damageHealth(self, other) },
                     collisionClass = RECEIVE_DAMAGE,
-                    collidesWith = DEAL_DAMAGE or TRIGGER))
+                    collidesWith = DEAL_DAMAGE or TRIGGER
+                )
+            )
         }
         println("spawned player at (${location.x}, ${location.y})")
 
@@ -55,7 +58,8 @@ class EntityFactory(private val engine: Engine, private val world: World) {
             add(Movement(Vector2.Zero, MovementType.FORCE, 2f, 15f))
             add(HasHealth(health))
             add(Textured(Sprites.EYE_BOT))
-            add(Physical(
+            add(
+                Physical(
                     body = world.body {
                         userData = this@apply
                         position.x = x
@@ -67,7 +71,9 @@ class EntityFactory(private val engine: Engine, private val world: World) {
                     },
                     collide = { self, other -> damageHealth(self, other) },
                     collisionClass = RECEIVE_DAMAGE,
-                    collidesWith = DEAL_DAMAGE))
+                    collidesWith = DEAL_DAMAGE
+                )
+            )
         }
     }
 
@@ -79,7 +85,8 @@ class EntityFactory(private val engine: Engine, private val world: World) {
             add(MonsterWalking())
             add(Movement(Vector2.Zero, MovementType.FORCE, 2f, 15f))
             add(CharacterAnimation(SpriteSheets.SKELETON))
-            add(Physical(
+            add(
+                Physical(
                     body = world.body {
                         userData = this@apply
                         position.x = x
@@ -91,7 +98,9 @@ class EntityFactory(private val engine: Engine, private val world: World) {
                     },
                     collide = { self, other -> damageHealth(self, other) },
                     collisionClass = RECEIVE_DAMAGE,
-                    collidesWith = DEAL_DAMAGE))
+                    collidesWith = DEAL_DAMAGE
+                )
+            )
         }
     }
 
@@ -107,16 +116,16 @@ class EntityFactory(private val engine: Engine, private val world: World) {
 
         debug("Creating entities")
         val startPosition =
-                if (previousMapName == null) {
-                    debug("No previous map, looking for 'start' object...")
-                    map.layers["entities"].objects["start"] as RectangleMapObject
-                } else {
-                    debug("Changing map from $previousMapName, looking for corresponding 'entrance_from'")
-                    map.layers["entities"].objects
-                            .filter { it.name == "entrance_from" }
-                            .map { it as RectangleMapObject }
-                            .find { it.properties["from"] == previousMapName }
-                }
+            if (previousMapName == null) {
+                debug("No previous map, looking for 'start' object...")
+                map.layers["entities"].objects["start"] as RectangleMapObject
+            } else {
+                debug("Changing map from $previousMapName, looking for corresponding 'entrance_from'")
+                map.layers["entities"].objects
+                    .filter { it.name == "entrance_from" }
+                    .map { it as RectangleMapObject }
+                    .find { it.properties["from"] == previousMapName }
+            }
         debug("Player start position is ${startPosition?.rectangle?.getCentralPoint()}")
         if (startPosition == null)
             throw IllegalStateException("Could not find entrance from $previousMapName!dd")
@@ -141,13 +150,16 @@ class EntityFactory(private val engine: Engine, private val world: World) {
 
     private fun createWall(world: World, rect: Rectangle, name: String?) {
         engine.entity().apply {
-            add(Physical(
+            add(
+                Physical(
                     body = world.body {
                         userData = this@apply
                         type = BodyDef.BodyType.StaticBody
                         position.set(rect.getCentralPoint())
                         box(width = rect.width / PPM, height = rect.height / PPM)
-                    }, collisionClass = if (name.isNullOrBlank()) SOLID_INVISIBLE else SOLID))
+                    }, collisionClass = if (name.isNullOrBlank()) SOLID_INVISIBLE else SOLID
+                )
+            )
 
             if (!name.isNullOrBlank()) {
                 add(Named(name))
@@ -159,7 +171,8 @@ class EntityFactory(private val engine: Engine, private val world: World) {
         engine.entity().apply {
             add(Named("fireball"))
             add(Textured(Sprites.FIREBALL))
-            add(Physical(
+            add(
+                Physical(
                     body = world.body {
                         userData = this@apply
                         type = BodyDef.BodyType.DynamicBody
@@ -171,7 +184,9 @@ class EntityFactory(private val engine: Engine, private val world: World) {
                     },
                     collide = ::destroyFireballWithExplosion,
                     collisionClass = DEAL_DAMAGE,
-                    collidesWith = RECEIVE_DAMAGE or SOLID))
+                    collidesWith = RECEIVE_DAMAGE or SOLID
+                )
+            )
             add(HasDamage(3070, owner))
             add(HasSound(Sounds.FIREBALL))
             add(TTL(2f))
@@ -182,7 +197,8 @@ class EntityFactory(private val engine: Engine, private val world: World) {
         engine.entity().apply {
             add(Named("fire-sprirals"))
             add(SimpleAnimation(SpriteSheets.FIRE_SPIRALS, 0.1f, Animation.PlayMode.LOOP))
-            add(Physical(
+            add(
+                Physical(
                     body = world.body {
                         userData = this@apply
                         type = BodyDef.BodyType.DynamicBody
@@ -194,7 +210,9 @@ class EntityFactory(private val engine: Engine, private val world: World) {
                     },
                     collide = ::destroyFireball,
                     collisionClass = DEAL_DAMAGE,
-                    collidesWith = RECEIVE_DAMAGE or SOLID))
+                    collidesWith = RECEIVE_DAMAGE or SOLID
+                )
+            )
             add(HasDamage(1000, owner))
             add(TTL(2f))
         }
@@ -217,7 +235,8 @@ class EntityFactory(private val engine: Engine, private val world: World) {
         debug("Creating transition to $nextMap")
         engine.entity().apply {
             add(Named(name))
-            add(Physical(
+            add(
+                Physical(
                     body = world.body {
                         userData = this@apply
                         type = BodyDef.BodyType.StaticBody
@@ -233,9 +252,13 @@ class EntityFactory(private val engine: Engine, private val world: World) {
                         }
                     },
                     collisionClass = TRIGGER,
-                    collidesWith = RECEIVE_DAMAGE))
+                    collidesWith = RECEIVE_DAMAGE
+                )
+            )
         }
     }
+
+
 
     private fun damageHealth(self: Entity, other: Entity) {
         val health = self.get<HasHealth>()
